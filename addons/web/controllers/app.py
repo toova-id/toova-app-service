@@ -56,5 +56,5 @@ class ManagedApp(http.Controller):
                 for company in user.company_ids
             ],
             'modules': modules,
-            'csrfToken': request.csrf_token(None),
+            'csrfToken': request.csrf_token(),
         }, headers=[('Cache-Control', 'no-store')])

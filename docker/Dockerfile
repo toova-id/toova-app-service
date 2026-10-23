@@ -48,7 +48,7 @@ WORKDIR /src/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci
 COPY frontend/ ./
-COPY addons/sale/frontend/ /src/addons/sale/frontend/
+COPY addons/ /src/addons/
 RUN npm run build
 
 # ============================================================

@@ -19,10 +19,11 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@addons/*": ["../addons/*"],
+      "@luma/*": ["./src/*"],
       "react": ["./node_modules/@types/react"],
       "react/*": ["./node_modules/@types/react/*"],
-      "lucide-react": ["./node_modules/lucide-react/dist/lucide-react"]
+      "lucide-react": ["./node_modules/lucide-react/dist/lucide-react"],
+      "react-router-dom": ["./node_modules/react-router-dom/dist/index.d.ts"]
     }
   },
   "include": ["src", "../addons/*/frontend"]

@@ -24,3 +24,14 @@ class TestManagedApp(HttpCase):
         self.assertEqual(payload['user']['id'], self.user.id)
         self.assertEqual(payload['company']['id'], self.user.company_id.id)
         self.assertIn('web', payload['modules'])
+
+        navigation = self.url_open('/api/v1/ui/navigation')
+        self.assertEqual(navigation.status_code, 200)
+        items = navigation.json()['items']
+        self.assertIsInstance(items, list)
+        self.assertNotIn('Apps', {item['label'] for item in items})
+        self.assertNotIn('Settings', {item['label'] for item in items})
+        paths = [item['path'] for item in items if item['path']]
+        self.assertTrue(all(path.startswith('/app/') for path in paths))
+        self.assertTrue(all('ir.actions.' not in path for path in paths))
+        self.assertTrue(all('xmlid' in item and 'module' in item for item in items))

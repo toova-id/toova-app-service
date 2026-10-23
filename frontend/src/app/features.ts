@@ -15,7 +15,7 @@ export const navigation: NavigationItem[] = [
 
 export const routes: FeatureRoute[] = [
   { path: "/app", component: lazy(() => import("@/features/dashboard/dashboard-page")) },
-  { path: "/app/sales", component: lazy(() => import("@addons/sale/frontend/sales-page")), module: "sale" },
+  { path: "/app/*", component: lazy(() => import("@/features/menu-route-page")) },
   { path: "*", component: lazy(() => import("@/features/not-found-page")) },
 ];
 

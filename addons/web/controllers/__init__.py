@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from . import utils
 from . import app
+from . import ui_api
 from . import action
 from . import binary
 from . import database

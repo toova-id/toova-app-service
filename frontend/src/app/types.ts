@@ -9,6 +9,16 @@ export interface Session {
   modules: string[];
   csrfToken: string;
 }
+export interface ServerNavigationItem {
+  id: number;
+  label: string;
+  path: string | null;
+  actionId: number | null;
+  actionModel: "ir.actions.act_window" | "ir.actions.client" | null;
+  xmlid: string;
+  module: string | null;
+  children: ServerNavigationItem[];
+}
 export interface NavigationItem {
   label: string;
   path: string;

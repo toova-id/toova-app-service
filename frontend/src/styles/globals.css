@@ -2,27 +2,338 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Lexend Deca";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/web/static/fonts/lexend-deca/LexendDeca-Variable-LatinExt.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Lexend Deca";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/web/static/fonts/lexend-deca/LexendDeca-Variable-Latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    --background: 0 0% 100%;
+    --foreground: 140 12% 13%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --primary: 188 86% 35%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 188 70% 94%;
-    --accent-foreground: 188 86% 25%;
+    --card-foreground: 140 12% 13%;
+    --primary: 156 100% 40%;
+    --primary-foreground: 140 31% 7%;
+    --secondary: 140 18% 97%;
+    --secondary-foreground: 140 11% 16%;
+    --muted: 140 18% 97%;
+    --muted-foreground: 140 8% 42%;
+    --accent: 149 53% 94%;
+    --accent-foreground: 145 70% 22%;
     --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 188 86% 35%;
-    --radius: 0.75rem;
+    --destructive-foreground: 0 0% 100%;
+    --border: 143 12% 93%;
+    --input: 143 12% 89%;
+    --ring: 156 100% 40%;
+    --radius: .375rem;
+    --focus-border: #65736a;
+    --muted-border: rgba(100, 116, 106, .28);
+    --shadow-low: 0 1px 1px rgba(10, 24, 16, .018);
+    --shadow-floating: 0 3px 12px rgba(10, 24, 16, .045);
   }
+
+  .dark {
+    --background: 145 14% 8%;
+    --foreground: 140 12% 91%;
+    --card: 145 13% 9%;
+    --card-foreground: 140 12% 91%;
+    --primary: 156 100% 40%;
+    --primary-foreground: 140 31% 7%;
+    --secondary: 145 10% 12%;
+    --secondary-foreground: 140 10% 89%;
+    --muted: 145 10% 12%;
+    --muted-foreground: 143 7% 60%;
+    --accent: 151 22% 15%;
+    --accent-foreground: 151 65% 70%;
+    --destructive: 0 62% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 145 9% 17%;
+    --input: 145 9% 21%;
+    --focus-border: #718078;
+    --muted-border: rgba(150, 165, 156, .26);
+    --shadow-low: 0 1px 1px rgba(0, 0, 0, .08);
+    --shadow-floating: 0 3px 12px rgba(0, 0, 0, .18);
+    color-scheme: dark;
+  }
+
   * { @apply border-border; }
-  body { @apply bg-background text-foreground antialiased; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  html, body, #root { min-height: 100%; }
+  body {
+    @apply m-0 bg-background text-foreground antialiased;
+    font-family: "Lexend Deca", ui-sans-serif, system-ui, sans-serif;
+    font-size: 13px;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    text-rendering: optimizeLegibility;
+  }
+}
+
+@layer components {
+  .luma-shell { @apply min-h-screen bg-background text-foreground; --luma-sidebar-width: 56px; }
+  .luma-sidebar-expanded { --luma-sidebar-width: 216px; }
+  .luma-sidebar { @apply fixed inset-y-0 left-0 z-50 flex w-14 flex-col border-r bg-background text-muted-foreground transition-[width,transform] duration-200; }
+  .luma-sidebar-expanded .luma-sidebar { @apply w-[216px]; }
+  .luma-brand { @apply flex h-11 shrink-0 items-center gap-3 border-b px-[18px] text-foreground; }
+  .luma-brand-mark { @apply h-[10px] w-[10px] shrink-0 rounded-[3px] bg-primary; box-shadow: 5px 5px 0 rgb(0 206 124 / .24); }
+  .luma-brand strong { @apply hidden text-[13px] font-semibold tracking-[-.02em]; }
+  .luma-sidebar-expanded .luma-brand strong { @apply block; }
+  .luma-navigation { @apply flex-1 overflow-y-auto overflow-x-hidden py-2; }
+  .luma-nav-group { @apply px-1.5; }
+  .luma-nav-row { @apply relative flex h-10 items-center rounded-md; }
+  .luma-nav-row > a { @apply flex h-full min-w-0 flex-1 items-center gap-3 px-[11px] text-[11px] font-medium; }
+  .luma-nav-row > button { @apply mr-1 hidden h-7 w-7 place-items-center rounded hover:bg-muted; }
+  .luma-sidebar-expanded .luma-nav-row > button { @apply grid; }
+  .luma-nav-row:hover { @apply bg-muted text-foreground; }
+  .luma-nav-row-active { @apply bg-accent/60 text-accent-foreground; }
+  .luma-nav-row-current { @apply bg-accent text-accent-foreground; }
+  .luma-nav-row-active::before { content: ""; @apply absolute -left-1.5 top-2 bottom-2 w-0.5 bg-primary; }
+  .luma-nav-icon { @apply grid h-[22px] w-[22px] shrink-0 place-items-center rounded bg-muted text-[9px] font-semibold text-muted-foreground; }
+  .luma-nav-icon svg { @apply h-3.5 w-3.5; }
+  .luma-nav-row-active .luma-nav-icon { @apply bg-primary text-primary-foreground; }
+  .luma-nav-label { @apply hidden min-w-0 overflow-hidden text-ellipsis whitespace-nowrap; }
+  .luma-sidebar-expanded .luma-nav-label { @apply block; }
+  .luma-submenus { @apply mb-1 ml-[22px] border-l py-1; }
+  .luma-submenu-row { @apply flex min-h-7 items-center pr-1; }
+  .luma-submenu-link { @apply min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap py-1 text-[10px] text-muted-foreground hover:text-foreground; }
+  .luma-submenu-link-active { @apply font-medium text-accent-foreground; }
+  .luma-submenu-link-current { @apply font-semibold text-primary; }
+  .luma-submenu-row > button { @apply grid h-6 w-6 place-items-center rounded hover:bg-muted; }
+  .luma-sidebar-toggle { @apply flex h-11 shrink-0 items-center gap-3 border-t px-[18px] text-[10px] hover:bg-muted hover:text-foreground; }
+  .luma-sidebar-toggle svg { @apply h-4 w-4 shrink-0; }
+  .luma-sidebar-toggle span { @apply hidden; }
+  .luma-sidebar-expanded .luma-sidebar-toggle span { @apply block; }
+  .luma-main { @apply min-h-screen transition-[padding] duration-200; padding-left: var(--luma-sidebar-width); }
+  .luma-topbar { @apply sticky top-0 z-40 flex h-11 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur; }
+  .luma-global-search { @apply flex h-7 w-[280px] items-center gap-2 rounded-[7px] border bg-muted px-2 text-left text-[11px] text-muted-foreground; }
+  .luma-global-search svg { @apply h-3 w-3; }
+  .luma-global-search span { @apply flex-1; }
+  .luma-global-search kbd { @apply rounded border bg-card px-[5px] py-0.5 text-[9px] font-normal; }
+  .luma-user-tools { @apply ml-auto flex items-center; }
+  .luma-user-trigger { @apply h-8 gap-2 px-2 text-[11px]; }
+  .luma-user-trigger > span { @apply hidden lg:block; }
+  .luma-mobile-backdrop { @apply fixed inset-0 z-40 bg-black/30 md:hidden; }
+  .workspace-content { @apply min-h-[calc(100vh-44px)] bg-background; }
+
+  .workspace-home { @apply w-full px-7 pb-10; }
+  .workspace-home-header { @apply flex min-h-[92px] items-center justify-between gap-6 border-b; }
+  .workspace-home-header h1 { @apply m-0 text-[clamp(24px,2.2vw,34px)] font-semibold tracking-[-.035em]; }
+  .workspace-home-header p { @apply mt-1 text-[11px] text-muted-foreground; }
+  .workspace-home-actions { @apply flex items-center gap-3; }
+  .workspace-home-actions > span { @apply text-[11px] text-muted-foreground; }
+  .workspace-home-actions .inline-flex { @apply h-7 px-2.5 text-[11px]; }
+  .workspace-home-section { @apply mt-7 w-full; }
+  .workspace-section-header { @apply mb-[13px] flex items-end justify-between gap-5; }
+  .workspace-section-header h2 { @apply m-0 text-[17px] font-semibold tracking-[-.02em]; }
+  .workspace-section-header span { @apply text-[11px] text-muted-foreground; }
+
+  .workspace-app-grid { @apply grid grid-cols-1 border-l border-t sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6; }
+  .workspace-app-tile { @apply flex min-h-[76px] min-w-0 items-center gap-[11px] border-b border-r p-3 text-left transition-colors hover:bg-secondary focus-visible:z-10 focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-[-1px]; }
+  .workspace-app-icon { @apply grid h-[38px] w-[38px] shrink-0 place-items-center rounded-md bg-secondary text-accent-foreground; }
+  .workspace-app-icon svg { @apply h-4 w-4; }
+  .workspace-app-copy { @apply flex min-w-0 flex-1 flex-col gap-0.5; }
+  .workspace-app-copy strong { @apply overflow-hidden text-ellipsis whitespace-nowrap text-xs font-medium; }
+  .workspace-app-copy small { @apply text-[10px] text-muted-foreground; }
+  .workspace-app-arrow { @apply h-2.5 w-2.5 -translate-x-1 text-muted-foreground opacity-0 transition-all; }
+  .workspace-app-tile:hover .workspace-app-arrow { @apply translate-x-0 opacity-100; }
+
+  .workspace-metric-grid { @apply grid grid-cols-1 border-l border-t sm:grid-cols-2 xl:grid-cols-4; }
+  .workspace-metric-grid article { @apply flex min-h-[108px] min-w-0 flex-col justify-between border-b border-r bg-card px-4 py-3.5; }
+  .workspace-metric-grid article:first-child > strong { @apply text-accent-foreground; }
+  .workspace-metric-grid article > strong { @apply overflow-hidden text-ellipsis whitespace-nowrap text-[clamp(22px,2vw,30px)] font-semibold tracking-[-.035em]; }
+  .workspace-metric-grid article > small { @apply text-[10px] text-muted-foreground; }
+  .workspace-metric-header { @apply flex items-center justify-between gap-3 text-[10px] font-medium uppercase tracking-[.02em] text-muted-foreground; }
+  .workspace-metric-header svg { @apply h-[13px] w-[13px] opacity-70; }
+
+  .workspace-panel-grid { @apply grid grid-cols-1 border-l xl:grid-cols-[1.45fr_.55fr]; }
+  .workspace-panel { @apply min-w-0 overflow-hidden border-b border-r border-t bg-background; }
+  .workspace-panel > header { @apply flex min-h-14 items-center justify-between gap-4 border-b px-[15px] py-[11px]; }
+  .workspace-panel > header div { @apply flex min-w-0 flex-col gap-0.5; }
+  .workspace-panel > header strong { @apply text-xs font-semibold; }
+  .workspace-panel > header span { @apply text-[10px] text-muted-foreground; }
+  .workspace-empty { @apply grid min-h-52 place-items-center content-center gap-2 text-[10px] text-muted-foreground; }
+  .workspace-empty svg { @apply h-6 w-6; }
+  .workspace-empty strong { @apply text-xs font-medium text-foreground; }
+  .workspace-status-ok { @apply flex min-h-52 items-center gap-3 px-6; }
+  .workspace-status-ok > i { @apply h-2 w-2 shrink-0 rounded-full bg-primary; }
+  .workspace-status-ok div { @apply flex flex-col gap-1; }
+  .workspace-status-ok strong { @apply text-xs font-medium; }
+  .workspace-status-ok span { @apply text-[10px] text-muted-foreground; }
+
+  .workspace-view { @apply min-h-[calc(100vh-44px)]; }
+  .workspace-control-panel { @apply grid h-[54px] grid-cols-[max-content_minmax(0,1fr)_max-content] items-center gap-3 border-b px-5; }
+  .workspace-control-title { @apply flex items-center gap-2; }
+  .workspace-control-title h1 { @apply m-0 whitespace-nowrap text-base font-semibold tracking-[-.025em]; }
+  .workspace-control-title > span { @apply rounded bg-accent px-1.5 py-0.5 text-[9px] font-medium text-accent-foreground; }
+  .workspace-search { @apply flex h-[34px] w-full min-w-0 items-center gap-2 rounded-[7px] border border-input bg-background px-2.5 focus-within:border-[var(--focus-border)]; }
+  .workspace-search svg { @apply h-3.5 w-3.5 shrink-0 text-muted-foreground; }
+  .workspace-search input { @apply h-full min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-muted-foreground; }
+  .workspace-control-actions { @apply flex justify-self-end gap-1; }
+  .workspace-control-actions .inline-flex { @apply h-8 px-3 text-xs; }
+  .workspace-control-actions b { @apply rounded bg-accent px-1 text-[9px] font-semibold text-accent-foreground; }
+
+  .workspace-list { @apply m-0 bg-background; }
+  .workspace-list table { @apply w-full border-collapse text-xs; }
+  .workspace-list thead { @apply border-b bg-secondary/60 text-left text-[10px] font-medium uppercase tracking-[.02em] text-muted-foreground; }
+  .workspace-list th { @apply h-9 px-4 font-medium; }
+  .workspace-list td { @apply h-11 border-b px-4; }
+  .workspace-list tbody tr { @apply cursor-pointer hover:bg-muted/60; }
+  .workspace-list tbody tr.workspace-row-selected { @apply bg-accent/50; }
+  .workspace-select-cell { @apply w-10 px-3 text-center; }
+  .workspace-select-cell input { @apply h-3.5 w-3.5 accent-[#00ce7c]; }
+  .workspace-list-empty { @apply grid min-h-[240px] place-items-center content-center gap-2 text-[10px] text-muted-foreground; }
+  .workspace-list-empty svg { @apply h-5 w-5; }
+  .workspace-list-empty strong { @apply text-xs font-medium text-foreground; }
+  .workspace-list-footer { @apply flex h-11 items-center justify-between border-b px-4 text-[10px] text-muted-foreground; }
+  .workspace-list-footer > div { @apply flex items-center gap-1; }
+  .workspace-footer-divider { @apply mx-1 h-4 w-px bg-border; }
+
+  .workspace-form-commandbar { @apply flex min-h-11 items-center justify-between gap-3 border-b px-5; }
+  .workspace-form-commandbar > div { @apply flex flex-wrap gap-1; }
+  .workspace-form-commandbar ol { @apply flex items-center overflow-hidden rounded border; }
+  .workspace-form-commandbar li { @apply relative min-w-20 border-r px-3 py-1.5 text-center text-[10px] text-muted-foreground last:border-r-0; }
+  .workspace-form-commandbar li.active { @apply bg-accent font-semibold text-accent-foreground; }
+  .workspace-form-sheet { @apply my-0 w-full bg-background; }
+  .workspace-form-sheet section { @apply border-b px-6 py-5 last:border-b-0; }
+  .workspace-form-sheet h2 { @apply mb-4 text-xs font-semibold tracking-[-.01em]; }
+  .workspace-form-grid { @apply grid grid-cols-1 gap-x-10 gap-y-3 lg:grid-cols-2 2xl:grid-cols-3; }
+  .workspace-form-grid label { @apply grid grid-cols-[minmax(110px,.42fr)_minmax(0,1fr)] items-center gap-3; }
+  .workspace-form-grid label > span { @apply text-[11px] text-muted-foreground; }
+  .workspace-form-grid label > span b { @apply ml-0.5 text-primary; }
+  .workspace-form-wide { @apply lg:col-span-2 2xl:col-span-3; }
+  .workspace-form-control { @apply min-h-[34px] min-w-0 text-[13px]; }
+  .workspace-form-control input:not([type=checkbox]), .workspace-form-control select, .workspace-form-control textarea { @apply h-[34px] w-full rounded-md border border-input bg-background px-2.5 text-[13px] outline-none focus:border-[var(--focus-border)]; }
+  .workspace-form-control textarea { @apply min-h-20 py-2; }
+  .workspace-form-control input[type=checkbox] { @apply h-4 w-4 accent-[#00ce7c]; }
+  .workspace-switch { @apply relative inline-flex h-5 w-9 cursor-pointer items-center; }
+  .workspace-switch input { @apply sr-only; }
+  .workspace-switch span { @apply h-5 w-9 rounded-full bg-muted transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-background after:shadow-[var(--shadow-low)] after:transition-transform; }
+  .workspace-switch input:checked + span { @apply bg-primary after:translate-x-4; }
+  .workspace-radio-group { @apply flex flex-wrap gap-3; }
+  .workspace-radio-group label { @apply flex cursor-pointer items-center gap-1.5 text-[11px]; }
+  .workspace-radio-group input { @apply h-3.5 w-3.5 accent-[#00ce7c]; }
+  .workspace-file-input { @apply inline-flex h-8 cursor-pointer items-center rounded-md border border-input px-2.5 text-[11px] hover:bg-muted; }
+  .workspace-file-input input { @apply sr-only; }
+  .workspace-tags-editor { @apply relative min-h-8 rounded-md border border-input bg-background px-1.5 py-1; }
+  .workspace-tags-editor > div { @apply flex flex-wrap gap-1; }
+  .workspace-tags-editor > div > span { @apply inline-flex items-center gap-1 rounded bg-accent px-1.5 py-0.5 text-[10px] text-accent-foreground; }
+  .workspace-tags-editor > div button { @apply text-muted-foreground hover:text-destructive; }
+  .workspace-tags-editor > input { @apply mt-1 h-6 border-0 px-1 text-[11px] focus:border-0; }
+  .workspace-tags-editor > ul { @apply absolute left-0 right-0 top-full z-20 max-h-40 overflow-auto rounded-b border bg-background p-1 shadow-[var(--shadow-floating)]; }
+  .workspace-tags-editor > ul button { @apply w-full rounded px-2 py-1 text-left text-[10px] hover:bg-muted; }
+  .workspace-priority { @apply flex items-center gap-0.5; }
+  .workspace-priority button { @apply text-sm text-muted-foreground/40; }
+  .workspace-priority button.active { @apply text-primary; }
+  .workspace-priority-read { @apply text-primary; }
+  .workspace-color { @apply inline-block h-3 w-3 rounded-full; }
+  .workspace-badge { @apply inline-flex rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium; }
+  .workspace-tags { @apply text-[10px] text-muted-foreground; }
+  .workspace-boolean-on { @apply text-accent-foreground; }
+  .workspace-boolean-off { @apply text-muted-foreground; }
+  .workspace-progress { @apply block h-1.5 min-w-20 overflow-hidden rounded-full bg-muted; }
+  .workspace-progress i { @apply block h-full rounded-full bg-primary; }
+  .workspace-relation { @apply w-full border; }
+  .workspace-relation table { @apply w-full border-collapse text-[11px]; }
+  .workspace-relation th { @apply h-8 border-b bg-muted/40 px-2 text-left text-[9px] font-medium uppercase tracking-[.02em] text-muted-foreground; }
+  .workspace-relation td { @apply min-w-28 border-b px-2 py-1.5 align-middle; }
+  .workspace-relation tr:last-child td { @apply border-b-0; }
+  .workspace-relation td input:not([type=checkbox]), .workspace-relation td select { @apply h-7 min-w-24 px-2 text-[11px]; }
+  .workspace-relation-delete { @apply w-8 min-w-8 text-right; }
+  .workspace-relation-delete button { @apply grid h-6 w-6 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-destructive; }
+  .workspace-relation-delete svg { @apply h-3 w-3; }
+  .workspace-relation-add { @apply flex h-8 w-full items-center gap-1 border-t px-2 text-[10px] text-accent-foreground hover:bg-muted; }
+  .workspace-relation-add svg { @apply h-3 w-3; }
+  .workspace-relation-empty { @apply block px-3 py-5 text-center text-[10px] text-muted-foreground; }
+  .workspace-form-loading { @apply fixed inset-x-0 top-0 z-[80] h-0.5 animate-pulse bg-primary; }
+
+  .luma-document { @apply min-h-[calc(100vh-44px)] bg-background; }
+  .luma-document-header { @apply sticky top-11 z-30 flex min-h-[62px] items-center justify-between gap-4 border-b bg-background/95 px-6 backdrop-blur; }
+  .luma-document-title { @apply flex min-w-0 items-center gap-2; }
+  .luma-document-title > div { @apply min-w-0; }
+  .luma-document-title h1 { @apply overflow-hidden text-ellipsis whitespace-nowrap text-lg font-semibold tracking-[-.025em]; }
+  .luma-document-actions { @apply flex flex-wrap justify-end gap-1; }
+  .luma-document-status { @apply flex min-h-10 items-center justify-end border-b px-6; }
+  .luma-document-status ol { @apply flex items-center gap-0; }
+  .luma-document-status li { @apply flex items-center gap-1.5 px-2.5 py-2 text-[10px] text-muted-foreground; }
+  .luma-document-status li i { @apply h-1.5 w-1.5 rounded-full border border-input bg-background; }
+  .luma-document-status li.active { @apply font-semibold text-accent-foreground; }
+  .luma-document-status li.active i { @apply border-primary bg-primary; }
+  .luma-document-body { @apply w-full; }
+  .luma-document-overview { @apply grid min-h-40 grid-cols-1 gap-10 border-b px-8 py-7 lg:grid-cols-[minmax(0,1.25fr)_minmax(380px,.75fr)]; }
+  .luma-document-primary { @apply min-w-0; }
+  .luma-document-eyebrow { @apply mb-2 block text-[9px] font-medium uppercase tracking-[.08em] text-muted-foreground; }
+  .luma-document-meta { @apply grid grid-cols-2 content-start gap-x-8 gap-y-3; }
+  .luma-document-field { @apply grid grid-cols-[120px_minmax(0,1fr)] items-center gap-3; }
+  .luma-document-field > span { @apply text-[10px] text-muted-foreground; }
+  .luma-document-field > span b { @apply ml-0.5 text-primary; }
+  .luma-document-field > div { @apply min-w-0 text-xs; }
+  .luma-document-hero { @apply mb-4 grid-cols-1 gap-1; }
+  .luma-document-hero > span { @apply sr-only; }
+  .luma-document-hero > div { @apply text-xl font-semibold tracking-[-.02em]; }
+  .luma-document-section { @apply border-b px-8 py-6; }
+  .luma-document-section > header { @apply mb-5; }
+  .luma-document-section > header h2 { @apply text-sm font-semibold tracking-[-.015em]; }
+  .luma-document-section > header span { @apply mt-1 block text-[10px] text-muted-foreground; }
+  .luma-document-fields { @apply grid grid-cols-1 gap-x-10 gap-y-3 md:grid-cols-2 xl:grid-cols-3; }
+  .luma-document-table { @apply block; }
+  .luma-document-table > span { @apply sr-only; }
+  .luma-document-table > div { @apply mt-0; }
+  .luma-document-summary { @apply grid grid-cols-1 gap-10 px-8 py-7 lg:grid-cols-[minmax(0,1fr)_360px]; }
+  .luma-document-note { @apply grid-cols-1 gap-2; }
+  .luma-document-summary dl { @apply space-y-2; }
+  .luma-document-summary dl > div { @apply flex items-center justify-between border-b pb-2 text-xs; }
+  .luma-document-summary dt { @apply text-muted-foreground; }
+  .luma-document-summary dd { @apply font-medium tabular-nums; }
+  .luma-document-summary dl > .total { @apply mt-3 border-b-0 pt-2 text-base; }
+  .luma-document-summary .total dt, .luma-document-summary .total dd { @apply font-semibold text-foreground; }
+  .workspace-loading, .workspace-error { @apply grid min-h-[calc(100vh-44px)] place-items-center content-center gap-2 text-xs text-muted-foreground; }
+  .workspace-error strong { @apply text-sm text-foreground; }
+  .luma-boot { @apply grid min-h-screen place-items-center content-center gap-3 bg-background text-muted-foreground; }
+  .luma-boot strong { @apply text-base text-foreground; }
+  .luma-boot > span:last-child { @apply text-[11px]; }
+  .workspace-view-loading { @apply min-h-[calc(100vh-44px)] bg-background; }
+  .workspace-loading-header { @apply grid h-[54px] grid-cols-[max-content_minmax(0,1fr)_max-content] items-center gap-3 border-b px-5; }
+  .workspace-loading-header > :nth-child(2) { @apply mx-auto; }
+  .workspace-loading-header > :last-child { @apply justify-self-end; }
+  .workspace-toast-error { @apply fixed bottom-4 right-4 z-[70] max-w-sm rounded-md border border-destructive/20 bg-background px-3 py-2 text-[11px] text-destructive shadow-[var(--shadow-floating)]; }
+  .luma-modal-backdrop { @apply fixed inset-0 z-[90] grid place-items-center bg-foreground/15 p-4 backdrop-blur-[1px]; }
+  .luma-modal { @apply max-h-[calc(100vh-32px)] w-full max-w-xl overflow-auto rounded-md border bg-background shadow-[var(--shadow-floating)]; }
+  .luma-modal > header { @apply sticky top-0 z-10 flex h-11 items-center justify-between border-b bg-background px-4; }
+  .luma-modal > header h2 { @apply text-sm font-semibold; }
+  .luma-modal > main { @apply grid gap-3 p-4; }
+  .luma-modal > main label { @apply grid grid-cols-[130px_minmax(0,1fr)] items-center gap-3; }
+  .luma-modal > main label > span { @apply text-[10px] text-muted-foreground; }
+  .luma-modal > main label > span b { @apply ml-0.5 text-primary; }
+  .luma-modal > main input:not([type=checkbox]), .luma-modal > main select, .luma-modal > main textarea { @apply h-8 w-full rounded-md border border-input bg-background px-2.5 text-xs outline-none focus:border-[var(--focus-border)]; }
+  .luma-modal > footer { @apply flex justify-end gap-1 border-t p-3; }
+  .luma-modal-error { @apply p-4 text-xs text-destructive; }
+  .luma-modal-loading { @apply p-8 text-center text-xs text-muted-foreground; }
+}
+
+@media (max-width: 767px) {
+  .luma-shell, .luma-sidebar-expanded { --luma-sidebar-width: 0px; }
+  .luma-sidebar, .luma-sidebar-expanded .luma-sidebar { @apply w-[216px] -translate-x-full; }
+  .luma-sidebar-mobile-open { @apply translate-x-0; }
+  .luma-sidebar .luma-brand strong, .luma-sidebar .luma-nav-label, .luma-sidebar .luma-sidebar-toggle span { @apply block; }
+  .luma-sidebar .luma-nav-row > button { @apply grid; }
+  .luma-main { @apply pl-0; }
+  .luma-global-search { @apply w-full max-w-sm; }
+  .workspace-home { @apply px-4; }
+  .workspace-home-header { @apply min-h-[110px] flex-col items-start justify-center gap-2; }
+  .workspace-home-actions { @apply w-full justify-between; }
+  .workspace-control-panel { @apply h-auto min-h-[108px] grid-cols-1 py-3; }
+  .workspace-search { @apply col-span-1 row-start-2; }
+  .workspace-control-actions { @apply absolute right-4 top-[55px]; }
 }

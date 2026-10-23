@@ -33,7 +33,7 @@
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <meta name="theme-color" content="#020617"/>
-        <title>ERP Workspace</title>
+        <title>Luma</title>
         <link t-foreach="styles" t-as="stylesheet" rel="stylesheet" t-att-href="stylesheet"/>
     </head>
     <body>
@@ -124,7 +124,7 @@
 
             <main class="o_workspace_login_shell">
                 <section class="o_workspace_login_intro">
-                    <span class="o_workspace_login_brand"><i/> Workspace</span>
+                    <span class="o_workspace_login_brand"><i/> Luma</span>
                     <div>
                         <span class="o_workspace_login_eyebrow">Business workspace</span>
                         <h1>One clean space for daily work.</h1>
