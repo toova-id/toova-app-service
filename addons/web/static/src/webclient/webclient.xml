@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.WebClient" owl="1">
+        <t t-if="!state.fullscreen">
+            <NavBar home="state.home"/>
+        </t>
+        <div class="o_workspace_main">
+            <HomeDashboard t-if="state.home and !state.fullscreen"/>
+            <div class="o_workspace_action_host" t-att-class="{'o_workspace_action_hidden': state.home and !state.fullscreen}">
+                <ActionContainer/>
+            </div>
+        </div>
+        <MainComponentsContainer/>
+    </t>
+
+</templates>

@@ -1,0 +1,241 @@
+# Reference only. Replace image digest, Secret, database filter, and external
+# service endpoints. All roles must use same immutable image digest.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odoo-http
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: odoo, role: http}
+  template:
+    metadata:
+      labels: {app: odoo, role: http}
+    spec:
+      terminationGracePeriodSeconds: 930
+      securityContext: {runAsNonRoot: true, runAsUser: 101, runAsGroup: 101, fsGroup: 101}
+      containers:
+        - name: odoo
+          image: odoo16-engine@sha256:REPLACE_ME
+          args: ["--config=/etc/odoo/odoo.conf", "--runtime-role=http"]
+          envFrom:
+            - secretRef: {name: odoo-runtime-secrets}
+          ports:
+            - {name: http, containerPort: 8069}
+          resources:
+            requests: {memory: 288Mi, cpu: 150m}
+            limits: {memory: 384Mi, cpu: 500m}
+          startupProbe:
+            httpGet: {path: /web/health, port: http}
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet: {path: "/web/health?db_server_status=1", port: http}
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet: {path: /web/health, port: http}
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+            seccompProfile: {type: RuntimeDefault}
+          volumeMounts:
+            - {name: config, mountPath: /etc/odoo, readOnly: true}
+            - {name: data, mountPath: /var/lib/odoo}
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: config
+          secret: {secretName: odoo-config}
+        - name: data
+          emptyDir: {sizeLimit: 64Mi}
+        - name: tmp
+          emptyDir: {sizeLimit: 256Mi}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: odoo-http
+spec:
+  scaleTargetRef: {apiVersion: apps/v1, kind: Deployment, name: odoo-http}
+  minReplicas: 1
+  maxReplicas: 10
+  behavior:
+    scaleDown: {stabilizationWindowSeconds: 300}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: {type: Utilization, averageUtilization: 70}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odoo-realtime
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: odoo, role: realtime}
+  template:
+    metadata:
+      labels: {app: odoo, role: realtime}
+    spec:
+      terminationGracePeriodSeconds: 60
+      securityContext: {runAsNonRoot: true, runAsUser: 101, runAsGroup: 101, fsGroup: 101}
+      containers:
+        - name: odoo
+          image: odoo16-engine@sha256:REPLACE_ME
+          args: ["gevent", "--config=/etc/odoo/odoo.conf", "--runtime-role=realtime", "--workers=0"]
+          envFrom:
+            - secretRef: {name: odoo-runtime-secrets}
+          ports:
+            - {name: realtime, containerPort: 8072}
+          resources:
+            requests: {memory: 64Mi, cpu: 25m}
+            limits: {memory: 128Mi, cpu: 150m}
+          readinessProbe:
+            httpGet: {path: /websocket/health, port: realtime}
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet: {path: /websocket/health, port: realtime}
+            periodSeconds: 30
+            timeoutSeconds: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+            seccompProfile: {type: RuntimeDefault}
+          volumeMounts:
+            - {name: config, mountPath: /etc/odoo, readOnly: true}
+            - {name: data, mountPath: /var/lib/odoo}
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: config
+          secret: {secretName: odoo-config}
+        - name: data
+          emptyDir: {sizeLimit: 64Mi}
+        - name: tmp
+          emptyDir: {sizeLimit: 256Mi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odoo-cron
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: odoo, role: cron}
+  template:
+    metadata:
+      labels: {app: odoo, role: cron}
+    spec:
+      terminationGracePeriodSeconds: 930
+      securityContext: {runAsNonRoot: true, runAsUser: 101, runAsGroup: 101, fsGroup: 101}
+      containers:
+        - name: odoo
+          image: odoo16-engine@sha256:REPLACE_ME
+          args: ["--config=/etc/odoo/odoo.conf", "--runtime-role=cron", "--workers=1"]
+          envFrom:
+            - secretRef: {name: odoo-runtime-secrets}
+          resources:
+            requests: {memory: 96Mi, cpu: 50m}
+            limits: {memory: 128Mi, cpu: 150m}
+          readinessProbe:
+            exec: {command: ["python", "-c", "import os,time; assert time.time()-os.path.getmtime('/tmp/odoo-cron-health') < 15"]}
+            periodSeconds: 15
+            timeoutSeconds: 3
+          livenessProbe:
+            exec: {command: ["python", "-c", "import os,time; assert time.time()-os.path.getmtime('/tmp/odoo-cron-health') < 15"]}
+            periodSeconds: 30
+            timeoutSeconds: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+            seccompProfile: {type: RuntimeDefault}
+          volumeMounts:
+            - {name: config, mountPath: /etc/odoo, readOnly: true}
+            - {name: data, mountPath: /var/lib/odoo}
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: config
+          secret: {secretName: odoo-config}
+        - name: data
+          emptyDir: {sizeLimit: 64Mi}
+        - name: tmp
+          emptyDir: {sizeLimit: 256Mi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odoo-broker
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: odoo, role: broker}
+  template:
+    metadata:
+      labels: {app: odoo, role: broker}
+    spec:
+      terminationGracePeriodSeconds: 60
+      securityContext: {runAsNonRoot: true, runAsUser: 101, runAsGroup: 101, fsGroup: 101}
+      containers:
+        - name: odoo
+          image: odoo16-engine@sha256:REPLACE_ME
+          args:
+            - --config=/etc/odoo/odoo.conf
+            - --runtime-role=broker
+            - --workers=0
+            - --no-http
+          envFrom:
+            - secretRef: {name: odoo-runtime-secrets}
+          resources:
+            requests: {memory: 96Mi, cpu: 50m}
+            limits: {memory: 128Mi, cpu: 150m}
+          livenessProbe:
+            exec: {command: ["python", "-c", "import os,time; assert time.time()-os.path.getmtime('/tmp/odoo-broker-health') < 30"]}
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            exec: {command: ["python", "-c", "import os,time; assert time.time()-os.path.getmtime('/tmp/odoo-broker-health') < 30"]}
+            periodSeconds: 5
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+            seccompProfile: {type: RuntimeDefault}
+          volumeMounts:
+            - {name: config, mountPath: /etc/odoo, readOnly: true}
+            - {name: data, mountPath: /var/lib/odoo}
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: config
+          secret: {secretName: odoo-config}
+        - name: data
+          emptyDir: {sizeLimit: 64Mi}
+        - name: tmp
+          emptyDir: {sizeLimit: 256Mi}
+---
+# CPU fallback. Production NSQ depth scaling needs KEDA Prometheus scaler plus
+# nsq_exporter metric nsq_topic_depth; endpoint and query are cluster-specific.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: odoo-broker
+spec:
+  scaleTargetRef: {apiVersion: apps/v1, kind: Deployment, name: odoo-broker}
+  minReplicas: 1
+  maxReplicas: 10
+  behavior:
+    scaleDown: {stabilizationWindowSeconds: 300}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: {type: Utilization, averageUtilization: 70}

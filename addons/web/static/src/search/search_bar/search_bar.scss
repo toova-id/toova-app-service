@@ -1,0 +1,33 @@
+// = Search Bar
+// ============================================================================
+
+.o_searchview_facet {
+    overflow: hidden;
+    border: 1px solid var(--border, #{$border-color});
+    border-radius: 5px;
+    background: var(--card, #{$o-view-background-color});
+    color: var(--foreground, #{$body-color});
+
+    .o_facet_values {
+        border: 0;
+        background: transparent;
+    }
+
+    .o_searchview_facet_label {
+        border: 0;
+        background: var(--accent, #e8f8f0);
+        color: var(--accent-foreground, #115f3c);
+    }
+
+    .o_facet_remove {
+        color: var(--muted-foreground, #{$gray-600}) !important;
+    }
+}
+
+.o_searchview_autocomplete {
+    margin-top: 8px;
+    border: 1px solid var(--border, #{$border-color});
+    border-radius: 8px;
+    background: var(--popover, #{$o-view-background-color});
+    box-shadow: var(--shadow-floating, #{$dropdown-box-shadow});
+}

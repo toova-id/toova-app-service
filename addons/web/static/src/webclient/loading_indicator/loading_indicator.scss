@@ -1,0 +1,38 @@
+.o_loading_indicator {
+    position: fixed;
+    inset: 0;
+    z-index: $zindex-modal + 1;
+    display: grid;
+    place-items: center;
+    background: rgba(12, 17, 14, .06);
+    cursor: progress;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    transition: opacity 140ms ease;
+
+    &.o-fade-leave,
+    &.o-fade-enter {
+        opacity: 0;
+    }
+}
+
+.o_loading_indicator_spinner {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--input, #d7e0da);
+    border-top-color: var(--primary, #00ce7c);
+    border-radius: 50%;
+    animation: o-workspace-spin .7s linear infinite;
+}
+
+@keyframes o-workspace-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .o_loading_indicator_spinner {
+        animation-duration: 1.4s;
+    }
+}

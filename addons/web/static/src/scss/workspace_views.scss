@@ -1,0 +1,2423 @@
+// Workspace view system. New layout layer for backend views; app bar stays untouched.
+
+.o_web_client {
+    --workspace-font-content: 13px;
+    --workspace-font-meta: 11px;
+
+    font-size: var(--workspace-font-content);
+
+    .o_action_manager > .o_action,
+    .o_action_manager > .o_action > .o_content {
+        min-width: 0;
+        background: var(--background);
+        font-size: var(--workspace-font-content);
+    }
+
+    button,
+    input,
+    select,
+    textarea,
+    .btn,
+    .dropdown-item,
+    .o_field_widget,
+    .o_data_cell {
+        font-size: var(--workspace-font-content);
+    }
+
+    // Unified single-row page header.
+    .o_control_panel {
+        position: relative;
+        z-index: 3;
+        display: block;
+        height: 54px;
+        padding: 0 20px;
+        border: 0;
+        border-bottom: 1px solid var(--border);
+        background: transparent !important;
+        box-shadow: none;
+
+        > .o_cp_top {
+            display: grid;
+            width: 100%;
+            min-width: 0;
+            height: 53px;
+            min-height: 53px;
+            grid-template-columns: max-content minmax(0, 1fr) max-content;
+            align-items: center;
+            gap: 12px;
+        }
+
+        > .o_cp_bottom {
+            display: none;
+        }
+
+        .o_workspace_cp_left,
+        .o_workspace_cp_right {
+            display: flex;
+            min-width: 0;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .o_workspace_cp_left {
+            width: max-content;
+            max-width: none;
+            overflow: visible;
+            flex-wrap: nowrap;
+            white-space: nowrap;
+        }
+
+        .o_workspace_cp_right {
+            width: max-content;
+            max-width: none;
+            overflow: visible;
+            flex: 0 0 auto;
+            flex-wrap: nowrap;
+            justify-self: end;
+            white-space: nowrap;
+        }
+
+        .o_cp_top_left {
+            width: max-content;
+            max-width: none;
+            min-width: 0;
+            overflow: visible;
+            flex: 0 0 auto;
+        }
+
+        .o_cp_top_right,
+        .o_workspace_cp_search {
+            width: 100% !important;
+            min-width: 0 !important;
+        }
+
+        .o_cp_bottom_right {
+            display: flex;
+            width: auto !important;
+            min-width: max-content;
+            flex: 0 0 auto;
+            flex-wrap: nowrap !important;
+            justify-content: flex-end;
+        }
+
+        .o_cp_bottom_left {
+            width: max-content;
+            min-width: max-content;
+            flex: 0 0 auto;
+            flex-wrap: nowrap;
+            margin-left: 4px;
+            padding-left: 12px;
+            border-left: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .o_cp_top_left,
+        .o_cp_top_right,
+        .o_cp_bottom_left,
+        .o_cp_bottom_right,
+        .o_workspace_cp_left,
+        .o_workspace_cp_right {
+            height: 32px;
+            min-height: 32px;
+            align-items: center;
+            background: transparent !important;
+        }
+
+        .breadcrumb {
+            width: max-content;
+            min-width: max-content;
+            min-height: 32px;
+            flex-wrap: nowrap;
+            overflow: visible;
+            white-space: nowrap;
+            padding: 0 !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            align-items: center;
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: -.025em;
+
+            .breadcrumb-item {
+                min-width: max-content;
+                flex: 0 0 auto;
+                overflow: visible;
+                color: var(--muted-foreground);
+                font-weight: 500;
+                white-space: nowrap;
+
+                &::before {
+                    color: var(--input);
+                }
+
+                a {
+                    color: inherit;
+                    text-decoration: none;
+                }
+
+                a:hover,
+                &.active {
+                    color: var(--foreground);
+                }
+            }
+        }
+
+        .o_workspace_cp_search > *,
+        .o_cp_top_right > *,
+        .o_cp_searchview,
+        .o_searchview {
+            width: 100% !important;
+            max-width: none !important;
+            height: 34px;
+            min-height: 34px;
+        }
+
+        .o_cp_searchview {
+            display: flex;
+            align-items: center;
+        }
+
+        .o_searchview {
+            display: flex;
+            align-items: center !important;
+            padding: 0 10px !important;
+            border: 1px solid var(--input) !important;
+            border-radius: 7px;
+            background: var(--background);
+
+            &:focus-within {
+                border-color: var(--focus-border) !important;
+                box-shadow: none;
+            }
+
+            .o_searchview_icon {
+                position: absolute;
+                top: 50%;
+                right: 10px;
+                left: auto;
+                display: flex;
+                width: 16px;
+                height: 16px;
+                align-items: center;
+                justify-content: center;
+                margin: 0;
+                color: var(--muted-foreground);
+                line-height: 1;
+                transform: translateY(-50%);
+            }
+
+            .o_searchview_input_container {
+                display: flex;
+                min-width: 0;
+                height: 32px;
+                flex: 1 1 auto;
+                flex-flow: row nowrap;
+                align-items: center;
+                gap: 4px;
+                padding-right: 22px;
+            }
+
+            .o_searchview_input {
+                height: 32px;
+                min-height: 32px;
+                margin: 0;
+                padding: 0;
+                border: 0;
+                color: var(--foreground);
+                font-size: var(--workspace-font-content);
+                line-height: 32px;
+
+                &::placeholder {
+                    color: var(--muted-foreground);
+                    line-height: 32px;
+                }
+            }
+
+            .o_searchview_facet {
+                display: inline-flex;
+                height: 24px;
+                min-height: 24px;
+                align-items: center;
+                margin: 0;
+                line-height: 1;
+
+                .o_searchview_facet_label,
+                .o_facet_values {
+                    display: flex;
+                    height: 22px;
+                    align-items: center;
+                    line-height: 1;
+                }
+
+                .o_facet_remove {
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    display: flex;
+                    width: 20px;
+                    min-width: 20px;
+                    height: 22px;
+                    min-height: 0;
+                    align-items: center;
+                    justify-content: center;
+                    margin: auto 0;
+                    padding: 0 !important;
+                    border: 0;
+                    line-height: 1;
+                }
+            }
+        }
+
+        .o_cp_bottom_left,
+        .o_cp_bottom_right,
+        .o_cp_buttons,
+        .o_form_buttons_edit,
+        .o_form_buttons_view {
+            display: flex;
+            width: max-content;
+            min-width: max-content;
+            height: 32px;
+            flex: 0 0 auto;
+            flex-flow: row nowrap;
+            align-items: center;
+            gap: 6px;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .o_cp_bottom_left > .o_cp_action_menus {
+            margin-left: 0;
+            padding-right: 0;
+        }
+
+        .o_list_selection_box {
+            display: inline-flex;
+            height: 32px;
+            min-height: 32px;
+            align-items: center;
+            gap: 6px;
+            margin: 0;
+            padding: 0 8px;
+            border: 0;
+            border-radius: 6px;
+            background: var(--muted);
+            color: var(--muted-foreground);
+            font-size: var(--workspace-font-meta);
+            line-height: 1;
+            white-space: nowrap;
+
+            .font-monospace {
+                color: var(--foreground);
+                font-family: inherit !important;
+                font-size: inherit;
+                font-weight: 600;
+            }
+
+            .o_list_select_domain {
+                min-height: 24px;
+                margin: 0;
+                padding: 0 5px;
+                color: var(--accent-foreground);
+                font-size: inherit;
+                line-height: 24px;
+            }
+        }
+
+        .o_cp_bottom_left .o_list_buttons {
+            align-items: center;
+            gap: 6px;
+
+            .o_list_button_add {
+                min-width: 58px;
+            }
+
+            .o_list_export_xlsx {
+                width: 32px;
+                min-width: 32px;
+                padding: 0;
+                border: 0;
+                background: transparent;
+                color: var(--muted-foreground);
+
+                &:hover {
+                    background: var(--muted);
+                    color: var(--foreground);
+                }
+            }
+        }
+
+        .btn {
+            min-height: 32px;
+            border-radius: 7px;
+            font-size: var(--workspace-font-content);
+        }
+
+        .btn-primary,
+        .o_form_button_save {
+            padding-right: 14px;
+            padding-left: 14px;
+        }
+
+        .o_search_options,
+        .o_cp_switch_buttons {
+            display: flex;
+            width: max-content;
+            flex: 0 0 auto;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 2px;
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+
+            > .btn,
+            > .dropdown > .btn,
+            .o_switch_view,
+            .o_view_menu_toggle {
+                min-width: 28px;
+                min-height: 30px;
+                padding: 3px 8px;
+                border: 0;
+                border-radius: 5px;
+                background: transparent;
+                color: var(--muted-foreground);
+
+                &:hover,
+                &.active {
+                    background: var(--muted);
+                    color: var(--foreground);
+                    box-shadow: none;
+                }
+            }
+
+            .dropdown-item.active {
+                background: var(--accent);
+                color: var(--accent-foreground);
+            }
+        }
+
+        .o_refine_menu {
+            flex: 0 0 auto;
+
+            > .o_refine_menu_toggle {
+                min-height: 32px;
+                padding: 4px 10px;
+                border: 0;
+                border-radius: 6px;
+                background: transparent;
+                color: var(--muted-foreground);
+
+                &:hover,
+                &[aria-expanded="true"] {
+                    background: var(--muted);
+                    color: var(--foreground);
+                }
+            }
+
+            > .o_refine_menu_dropdown {
+                min-width: 180px;
+                padding: 5px;
+
+                > .o-dropdown {
+                    display: block;
+                    width: 100%;
+
+                    > .dropdown-toggle {
+                        display: flex;
+                        width: 100%;
+                        min-height: 32px;
+                        align-items: center;
+                        padding: 6px 9px;
+                        border: 0;
+                        border-radius: 5px;
+                        background: transparent;
+                        color: var(--foreground);
+                        text-align: left;
+
+                        &::after {
+                            margin-left: auto;
+                        }
+
+                        &:hover,
+                        &[aria-expanded="true"] {
+                            background: var(--muted);
+                        }
+                    }
+                }
+
+                .o_dropdown_title {
+                    clip: auto;
+                    width: auto;
+                    height: auto;
+                    overflow: visible;
+                    position: static;
+                    white-space: nowrap;
+                }
+
+                .dropdown-menu {
+                    min-width: 220px;
+                }
+            }
+        }
+
+        .o_cp_pager {
+            display: flex;
+            width: max-content;
+            min-height: 32px;
+            flex: 0 0 auto;
+            white-space: nowrap;
+            align-items: center;
+            padding: 0;
+            color: var(--muted-foreground);
+            font-size: var(--workspace-font-meta);
+        }
+    }
+
+    .o_cp_action_menus {
+        display: flex;
+        width: max-content;
+        min-width: max-content;
+        flex: 0 0 auto;
+        flex-flow: row nowrap;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+
+        > .o-dropdown,
+        > .btn-group {
+            flex: 0 0 auto;
+            margin: 0 !important;
+        }
+
+        .dropdown-toggle,
+        .btn {
+            margin: 0 !important;
+        }
+    }
+
+    // Form header has no search rail; action group belongs at far right.
+    .o_workspace_form_control_panel > .o_cp_top {
+        display: flex;
+
+        .o_cp_top_left {
+            max-width: none;
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        .o_cp_bottom_right {
+            width: auto !important;
+            min-width: 0;
+            flex: 0 0 auto !important;
+            margin-left: auto;
+        }
+    }
+
+    // Border-only focus across workspace. No glow.
+    input:focus,
+    textarea:focus,
+    select:focus,
+    .o_input:focus,
+    .form-control:focus,
+    .form-select:focus,
+    .o_searchview_input:focus {
+        outline: 0 !important;
+        box-shadow: none !important;
+    }
+
+    // Form page shell
+    .o_form_view {
+        --Workspace-content-max: none;
+        --Workspace-page-gutter: 20px;
+        --Workspace-section-gap: 12px;
+    }
+
+    .o_form_view .o_workspace_form {
+        min-width: 0;
+        background: var(--background);
+
+        .o_form_sheet_bg {
+            min-width: 0;
+            flex: 1 1 auto;
+            overflow: auto;
+            padding: 0 0 24px;
+            border: 0;
+            background: var(--background);
+        }
+
+        .o_form_sheet_bg > .o_form_sheet,
+        .o_form_sheet_bg > .o_workspace_command_bar,
+        .o_form_sheet_bg > .alert {
+            width: 100%;
+            max-width: var(--Workspace-content-max);
+            margin-right: auto;
+            margin-left: auto;
+        }
+
+        .o_form_sheet_bg > .o_form_sheet {
+            box-sizing: border-box;
+            margin-top: 0;
+            margin-bottom: 0;
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        // Command rail replaces Odoo statusbar chrome.
+        .o_workspace_command_bar {
+            display: grid !important;
+            height: 48px;
+            min-height: 48px;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center !important;
+            gap: 18px;
+            margin-top: 0;
+            margin-bottom: 0;
+            padding: 0 var(--Workspace-page-gutter);
+            border: 0 !important;
+            border-bottom: 1px solid var(--border) !important;
+            border-radius: 0;
+            background: transparent;
+        }
+
+        .o_workspace_command_actions {
+            display: flex;
+            min-width: 0;
+            height: 32px;
+            min-height: 32px;
+            align-items: center !important;
+            align-self: center !important;
+            justify-content: flex-end;
+            justify-self: end;
+            margin: 0;
+            padding: 0;
+        }
+
+        .o_workspace_command_actions > .o_statusbar_buttons {
+            display: flex;
+            height: 32px;
+            min-height: 32px;
+            flex-flow: row nowrap;
+            align-content: center;
+            align-items: center !important;
+            justify-content: flex-end;
+            gap: 6px;
+            margin: 0 !important;
+            padding: 0 !important;
+
+            > .btn,
+            .o_widget > .btn {
+                display: inline-flex;
+                height: 30px !important;
+                min-height: 30px !important;
+                align-items: center;
+                justify-content: center;
+                align-self: center;
+                margin: 0 !important;
+                padding: 0 9px !important;
+                border: 0;
+                border-radius: 6px;
+                background: transparent;
+                color: var(--muted-foreground);
+                font-size: var(--workspace-font-content);
+                font-weight: 500;
+                line-height: 1;
+                vertical-align: middle;
+                box-shadow: none;
+
+                > .o_button_icon,
+                > .fa,
+                > .oi {
+                    margin-right: 5px !important;
+                    font-size: 11px;
+                }
+
+                &:hover {
+                    background: var(--muted);
+                    color: var(--foreground);
+                }
+
+                &:first-child {
+                    padding-right: 13px;
+                    padding-left: 13px;
+                    background: var(--primary);
+                    color: var(--primary-foreground);
+                }
+            }
+        }
+
+        .o_workspace_command_progress {
+            display: flex;
+            min-width: 0;
+            height: 32px;
+            min-height: 32px;
+            align-items: center !important;
+            align-self: center !important;
+            justify-content: flex-start;
+            justify-self: start;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .o_workspace_command_progress .o_field_statusbar,
+        .o_workspace_command_progress .o_workspace_workflow {
+            display: flex;
+            min-width: 0;
+            height: 32px;
+            align-items: center !important;
+            align-self: center !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .o_workspace_workflow {
+            display: flex;
+            min-width: 0;
+            height: 32px;
+            align-items: center !important;
+            align-self: center !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .o_workspace_workflow_steps {
+            display: flex;
+            min-width: 0;
+            height: 32px;
+            flex-flow: row nowrap !important;
+            align-content: center !important;
+            align-items: center !important;
+            align-self: center !important;
+            gap: 0;
+            margin: 0 !important;
+            padding: 0;
+            border: 0;
+            background: transparent;
+        }
+
+        .o_workspace_workflow_step {
+            position: relative;
+            display: flex;
+            min-width: 84px;
+            min-height: 30px;
+            flex-direction: row;
+            align-items: center;
+            gap: 7px;
+            padding: 0 18px 0 0 !important;
+            border: 0 !important;
+            background: transparent !important;
+            color: var(--muted-foreground);
+            box-shadow: none !important;
+
+            &::before,
+            &::after {
+                content: "" !important;
+                position: absolute !important;
+                top: 50% !important;
+                right: auto !important;
+                bottom: auto !important;
+                display: block !important;
+                width: 12px !important;
+                height: 1px !important;
+                border: 0 !important;
+                background: var(--border) !important;
+                transform: translateY(-50%) !important;
+            }
+
+            &::before {
+                display: none !important;
+            }
+
+            &::after {
+                left: auto !important;
+                right: 3px !important;
+            }
+
+            &:last-child::after {
+                display: none !important;
+            }
+
+            &:hover:not(.disabled) .o_workspace_workflow_label {
+                color: var(--foreground);
+            }
+        }
+
+        .o_workspace_workflow_marker {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            width: 20px;
+            height: 20px;
+            flex: 0 0 20px;
+            place-items: center;
+            border: 1px solid var(--input);
+            border-radius: 50%;
+            background: var(--background);
+            color: var(--muted-foreground);
+            font-size: 9px;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .o_workspace_workflow_label {
+            color: inherit;
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .o_workspace_workflow_complete {
+            color: var(--foreground);
+
+            &::after {
+                background: var(--primary) !important;
+            }
+
+            .o_workspace_workflow_marker {
+                border-color: var(--primary);
+                background: var(--accent);
+                color: var(--accent-foreground);
+            }
+        }
+
+        .o_workspace_workflow_current {
+            color: var(--foreground);
+
+            .o_workspace_workflow_marker {
+                border-color: var(--primary);
+                background: var(--primary);
+                color: var(--primary-foreground);
+                box-shadow: 0 0 0 3px var(--accent);
+            }
+
+            .o_workspace_workflow_label {
+                font-weight: 600;
+            }
+        }
+
+        .o_workspace_workflow_more {
+            min-height: 28px;
+            margin-right: 4px;
+            border: 0;
+            background: transparent;
+            color: var(--muted-foreground);
+        }
+
+        // Record identity and KPIs form one flat page heading.
+        &.o_form_readonly .o_workspace_form_heading_title_only {
+            display: none;
+        }
+
+        &.o_form_editable .o_workspace_form_heading_title_only {
+            padding-top: var(--Workspace-section-gap);
+        }
+
+        .o_workspace_form_heading {
+            display: grid;
+            min-width: 0;
+            grid-template-columns: minmax(240px, 1fr) auto;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: var(--Workspace-section-gap);
+            padding: 2px var(--Workspace-page-gutter) var(--Workspace-section-gap);
+            border: 0;
+            border-bottom: 1px solid var(--border);
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .o_workspace_form_identity {
+            display: flex;
+            min-width: 0;
+            align-items: center;
+            gap: 14px;
+
+            .oe_avatar {
+                order: -1;
+                float: none;
+                flex: 0 0 auto;
+                margin: 0;
+
+                .img {
+                    width: 54px;
+                    height: 54px;
+                    overflow: hidden;
+                    border: 1px solid var(--border);
+                    border-radius: 10px;
+                    background: var(--muted);
+                }
+            }
+
+            .oe_title {
+                min-width: 0;
+                max-width: none;
+                margin: 0;
+
+                > h1,
+                > h2,
+                > h3 {
+                    min-height: 0;
+                    margin: 0;
+                    color: var(--foreground);
+                    font-weight: 600;
+                    line-height: 1.2;
+                    letter-spacing: -.035em;
+                }
+
+                > h1 {
+                    font-size: 28px;
+                }
+
+                .o_input {
+                    min-height: 38px;
+                    padding: 5px 8px;
+                    border-radius: 6px;
+                }
+            }
+        }
+
+        .o_workspace_form_insights {
+            min-width: 0;
+        }
+
+        .o_workspace_command_actions > .o_workspace_form_insights {
+            display: flex;
+            height: 32px;
+            align-items: center;
+            margin: 0 4px 0 0;
+            padding: 0 8px 0 0;
+            border-right: 0;
+        }
+
+        .o_workspace_command_actions .o-form-buttonbox {
+            display: flex;
+            height: 32px;
+            max-width: none;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 4px;
+            margin: 0;
+            overflow: visible;
+        }
+
+        .o_workspace_command_actions .o-form-buttonbox .btn.oe_stat_button,
+        .o_workspace_command_actions .o-form-buttonbox > .o_field_widget {
+            display: inline-flex;
+            width: auto;
+            min-width: 0;
+            height: 30px;
+            min-height: 30px;
+            align-items: center;
+            padding: 0 8px;
+            border: 0 !important;
+            border-radius: 6px !important;
+            background: transparent;
+
+            &:hover {
+                background: var(--muted);
+            }
+        }
+
+        .o_workspace_command_actions .o-form-buttonbox .btn.oe_stat_button > .o_button_icon {
+            width: 16px;
+            margin-right: 5px !important;
+            font-size: 11px;
+            line-height: 1;
+        }
+
+        .o_workspace_command_actions .o-form-buttonbox .o_stat_info,
+        .o_workspace_command_actions .o-form-buttonbox .o_field_statinfo {
+            display: flex !important;
+            align-items: center;
+            gap: 5px;
+            max-width: none !important;
+            padding: 0 !important;
+            line-height: 1;
+        }
+
+        .o_workspace_command_actions .o-form-buttonbox .o_stat_text,
+        .o_workspace_command_actions .o-form-buttonbox .o_stat_value {
+            display: inline !important;
+            font-size: 11px;
+            line-height: 1;
+        }
+
+        // Global work/context layout for forms with a primary notebook or relational work area.
+        .o_workspace_form_body {
+            min-width: 0;
+        }
+
+        .o_workspace_form_body_split {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 380px;
+            align-items: start;
+        }
+
+        .o_workspace_form_primary {
+            min-width: 0;
+            padding-bottom: 24px;
+        }
+
+        .o_workspace_form_context {
+            position: static;
+            min-width: 0;
+            min-height: 100%;
+            padding: 18px var(--Workspace-page-gutter) 24px;
+            border-left: 1px solid var(--border);
+            background: transparent;
+
+            &::before {
+                content: "Details";
+                display: block;
+                margin-bottom: 12px;
+                color: var(--foreground);
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: .06em;
+                text-transform: uppercase;
+            }
+        }
+
+        .o_workspace_form_context > .o_group {
+            display: block;
+            margin: 0;
+            padding: 0;
+        }
+
+        .o_workspace_form_context > .o_group > .o_inner_group {
+            display: grid;
+            width: 100% !important;
+            grid-template-columns: 1fr;
+            gap: 0;
+            margin: 0;
+            padding: 0 0 10px;
+            border: 0;
+        }
+
+        .o_workspace_form_context > .o_group > .o_inner_group + .o_inner_group {
+            margin-top: 12px;
+            padding: 12px 0 0;
+            border-top: 1px solid var(--border);
+            border-left: 0;
+        }
+
+        .o_workspace_form_context .o_wrap_field {
+            display: grid !important;
+            width: 100%;
+            grid-column: 1 / -1;
+            grid-template-columns: 1fr;
+            gap: 4px;
+            margin: 0 0 10px !important;
+        }
+
+        .o_workspace_form_context .o_cell {
+            display: block;
+            width: 100% !important;
+            max-width: none;
+            grid-column: auto !important;
+        }
+
+        .o_workspace_form_context .o_form_label {
+            margin: 0;
+            padding: 0;
+            color: var(--muted-foreground);
+            font-size: var(--workspace-font-meta);
+            font-weight: 500;
+            line-height: 1.25;
+        }
+
+        .o_workspace_form_context .o_wrap_input {
+            min-height: 26px;
+            margin-bottom: 2px;
+        }
+
+        .o_workspace_form_context .o_field_widget {
+            display: block;
+            width: 100%;
+            color: var(--foreground);
+            line-height: 1.45;
+        }
+
+        .o_workspace_form_context .o_address_format {
+            color: var(--muted-foreground);
+            line-height: 1.55;
+        }
+
+        .o_workspace_form_context .o_horizontal_separator {
+            margin: 0 0 12px;
+            padding: 0 0 7px;
+        }
+
+        .o_workspace_form_primary > .o_notebook:first-child {
+            margin-top: 0;
+        }
+
+        .o-form-buttonbox {
+            display: flex;
+            max-width: 620px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 0;
+            margin: 0;
+            padding: 0;
+            box-shadow: none;
+
+            .btn.oe_stat_button,
+            > .o_field_widget {
+                width: auto;
+                min-width: 88px;
+                height: 38px;
+                min-height: 38px;
+                padding: 0 12px;
+                border: 0 !important;
+                border-left: 1px solid var(--border) !important;
+                border-radius: 0 !important;
+                background: transparent;
+                color: var(--foreground);
+
+                &:hover {
+                    background: var(--muted);
+                }
+            }
+
+            .btn.oe_stat_button > .o_button_icon {
+                width: 26px;
+                color: #00a864;
+                line-height: 36px;
+            }
+
+            .btn.oe_stat_button .o_stat_value {
+                color: var(--foreground);
+                font-size: var(--workspace-font-content);
+                font-weight: 600;
+            }
+
+            .btn.oe_stat_button .o_stat_text {
+                color: var(--muted-foreground);
+                font-size: var(--workspace-font-meta);
+            }
+        }
+
+        // Information uses whitespace and column dividers, never nested cards.
+        .o_form_sheet > .o_group,
+        .o_notebook .tab-pane > .o_group {
+            display: grid;
+            min-width: 0;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0 24px;
+            margin: 0 0 20px;
+            padding-right: var(--Workspace-page-gutter);
+            padding-left: var(--Workspace-page-gutter);
+        }
+
+        .o_group > .o_inner_group,
+        .o_form_sheet > .o_inner_group,
+        .o_notebook .tab-pane > .o_inner_group {
+            width: auto !important;
+            max-width: none;
+            min-width: 0;
+            row-gap: 7px;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+        }
+
+        .o_group > .o_inner_group + .o_inner_group {
+            padding-left: 28px;
+            border-left: 0;
+        }
+
+        .o_inner_group .o_inner_group {
+            padding: 0;
+            border: 0;
+            background: transparent;
+        }
+
+        .o_wrap_field {
+            min-width: 0;
+            margin-bottom: 0 !important;
+        }
+
+        .o_cell,
+        .o_wrap_input,
+        .o_field_widget {
+            min-width: 0;
+        }
+
+        .o_form_label {
+            margin-bottom: 2px;
+            color: var(--muted-foreground);
+            font-size: var(--workspace-font-meta);
+            font-weight: 500;
+            letter-spacing: .01em;
+        }
+
+        .o_wrap_label .o_form_label {
+            color: var(--foreground);
+            font-weight: 500;
+        }
+
+        .o_field_widget {
+            color: var(--foreground);
+            font-size: var(--workspace-font-content);
+        }
+
+        &.o_form_editable {
+            .o_field_widget:not(.o_field_boolean):not(.o_field_radio):not(.o_field_image) {
+                .o_input,
+                input.o_input,
+                select.o_input {
+                    min-width: 0;
+                    min-height: 32px;
+                    padding: 5px 8px;
+                    border: 1px solid var(--input);
+                    border-radius: 6px;
+                    background: var(--background);
+                    color: var(--foreground);
+
+                    &:hover {
+                        border-color: var(--muted-border);
+                    }
+
+                    &:focus {
+                        border-color: var(--focus-border);
+                        outline: 0;
+                        box-shadow: none;
+                    }
+                }
+            }
+        }
+
+        .o_horizontal_separator {
+            margin: 8px 0 12px;
+            padding-bottom: 0;
+            border-bottom: 0;
+            color: var(--foreground);
+            font-size: var(--workspace-font-content);
+            font-weight: 600;
+            box-shadow: none;
+        }
+
+        // Notebook is flat detail workspace.
+        .o_notebook {
+            --notebook-margin-x: 0;
+            --notebook-padding-x: 0;
+
+            min-width: 0;
+            margin-top: var(--Workspace-section-gap);
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+        }
+
+        .o_notebook_headers {
+            margin: 0;
+            padding: 0 var(--Workspace-page-gutter);
+            border-bottom: 1px solid var(--border);
+            background: transparent;
+        }
+
+        .o_notebook .nav {
+            gap: 3px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+        }
+
+        .o_notebook .nav-item {
+            margin: 0;
+        }
+
+        .o_notebook .nav-link {
+            position: relative;
+            padding: 9px 12px;
+            border: 0;
+            border-radius: 0;
+            color: var(--muted-foreground);
+            font-size: var(--workspace-font-content);
+            font-weight: 500;
+
+            &:hover {
+                background: transparent;
+                color: var(--foreground);
+            }
+
+            &.active,
+            &.active:hover,
+            &.active:focus {
+                border: 0;
+                background: transparent;
+                color: var(--foreground);
+
+                &::after {
+                    content: "";
+                    position: absolute;
+                    right: 10px;
+                    bottom: -1px;
+                    left: 10px;
+                    height: 2px;
+                    background: var(--primary);
+                }
+            }
+        }
+
+        .o_notebook > .tab-content {
+            min-width: 0;
+            border: 0;
+        }
+
+        .o_notebook > .tab-content > .tab-pane {
+            min-width: 0;
+            padding: var(--Workspace-section-gap) var(--Workspace-page-gutter) 0;
+        }
+
+        .o_workspace_section_notebook {
+            display: grid !important;
+            grid-template-columns: 180px minmax(0, 1fr);
+            align-items: start;
+            margin-top: 0;
+        }
+
+        .o_workspace_section_notebook > .o_notebook_headers {
+            position: sticky;
+            top: 0;
+            align-self: start;
+            overflow: visible;
+            padding: 12px 20px 12px var(--Workspace-page-gutter);
+            border-right: 1px solid var(--border);
+            border-bottom: 0;
+        }
+
+        .o_workspace_section_notebook > .o_notebook_headers > .nav {
+            display: flex;
+            flex-direction: column !important;
+            gap: 2px;
+        }
+
+        .o_workspace_section_notebook > .o_notebook_headers .nav-item {
+            width: 100%;
+        }
+
+        .o_workspace_section_notebook > .o_notebook_headers .nav-link {
+            position: relative;
+            display: flex;
+            width: 100%;
+            min-height: 34px;
+            align-items: center;
+            padding: 7px 12px 7px 12px;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            color: var(--muted-foreground);
+            text-align: left;
+            transition: color 140ms ease;
+
+            &::after {
+                display: none;
+            }
+
+            &::before {
+                content: "";
+                position: absolute;
+                top: 5px;
+                bottom: 5px;
+                left: 0;
+                display: block;
+                width: 2px;
+                border-radius: 999px;
+                background: transparent;
+            }
+
+            &:hover {
+                background: transparent;
+                color: var(--foreground);
+            }
+
+            &.active,
+            &.active:hover,
+            &.active:focus {
+                background: transparent;
+                color: var(--foreground);
+                font-weight: 600;
+                box-shadow: none;
+
+                &::before {
+                    background: var(--primary);
+                }
+            }
+        }
+
+        .o_workspace_section_notebook > .o_notebook_content {
+            min-width: 0;
+        }
+
+        .o_workspace_section_notebook > .o_notebook_content > .tab-pane {
+            padding: 0 var(--Workspace-page-gutter);
+        }
+
+        // Notebook pages are information layouts: sections across, label/value rows within.
+        .o_workspace_section_notebook > .o_notebook_content > .tab-pane > .o_group {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-items: start;
+            gap: 28px 36px;
+            margin: 0 0 28px;
+            padding: 0;
+        }
+
+        .o_workspace_section_notebook > .o_notebook_content > .tab-pane > .o_group:last-child {
+            margin-bottom: 0;
+        }
+
+        .o_workspace_section_notebook .o_group > .o_inner_group,
+        .o_workspace_section_notebook .o_group > .o_group {
+            width: 100% !important;
+            max-width: none;
+            min-width: 0;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            background: transparent;
+        }
+
+        .o_workspace_section_notebook .o_group > .o_group {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        .o_workspace_section_notebook .o_inner_group {
+            display: block;
+        }
+
+        .o_workspace_section_notebook .o_inner_group > [class*="g-col-"] {
+            width: 100%;
+            margin: 0 0 10px;
+            padding: 0 0 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .o_workspace_section_notebook .o_inner_group > [class*="g-col-"] .o_horizontal_separator,
+        .o_workspace_section_notebook .o_inner_group > .o_horizontal_separator {
+            margin: 0;
+            padding: 0;
+            color: var(--foreground);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .025em;
+            text-transform: none;
+        }
+
+        .o_workspace_section_notebook .o_inner_group > .o_wrap_field {
+            display: grid !important;
+            width: 100%;
+            min-height: 34px;
+            grid-template-columns: minmax(112px, 34%) minmax(0, 1fr);
+            align-items: start;
+            gap: 14px;
+            margin: 0 !important;
+            padding: 5px 0;
+        }
+
+        .o_workspace_section_notebook .o_wrap_field_boolean {
+            display: contents !important;
+        }
+
+        .o_workspace_section_notebook .o_wrap_field > .o_cell,
+        .o_workspace_section_notebook .o_wrap_field_boolean > .o_cell {
+            width: 100% !important;
+            max-width: none !important;
+            min-width: 0;
+            grid-column: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .o_workspace_section_notebook .o_wrap_field > .o_cell:only-child {
+            grid-column: 1 / -1 !important;
+        }
+
+        .o_workspace_section_notebook .o_wrap_label {
+            padding-top: 7px !important;
+        }
+
+        .o_workspace_section_notebook .o_form_label {
+            margin: 0;
+            color: var(--muted-foreground);
+            font-size: var(--workspace-font-meta);
+            font-weight: 500;
+            line-height: 1.35;
+        }
+
+        .o_workspace_section_notebook .o_wrap_input,
+        .o_workspace_section_notebook .o_cell:not(.o_wrap_label) {
+            min-height: 32px;
+        }
+
+        .o_workspace_section_notebook .o_cell:not(.o_wrap_label) > .o_field_widget:not(.o_field_boolean),
+        .o_workspace_section_notebook .o_wrap_input > .o_field_widget:not(.o_field_boolean) {
+            width: 100% !important;
+            max-width: none !important;
+        }
+
+        .o_workspace_section_notebook .o_cell:not(.o_wrap_label) > .o_field_boolean,
+        .o_workspace_section_notebook .o_wrap_input > .o_field_boolean {
+            width: auto !important;
+        }
+
+        .o_workspace_section_notebook .o_row {
+            display: flex;
+            width: 100% !important;
+            min-width: 0;
+            flex-flow: row nowrap;
+            align-items: center;
+            gap: 6px;
+            margin: 0;
+        }
+
+        .o_workspace_section_notebook .o_row > * {
+            min-width: 0;
+            margin: 0 !important;
+        }
+
+        .o_workspace_section_notebook .o_row > .o_field_widget:not(.o_field_boolean) {
+            width: auto !important;
+            flex: 1 1 auto;
+        }
+
+        .o_workspace_section_notebook .o_row > .o_field_boolean,
+        .o_workspace_section_notebook .o_row > .btn,
+        .o_workspace_section_notebook .o_row > span {
+            width: auto !important;
+            flex: 0 0 auto;
+        }
+
+        .o_workspace_form_context .o_wrap_field,
+        .o_workspace_form_context .o_wrap_field_boolean {
+            display: flex !important;
+            width: 100% !important;
+            max-width: none !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+        }
+
+        .o_workspace_form_context .o_wrap_field > .o_cell,
+        .o_workspace_form_context .o_wrap_field_boolean > .o_cell {
+            display: block !important;
+            width: 100% !important;
+            max-width: none !important;
+            flex: 0 0 auto !important;
+            grid-column: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .o_workspace_form_context .o_field_widget,
+        .o_workspace_form_context .o_field_widget.oe_inline {
+            width: 100% !important;
+            max-width: none !important;
+        }
+
+        .o_workspace_form_context .o_row {
+            display: flex;
+            width: 100% !important;
+            min-width: 0;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            margin: 0;
+        }
+
+        // Prevent Odoo negative sheet margins from pushing line tables over cards.
+        .o_notebook > .tab-content > .tab-pane > :first-child:not(.o_group) .o_field_x2many.o_field_x2many_list,
+        .o_notebook > .tab-content > .tab-pane > .o_field_x2many,
+        .o_field_x2many {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            margin: 0 !important;
+        }
+
+        // Relational tables are full-bleed inside primary work area.
+        .o_workspace_form_primary .o_notebook > .tab-content > .tab-pane > .o_field_x2many,
+        .o_workspace_form_primary .o_notebook > .tab-content > .tab-pane > :first-child:not(.o_group) .o_field_x2many.o_field_x2many_list {
+            width: calc(100% + (var(--Workspace-page-gutter) * 2));
+            max-width: none;
+            margin-right: calc(var(--Workspace-page-gutter) * -1) !important;
+            margin-left: calc(var(--Workspace-page-gutter) * -1) !important;
+        }
+
+        .o_field_x2many > .o_list_view,
+        .o_field_x2many > div,
+        .o_field_x2many .o_list_renderer {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+        }
+
+        .oe_subtotal_footer {
+            padding: 10px 0 0;
+            border-color: var(--border);
+        }
+    }
+
+    // Dialog, settings, and compact forms stay single-column.
+    .modal .o_form_view .o_workspace_form,
+    .o_form_view.o_xxs_form_view .o_workspace_form,
+    .o_form_view.o_base_settings .o_workspace_form {
+        .o_workspace_form_body_split {
+            display: block;
+        }
+
+        .o_workspace_form_context {
+            position: static;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            border-left: 0;
+        }
+
+        .o_form_sheet_bg {
+            padding: 0;
+            background: var(--card);
+        }
+
+        .o_form_sheet_bg > .o_form_sheet {
+            padding: 16px;
+        }
+
+        .o_workspace_form_heading {
+            display: block;
+            padding: 0;
+            border: 0;
+            box-shadow: none;
+        }
+    }
+
+    // List workspace: flat data surface, no outer card.
+    .o_list_view .o_list_renderer,
+    .o_form_view .o_field_x2many .o_list_renderer {
+        overflow: auto;
+        background: var(--background);
+    }
+
+    .o_list_view > .o_content > .o_list_renderer {
+        width: 100%;
+        max-width: none;
+        padding: 0 0 20px;
+    }
+
+    .o_list_renderer {
+        --ListRenderer-thead-padding-v: 4px;
+        --ListRenderer-table-padding-h: 12px;
+    }
+
+    .o_list_renderer .o_list_table {
+        width: 100%;
+        min-width: 100%;
+        overflow: visible;
+        border: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 0;
+        background: transparent;
+        color: var(--foreground);
+        box-shadow: none;
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: var(--background);
+            color: var(--muted-foreground);
+            font-size: var(--workspace-font-meta);
+            font-weight: 500;
+            letter-spacing: .035em;
+            text-transform: uppercase;
+
+            th {
+                height: 30px;
+                padding-top: 4px !important;
+                padding-bottom: 4px !important;
+                border: 0;
+                border-bottom: 1px solid var(--border);
+                background: var(--background);
+            }
+        }
+
+        tbody td {
+            box-sizing: border-box;
+            height: 38px;
+            padding-top: 6px;
+            padding-bottom: 6px;
+            border: 0;
+            vertical-align: middle;
+        }
+
+        tbody > .o_selected_row > td {
+            padding-top: 4px;
+            padding-bottom: 4px;
+            background: transparent;
+            vertical-align: middle !important;
+        }
+
+        tbody > .o_selected_row > td.o_data_cell:focus-within {
+            background: transparent;
+        }
+
+        thead th,
+        tfoot td {
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody > .o_data_row {
+            border: 0;
+            background: transparent;
+            color: var(--foreground);
+            font-size: var(--workspace-font-content);
+
+            &:hover,
+            &.o_selected_row,
+            &.o_data_row_selected {
+                --bs-table-accent-bg: var(--muted);
+                --table-accent-bg: var(--muted);
+            }
+        }
+
+        .o_data_cell {
+            max-width: 360px;
+            overflow: hidden;
+            font-size: var(--workspace-font-content);
+            line-height: 1.35;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        tbody > .o_data_row:not(.o_selected_row) > .o_data_cell,
+        tbody > .o_data_row:not(.o_selected_row) > .o_data_cell.o_list_text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap !important;
+        }
+
+        tbody > .o_data_row:not(.o_selected_row) > .o_data_cell > .o_field_widget,
+        tbody > .o_data_row:not(.o_selected_row) > .o_data_cell > .o_field_widget > span,
+        tbody > .o_data_row:not(.o_selected_row) > .o_data_cell > span {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            font-size: inherit;
+            line-height: inherit;
+            text-overflow: ellipsis;
+            white-space: nowrap !important;
+        }
+
+        .o_data_cell .o_input,
+        .o_data_cell input,
+        .o_data_cell select,
+        .o_data_cell textarea,
+        .o_data_cell .o_field_widget {
+            max-width: 100%;
+            min-width: 0;
+            font-size: var(--workspace-font-content);
+        }
+
+        .o_group_header,
+        tfoot {
+            background: var(--background);
+            color: var(--muted-foreground);
+            font-size: var(--workspace-font-meta);
+        }
+
+        .o_group_header > * {
+            border-bottom: 0;
+        }
+
+        .o_list_record_selector {
+            width: 38px;
+            min-width: 38px;
+        }
+
+        .o_list_actions_header {
+            background: var(--background);
+        }
+    }
+
+    .o_form_view .o_field_x2many .o_list_renderer {
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+
+        .o_list_table {
+            border-radius: 0;
+            box-shadow: none;
+        }
+    }
+
+    // Kanban uses same compact cards and page gutters.
+    .o_kanban_view .o_kanban_renderer {
+        gap: 8px;
+        padding: 12px;
+        background: var(--background);
+
+        .o_kanban_record {
+            margin: 0;
+
+            > div {
+                overflow: hidden;
+                padding: 12px;
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                color: var(--foreground);
+                box-shadow: var(--shadow-low);
+                transition: border-color 140ms ease, background-color 140ms ease;
+            }
+
+            > div:not([class*="oe_kanban_color_"]) {
+                background: var(--card);
+            }
+
+            &:hover > div,
+            &:focus > div,
+            &:focus-within > div {
+                border-color: var(--muted-border);
+                outline: 0;
+                box-shadow: var(--shadow-low);
+            }
+
+            .o_kanban_record_title,
+            .o_kanban_record_title strong {
+                color: var(--foreground);
+                font-size: var(--workspace-font-content);
+                font-weight: 600;
+            }
+
+            .o_kanban_record_subtitle,
+            .oe_kanban_details,
+            .text-muted {
+                color: var(--muted-foreground) !important;
+                font-size: var(--workspace-font-meta);
+            }
+        }
+
+        &.o_kanban_ungrouped {
+            gap: 8px;
+            padding: 12px;
+
+            .o_kanban_record {
+                margin: 0;
+            }
+        }
+
+        &.o_kanban_grouped {
+            align-items: flex-start;
+            overflow: auto;
+
+            .o_kanban_group {
+                min-height: calc(100% - 4px);
+                padding: 0 8px 10px;
+                border: 1px solid var(--border);
+                border-radius: 9px;
+                background: var(--muted);
+
+                .o_kanban_header {
+                    padding: 10px 3px 8px !important;
+                }
+
+                .o_column_title {
+                    color: var(--foreground);
+                    font-size: var(--workspace-font-content) !important;
+                    font-weight: 600 !important;
+                }
+
+                .o_kanban_record {
+                    margin-bottom: 7px;
+                }
+            }
+        }
+
+        .o_kanban_quick_create {
+            margin: 0 0 8px;
+            padding: 10px;
+            border-color: var(--ring-border);
+            border-radius: 8px;
+            background: var(--card);
+            box-shadow: none;
+        }
+    }
+}
+
+// Activity drawer overlays the form and never participates in form sizing.
+.o_workspace_activity_trigger {
+    display: inline-flex;
+    height: 32px;
+    min-height: 32px;
+    align-items: center;
+    margin: 0 6px;
+    border: 0;
+    background: transparent;
+    color: var(--muted-foreground);
+
+    &:hover,
+    &.active {
+        background: var(--muted);
+        color: var(--foreground);
+    }
+}
+
+.o_workspace_activity_backdrop {
+    position: fixed;
+    top: var(--o-navbar-height, 44px);
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1035;
+    background: rgba(12, 17, 14, .12);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+}
+
+.o_workspace_activity_drawer {
+    position: fixed;
+    top: var(--o-navbar-height, 44px);
+    right: 0;
+    bottom: 0;
+    z-index: 1040;
+    width: 420px;
+    max-width: calc(100vw - 48px);
+    overflow: hidden;
+    border-left: 1px solid var(--border);
+    background: var(--background);
+    box-shadow: -12px 0 32px rgba(10, 24, 16, .12);
+
+    .o_FormRenderer_chatterContainer,
+    .o_ChatterContainer,
+    .o_Chatter {
+        width: 100% !important;
+        max-width: none !important;
+        height: 100%;
+        min-height: 0;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}
+
+.o_workspace_activity_close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 8;
+    display: grid;
+    width: 30px;
+    height: 30px;
+    min-height: 30px;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--muted-foreground);
+
+    &:hover {
+        background: var(--muted);
+        color: var(--foreground);
+    }
+}
+
+.o_web_client .o_form_view {
+    min-width: 0;
+
+    .o_form_view_container,
+    .o_workspace_form,
+    .o_form_sheet_bg {
+        min-width: 0;
+    }
+
+    .o_form_view_container {
+        flex: 1 1 0;
+        width: auto;
+    }
+
+    .o_FormRenderer_chatterContainer {
+        min-width: 0;
+        overflow: hidden;
+        background: var(--background);
+    }
+
+    .o_FormRenderer_chatterContainer {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .o_ChatterContainer,
+    .o_Chatter {
+        width: 100%;
+        min-width: 0;
+        background: var(--background) !important;
+    }
+
+    .o_Chatter_fixedPanel {
+        position: sticky;
+        top: 0;
+        z-index: 4;
+        background: var(--background);
+    }
+
+    .o_workspace_activity_heading {
+        display: flex;
+        min-height: 54px;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2px;
+        padding: 8px var(--Workspace-page-gutter);
+        border-bottom: 1px solid var(--border);
+
+        strong {
+            color: var(--foreground);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: -.01em;
+        }
+
+        span {
+            color: var(--muted-foreground);
+            font-size: 10px;
+        }
+    }
+
+    .o_ChatterTopbar {
+        min-height: 42px;
+        padding: 6px var(--Workspace-page-gutter);
+        border-bottom: 1px solid var(--border);
+        box-sizing: border-box;
+    }
+
+    .o_ChatterTopbar_actions {
+        display: grid !important;
+        min-width: 0;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .o_ChatterTopbar_controllers,
+    .o_ChatterTopbar_tools,
+    .o_ChatterTopbar_rightSection {
+        min-width: 0;
+        align-items: center;
+    }
+
+    .o_ChatterTopbar_controllers {
+        display: flex;
+        gap: 2px;
+        padding: 3px !important;
+        border-radius: 7px;
+        background: var(--muted);
+    }
+
+    .o_ChatterTopbar_tools {
+        flex: 0 0 auto !important;
+        padding: 0 !important;
+        border: 0;
+    }
+
+    .o_ChatterTopbar_borderLeft {
+        border-left: 0;
+    }
+
+    .o_ChatterTopbar_button {
+        min-height: 30px;
+        margin: 0 !important;
+        padding: 4px 8px;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--muted-foreground);
+        font-size: 11px;
+        font-weight: 500;
+        box-shadow: none;
+
+        &:hover {
+            background: var(--muted);
+            color: var(--foreground);
+        }
+
+        &.o-active {
+            background: var(--background);
+            color: var(--foreground);
+            box-shadow: var(--shadow-low);
+        }
+    }
+
+    .o_ChatterTopbar_buttonSendMessage.o-active,
+    .o_ChatterTopbar_buttonLogNote.o-active {
+        color: var(--accent-foreground);
+    }
+
+    .o_ChatterTopbar_buttonScheduleActivity {
+        span {
+            font-size: 11px;
+        }
+    }
+
+    .o_ChatterTopbar_buttonAddAttachments,
+    .o_ChatterTopbar_buttonToggleAttachments {
+        width: 30px;
+        padding: 0;
+        font-size: 0;
+
+        .fa,
+        .o_ChatterTopbar_buttonCount {
+            font-size: 12px;
+        }
+    }
+
+    .o_Chatter_composer {
+        margin: 0;
+        padding: var(--Workspace-section-gap) var(--Workspace-page-gutter);
+        border-bottom: 1px solid var(--border) !important;
+        background: var(--background);
+    }
+
+    .o_Composer_currentPartnerAvatar {
+        width: 32px !important;
+        min-width: 32px;
+        height: 32px !important;
+        min-height: 32px;
+        aspect-ratio: 1;
+        border-radius: 50% !important;
+        object-fit: cover !important;
+    }
+
+    .o_ComposerTextInput {
+        border: 1px solid var(--input) !important;
+        border-radius: 7px;
+        background: var(--background) !important;
+    }
+
+    .o_ComposerTextInput_textarea {
+        min-height: 54px;
+        padding: 8px 10px !important;
+        background: transparent;
+        font-size: 12px;
+    }
+
+    .o_Chatter_scrollPanel,
+    .o_MessageList {
+        min-width: 0;
+        background: var(--background) !important;
+    }
+
+    .o_MessageList {
+        padding: 4px var(--Workspace-page-gutter) 20px !important;
+    }
+
+    .o_Message {
+        width: 100%;
+        max-width: 100%;
+        padding: 12px 0 !important;
+        border: 0 !important;
+        border-bottom: 1px solid var(--border) !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    .o_Message_sidebar {
+        width: 40px !important;
+        min-width: 40px;
+        max-width: 40px;
+        flex: 0 0 40px !important;
+        flex-basis: 40px;
+        justify-content: flex-start !important;
+    }
+
+    .o_Message_authorAvatarContainer {
+        width: 32px !important;
+        min-width: 32px;
+        max-width: 32px;
+        height: 32px !important;
+        min-height: 32px;
+        max-height: 32px;
+        flex: 0 0 32px;
+        aspect-ratio: 1;
+    }
+
+    .o_Message_authorAvatar {
+        display: block;
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px;
+        min-height: 32px;
+        border-radius: 50% !important;
+        object-fit: cover !important;
+    }
+
+    .o_Message_content {
+        color: var(--foreground);
+        font-size: 12px;
+        line-height: 1.55;
+    }
+
+    .o_Message_prettyBody {
+        color: var(--foreground);
+    }
+
+    .o_MessageList_separator {
+        padding-top: 14px !important;
+        color: var(--muted-foreground);
+        font-size: 10px;
+        font-weight: 500 !important;
+    }
+
+    .o_Chatter_attachmentBox,
+    .o_Chatter_activityBox {
+        margin: 0;
+        padding: var(--Workspace-section-gap) var(--Workspace-page-gutter);
+        border-bottom: 1px solid var(--border);
+        background: var(--background);
+    }
+}
+
+@media (max-width: 1199.98px) {
+    .o_web_client .o_form_view {
+        --Workspace-page-gutter: 16px;
+
+        .o_workspace_form_body_split {
+            grid-template-columns: minmax(0, 1fr) 340px;
+        }
+    }
+}
+
+@media (max-width: 991.98px) {
+    .o_web_client {
+        .o_form_view .o_workspace_form .o_workspace_section_notebook {
+            display: flex !important;
+            flex-direction: column;
+        }
+
+        .o_form_view .o_workspace_form .o_workspace_section_notebook > .o_notebook_headers {
+            position: static;
+            width: 100%;
+            overflow-x: auto;
+            padding: 0 var(--Workspace-page-gutter);
+            border-right: 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .o_form_view .o_workspace_form .o_workspace_section_notebook > .o_notebook_headers > .nav {
+            flex-direction: row !important;
+            flex-wrap: nowrap;
+        }
+
+        .o_form_view .o_workspace_form .o_workspace_section_notebook > .o_notebook_headers .nav-item {
+            width: auto;
+        }
+
+        .o_form_view .o_workspace_form .o_workspace_section_notebook > .o_notebook_headers .nav-link {
+            width: auto;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .o_form_view .o_workspace_form .o_workspace_section_notebook > .o_notebook_headers .nav-link {
+            padding: 9px 12px;
+
+            &::before {
+                display: none;
+            }
+        }
+
+        .o_form_view .o_workspace_form .o_workspace_section_notebook > .o_notebook_headers .nav-link.active {
+            background: transparent;
+            color: var(--foreground);
+            box-shadow: inset 0 -2px var(--primary);
+        }
+
+        .o_form_view .o_workspace_form {
+            .o_workspace_form_body_split {
+                display: block;
+            }
+
+            .o_workspace_form_context {
+                position: static;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 24px;
+                padding-top: 16px;
+                border-top: 1px solid var(--border);
+                border-left: 0;
+            }
+        }
+
+        .o_control_panel {
+            height: 50px;
+            padding: 0 14px;
+
+            > .o_cp_top {
+                height: 49px;
+                min-height: 49px;
+                grid-template-columns: max-content minmax(0, 1fr) max-content;
+                gap: 8px;
+            }
+
+            .o_workspace_cp_left {
+                max-width: none;
+            }
+
+            .o_cp_top_left {
+                max-width: none;
+            }
+
+            .o_cp_top_right {
+                min-width: 0;
+            }
+
+            .o_workspace_cp_search_actions {
+                display: none;
+            }
+
+            .o_cp_bottom_left {
+                padding-left: 8px;
+            }
+        }
+
+        .o_form_view .o_workspace_form {
+            .o_form_sheet_bg {
+                padding: 12px;
+            }
+
+            .o_workspace_form_heading {
+                grid-template-columns: 1fr;
+            }
+
+            .o-form-buttonbox {
+                max-width: 100%;
+                justify-content: flex-start;
+            }
+
+            .o_form_sheet > .o_group,
+            .o_notebook .tab-pane > .o_group {
+                grid-template-columns: 1fr;
+                gap: 18px;
+            }
+
+            .o_group > .o_inner_group + .o_inner_group {
+                padding-left: 0;
+                border-left: 0;
+            }
+        }
+    }
+}
+
+@media (max-width: 767.98px) {
+    .o_workspace_activity_drawer {
+        width: 100%;
+        max-width: none;
+    }
+
+    .o_web_client {
+        .o_control_panel {
+            display: block;
+            height: auto;
+            padding: 9px 12px;
+
+            > .o_cp_top,
+            > .o_cp_bottom {
+                display: flex;
+            }
+
+            .breadcrumb {
+                font-size: 15px;
+            }
+        }
+
+        .o_form_view .o_workspace_form {
+            .o_workspace_section_notebook > .o_notebook_content > .tab-pane {
+                padding: 0 var(--Workspace-page-gutter);
+            }
+
+            .o_workspace_section_notebook > .o_notebook_content > .tab-pane > .o_group {
+                grid-template-columns: 1fr;
+                gap: 22px;
+            }
+
+            .o_workspace_section_notebook .o_inner_group > .o_wrap_field {
+                display: flex !important;
+                min-height: 0;
+                flex-direction: column;
+                gap: 4px;
+                padding: 5px 0;
+            }
+
+            .o_workspace_section_notebook .o_wrap_label {
+                padding-top: 0 !important;
+            }
+
+            .o_workspace_section_notebook .o_inner_group > .o_wrap_field > .o_wrap_label,
+            .o_workspace_section_notebook .o_inner_group > .o_wrap_field > .o_wrap_input {
+                width: 100% !important;
+                max-width: none;
+            }
+
+            .o_workspace_section_notebook .o_row {
+                flex-wrap: wrap;
+            }
+
+            .o_form_sheet_bg {
+                padding: 0;
+            }
+
+            .o_workspace_command_bar {
+                overflow-x: auto;
+                margin-bottom: 0;
+                border-right: 0 !important;
+                border-left: 0 !important;
+                border-radius: 0;
+            }
+
+            .o_workspace_command_progress {
+                flex: 0 0 auto;
+            }
+
+            .o_form_sheet_bg > .o_form_sheet {
+                padding: 10px;
+            }
+
+            .o_workspace_form_heading {
+                padding: 4px 0 14px;
+            }
+
+            .o-form-buttonbox {
+                flex-wrap: nowrap;
+                justify-content: flex-start;
+                overflow-x: auto;
+            }
+
+            .o_workspace_form_context {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .o_notebook > .tab-content > .tab-pane {
+                padding: 14px 0 0;
+            }
+        }
+
+        .o_list_view > .o_content > .o_list_renderer {
+            padding: 0 12px 12px;
+        }
+    }
+}

@@ -1,0 +1,46 @@
+// Dark palette is compiled through web.dark_mode_* bundles before component CSS.
+$o-webclient-color-scheme: dark;
+
+$o-white: #111713;
+$o-black: #f4f7f5;
+
+$o-gray-100: #161d19;
+$o-gray-200: #222b26;
+$o-gray-300: #303b35;
+$o-gray-400: #445149;
+$o-gray-500: #758179;
+$o-gray-600: #9ba69f;
+$o-gray-700: #c0c8c3;
+$o-gray-800: #dde3df;
+$o-gray-900: #f4f7f5;
+
+$o-community-color: #00ce7c;
+$o-enterprise-color: #00ce7c;
+$o-enterprise-primary-color: #00ce7c;
+$o-brand-odoo: #00ce7c;
+$o-brand-primary: #00ce7c;
+$o-brand-secondary: $o-gray-600;
+$o-brand-lightsecondary: $o-gray-100;
+
+$o-main-text-color: $o-gray-700;
+$o-main-bg-color: #0c110e;
+$o-main-color-muted: $o-gray-500;
+$o-main-headings-color: $o-gray-900;
+$o-main-link-color: #36dc9a;
+$o-view-background-color: #111713;
+$o-shadow-color: #000;
+$o-border-color: $o-gray-200;
+$o-form-lightsecondary: $o-gray-400;
+$o-list-footer-bg-color: $o-gray-100;
+$o-tooltip-background-color: #18201b;
+$o-tooltip-color: $o-gray-700;
+$o-tooltip-arrow-color: #18201b;
+$o-tooltip-text-color: $o-gray-700;
+$o-tooltip-title-text-color: $o-gray-900;
+$o-tooltip-title-background-color: #18201b;
+$o-btn-secondary-bg: #161d19;
+$o-btn-secondary-hover-bg: #222b26;
+$o-btn-secondary-hover-border: #303b35;
+$o-btn-light-bg: #161d19;
+$o-btn-light-border: #222b26;
+$o-btn-light-background-hover: #222b26;

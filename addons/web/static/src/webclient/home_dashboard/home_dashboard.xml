@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.HomeDashboard" owl="1">
+        <main class="o_workspace_home">
+            <header class="o_workspace_home_header">
+                <div>
+                    <h1>Welcome back, <t t-esc="user.name"/></h1>
+                </div>
+                <div class="o_workspace_home_actions">
+                    <span>Updated <t t-esc="state.lastUpdated"/></span>
+                    <button type="button" class="btn btn-light" t-att-disabled="state.refreshing" t-on-click="refreshAnalytics">
+                        <i class="fa fa-refresh" t-att-class="{'fa-spin': state.refreshing}" aria-hidden="true"/>
+                        <span>Refresh</span>
+                    </button>
+                </div>
+            </header>
+
+            <section class="o_workspace_apps" aria-labelledby="workspace-apps-title">
+                <div class="o_workspace_section_header">
+                    <div>
+                        <h2 id="workspace-apps-title">Applications</h2>
+                    </div>
+                    <span class="o_workspace_count"><t t-esc="apps.length"/> apps</span>
+                </div>
+                <div t-if="apps.length" class="o_workspace_app_grid">
+                    <button
+                        t-foreach="apps"
+                        t-as="app"
+                        t-key="app.id"
+                        type="button"
+                        class="o_workspace_app"
+                        t-att-data-menu-xmlid="app.xmlid"
+                        t-on-click="() => this.selectApp(app)"
+                    >
+                        <span class="o_workspace_app_icon">
+                            <img t-if="getAppIcon(app)" t-att-src="getAppIcon(app)" alt=""/>
+                            <span t-else="" t-esc="getAppInitial(app)"/>
+                        </span>
+                        <span class="o_workspace_app_copy">
+                            <strong t-esc="app.name"/>
+                            <small>Open app</small>
+                        </span>
+                        <i class="fa fa-arrow-right" aria-hidden="true"/>
+                    </button>
+                </div>
+                <div t-else="" class="o_workspace_empty">
+                    <i class="oi oi-grid" aria-hidden="true"/>
+                    <strong>No applications available</strong>
+                </div>
+            </section>
+
+            <section class="o_workspace_analytics" aria-labelledby="workspace-analytics-title">
+                <div class="o_workspace_section_header">
+                    <div>
+                        <h2 id="workspace-analytics-title">Business pulse</h2>
+                    </div>
+                    <span class="o_workspace_count">Current workspace data</span>
+                </div>
+
+                <div class="o_workspace_overview" aria-label="Key performance indicators">
+                    <article t-foreach="state.metrics" t-as="metric" t-key="metric.id">
+                        <div class="o_workspace_metric_header">
+                            <span t-esc="metric.label"/>
+                            <i t-attf-class="fa {{ metric.icon }}" aria-hidden="true"/>
+                        </div>
+                        <strong t-esc="metric.value"/>
+                        <small t-esc="metric.detail"/>
+                    </article>
+                </div>
+
+                <div class="o_workspace_analytics_grid">
+                    <article class="o_workspace_panel o_workspace_revenue_panel">
+                        <div class="o_workspace_panel_header">
+                            <div>
+                                <strong>Revenue trend</strong>
+                                <span>Confirmed sales by month</span>
+                            </div>
+                            <span>Last 6 months</span>
+                        </div>
+                        <div t-if="state.salesTrend.length" class="o_workspace_chart" aria-label="Sales revenue chart">
+                            <div t-foreach="state.salesTrend" t-as="point" t-key="point_index" class="o_workspace_chart_point">
+                                <span class="o_workspace_chart_value" t-esc="formatMoney(point.value)"/>
+                                <span class="o_workspace_chart_track">
+                                    <i t-att-style="`height: ${point.height}%`"/>
+                                </span>
+                                <small t-esc="point.label"/>
+                            </div>
+                        </div>
+                        <div t-else="" class="o_workspace_analytics_empty">
+                            <i class="fa fa-bar-chart" aria-hidden="true"/>
+                            <span>No confirmed sales activity yet</span>
+                        </div>
+                    </article>
+
+                    <article class="o_workspace_panel o_workspace_activity_panel">
+                        <div class="o_workspace_panel_header">
+                            <div>
+                                <strong>Activity workload</strong>
+                                <span>Your current follow-ups</span>
+                            </div>
+                            <span><t t-esc="activityTotal"/> total</span>
+                        </div>
+                        <div class="o_workspace_activity_body">
+                            <div class="o_workspace_activity_donut" t-att-style="state.activityChartStyle">
+                                <span><strong t-esc="activityTotal"/><small>Activities</small></span>
+                            </div>
+                            <div class="o_workspace_activity_legend">
+                                <div t-foreach="state.activitySummary" t-as="item" t-key="item.id" t-attf-class="o_workspace_activity_legend_item o_{{ item.id }}">
+                                    <span><i/><t t-esc="item.label"/></span>
+                                    <strong t-esc="item.value"/>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="o_workspace_panel o_workspace_pipeline_panel">
+                        <div class="o_workspace_panel_header">
+                            <div>
+                                <strong>Pipeline by stage</strong>
+                                <span>Expected revenue and opportunities</span>
+                            </div>
+                        </div>
+                        <div t-if="state.pipelineStages.length" class="o_workspace_pipeline">
+                            <div t-foreach="state.pipelineStages" t-as="stage" t-key="stage.id" class="o_workspace_pipeline_row">
+                                <div>
+                                    <strong t-esc="stage.label"/>
+                                    <span><t t-esc="stage.count"/> opportunities</span>
+                                </div>
+                                <span class="o_workspace_pipeline_track"><i t-att-style="`width: ${stage.width}%`"/></span>
+                                <b t-esc="formatMoney(stage.value)"/>
+                            </div>
+                        </div>
+                        <div t-else="" class="o_workspace_analytics_empty">
+                            <i class="fa fa-line-chart" aria-hidden="true"/>
+                            <span>No pipeline activity yet</span>
+                        </div>
+                    </article>
+
+                    <article class="o_workspace_panel o_workspace_updates_panel">
+                        <div class="o_workspace_panel_header">
+                            <div>
+                                <strong>Upcoming work</strong>
+                                <span>Next activities assigned to you</span>
+                            </div>
+                            <span>Latest updates</span>
+                        </div>
+                        <div t-if="state.activities.length" class="o_workspace_updates_list">
+                            <div t-foreach="state.activities" t-as="activity" t-key="activity.id" class="o_workspace_update_row">
+                                <span class="o_workspace_update_icon"><i class="fa fa-check" aria-hidden="true"/></span>
+                                <div>
+                                    <strong t-esc="activity.summary || (activity.activity_type_id and activity.activity_type_id[1]) || 'Follow up'"/>
+                                    <span t-esc="activity.res_name || activity.res_model"/>
+                                </div>
+                                <time t-esc="formatDate(activity.date_deadline)"/>
+                            </div>
+                        </div>
+                        <div t-else="" class="o_workspace_analytics_empty">
+                            <i class="fa fa-check-circle-o" aria-hidden="true"/>
+                            <span>No activities assigned</span>
+                        </div>
+                    </article>
+
+                    <article class="o_workspace_panel o_workspace_orders_panel">
+                        <div class="o_workspace_panel_header">
+                            <div>
+                                <strong>Latest orders</strong>
+                                <span>Recently confirmed sales</span>
+                            </div>
+                        </div>
+                        <div t-if="state.recentSales.length" class="o_workspace_sales_list">
+                            <div t-foreach="state.recentSales" t-as="order" t-key="order.id" class="o_workspace_sale_row">
+                                <div>
+                                    <strong t-esc="order.name"/>
+                                    <span t-esc="order.partner_id and order.partner_id[1]"/>
+                                </div>
+                                <span t-esc="formatMoney(order.amount_total)"/>
+                            </div>
+                        </div>
+                        <div t-else="" class="o_workspace_analytics_empty">
+                            <i class="fa fa-shopping-bag" aria-hidden="true"/>
+                            <span>No confirmed orders yet</span>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </t>
+
+</templates>

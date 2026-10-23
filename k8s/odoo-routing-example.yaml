@@ -1,0 +1,40 @@
+# Route regular HTTP to odoo-http and websocket traffic to odoo-realtime.
+apiVersion: v1
+kind: Service
+metadata:
+  name: odoo-http
+spec:
+  selector: {app: odoo, role: http}
+  ports:
+    - {name: http, port: 8069, targetPort: http}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: odoo-realtime
+spec:
+  selector: {app: odoo, role: realtime}
+  ports:
+    - {name: realtime, port: 8072, targetPort: realtime}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: odoo
+  annotations:
+    # Controller-specific timeout names may differ. WebSockets need long idle timeouts.
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  rules:
+    - host: odoo.example.com
+      http:
+        paths:
+          - path: /websocket
+            pathType: Prefix
+            backend:
+              service: {name: odoo-realtime, port: {name: realtime}}
+          - path: /
+            pathType: Prefix
+            backend:
+              service: {name: odoo-http, port: {name: http}}

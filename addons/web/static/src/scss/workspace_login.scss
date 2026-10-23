@@ -1,0 +1,218 @@
+@font-face {
+    font-family: "Lexend Deca";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("/web/static/fonts/lexend-deca/LexendDeca-Variable-LatinExt.woff2") format("woff2");
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+    font-family: "Lexend Deca";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("/web/static/fonts/lexend-deca/LexendDeca-Variable-Latin.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+.o_workspace_login {
+    margin: 0;
+    background: #f7faf8;
+    color: #1d2520;
+    font-family: "Lexend Deca", sans-serif;
+
+    #wrapwrap,
+    #wrapwrap > main {
+        min-height: 100%;
+    }
+}
+
+.o_workspace_login_shell {
+    display: grid;
+    min-height: 100vh;
+    grid-template-columns: minmax(0, 1.15fr) minmax(420px, .85fr);
+}
+
+.o_workspace_login_intro {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: clamp(32px, 6vw, 88px);
+    background:
+        radial-gradient(circle at 15% 85%, rgba(0, 206, 124, .16), transparent 24rem),
+        #101713;
+    color: #eef5f0;
+
+    h1 {
+        max-width: 720px;
+        margin: 12px 0 20px;
+        font-size: clamp(42px, 6vw, 76px);
+        font-weight: 500;
+        letter-spacing: -.065em;
+        line-height: 1.02;
+    }
+
+    p {
+        max-width: 540px;
+        margin: 0;
+        color: #9eaaa2;
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    small {
+        color: #77837b;
+        font-size: 11px;
+    }
+}
+
+.o_workspace_login_brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    font-size: 14px;
+    font-weight: 600;
+
+    i {
+        width: 11px;
+        height: 11px;
+        border-radius: 3px;
+        background: #00ce7c;
+        box-shadow: 5px 5px 0 rgba(0, 206, 124, .24);
+    }
+}
+
+.o_workspace_login_eyebrow {
+    color: #00ce7c;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+.o_workspace_login_panel {
+    display: grid;
+    min-height: 100vh;
+    place-items: center;
+    padding: 32px;
+}
+
+.o_workspace_login_card {
+    width: 100%;
+    max-width: 390px;
+
+    label {
+        margin-bottom: 7px;
+        color: #39443d;
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    .form-control,
+    .input-group .btn {
+        min-height: 44px;
+        border-color: #dce5df;
+        border-radius: 8px;
+        background-color: #fff;
+        box-shadow: none;
+    }
+
+    .form-control:focus {
+        border-color: rgba(0, 206, 124, .72);
+        box-shadow: 0 0 0 3px rgba(0, 206, 124, .15);
+    }
+
+    .btn-primary {
+        min-height: 44px;
+        border-color: #00ce7c;
+        border-radius: 8px;
+        background: #00ce7c;
+        color: #0c1711;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: none;
+        box-shadow: none;
+
+        &:hover {
+            border-color: #00b86f;
+            background: #00b86f;
+        }
+    }
+
+    .btn-link {
+        color: #64746a;
+        text-transform: none;
+    }
+}
+
+.o_workspace_login_identity {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 36px;
+
+    img {
+        width: 48px;
+        height: 48px;
+        object-fit: contain;
+        border: 1px solid #e3e9e5;
+        border-radius: 12px;
+        background: #fff;
+    }
+
+    div {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    span {
+        color: #78847c;
+        font-size: 10px;
+    }
+
+    strong {
+        font-size: 16px;
+        font-weight: 600;
+    }
+}
+
+.o_workspace_login_footer {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid #e3e9e5;
+    font-size: 10px;
+    text-align: center;
+
+    a {
+        color: #64746a;
+    }
+}
+
+@media (max-width: 899.98px) {
+    .o_workspace_login_shell {
+        grid-template-columns: 1fr;
+    }
+
+    .o_workspace_login_intro {
+        min-height: 260px;
+        padding: 28px;
+
+        h1 {
+            margin-bottom: 0;
+            font-size: 38px;
+        }
+
+        p,
+        small {
+            display: none;
+        }
+    }
+
+    .o_workspace_login_panel {
+        min-height: auto;
+        padding: 48px 24px;
+    }
+}

@@ -1,0 +1,1282 @@
+// Unified backend control system. Loaded last to normalize core and legacy widgets.
+
+.o_web_client {
+    --Workspace-control-height: 34px;
+    --Workspace-control-radius: 6px;
+    --Workspace-control-font: 13px;
+    --Workspace-control-padding-x: 9px;
+    --Workspace-control-icon-size: 12px;
+
+    .o_form_view .btn,
+    .o_list_view .o_cp_buttons .btn,
+    .o_control_panel > .o_cp_top > .o_workspace_cp_right > .o_cp_bottom_left .btn,
+    .o_workspace_command_bar .btn,
+    .modal-footer .btn {
+        text-transform: capitalize !important;
+    }
+
+    .o_main_navbar button,
+    .dropdown-menu button,
+    .dropdown-menu .dropdown-item,
+    .o_search_options button,
+    .o_refine_menu button {
+        text-transform: none !important;
+    }
+
+    // Base interactive controls
+    .o_form_view,
+    .o_list_view,
+    .modal-content {
+        input.o_input,
+        select.o_input,
+        textarea.o_input,
+        input.form-control,
+        select.form-select,
+        textarea.form-control,
+        .input-group-text {
+            min-width: 0;
+            height: var(--Workspace-control-height);
+            min-height: var(--Workspace-control-height);
+            padding: 0 var(--Workspace-control-padding-x);
+            border: 1px solid var(--input);
+            border-radius: var(--Workspace-control-radius);
+            background: var(--background);
+            color: var(--foreground);
+            font-size: var(--Workspace-control-font);
+            line-height: calc(var(--Workspace-control-height) - 2px);
+            box-shadow: none;
+            transition: border-color 120ms ease, background-color 120ms ease;
+
+            &::placeholder {
+                color: var(--muted-foreground);
+                opacity: .72;
+            }
+
+            &:hover:not(:disabled):not([readonly]) {
+                border-color: var(--muted-border);
+            }
+
+            &:focus,
+            &:focus-within {
+                border-color: var(--focus-border);
+                outline: 0;
+                box-shadow: none;
+            }
+
+            &:disabled,
+            &[readonly] {
+                border-color: var(--border);
+                background: var(--muted);
+                color: var(--muted-foreground);
+                cursor: not-allowed;
+                opacity: .8;
+            }
+        }
+
+        textarea.o_input,
+        textarea.form-control {
+            height: auto;
+            min-height: 76px;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            line-height: 1.45;
+            resize: vertical;
+        }
+
+        select.o_input,
+        .form-select {
+            padding-right: 28px;
+            appearance: auto;
+        }
+
+        .btn {
+            display: inline-flex;
+            min-height: var(--Workspace-control-height);
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 0 11px;
+            border-radius: var(--Workspace-control-radius);
+            font-size: var(--Workspace-control-font);
+            font-weight: 500;
+            line-height: 1;
+            box-shadow: none;
+
+            > .fa,
+            > .oi,
+            > .o_button_icon {
+                margin: 0 !important;
+                font-size: var(--Workspace-control-icon-size);
+                line-height: 1;
+            }
+        }
+
+        .btn-sm {
+            min-height: 28px;
+            padding: 0 8px;
+            font-size: 12px;
+        }
+
+        .btn-primary,
+        .btn-fill-primary {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: var(--primary-foreground);
+        }
+
+        .btn-secondary,
+        .btn-light,
+        .btn-outline-secondary,
+        .btn-outline-primary {
+            border-color: var(--input);
+            background: var(--background);
+            color: var(--foreground);
+
+            &:hover,
+            &:focus,
+            &:active {
+                border-color: var(--muted-border);
+                background: var(--muted);
+                color: var(--foreground);
+            }
+        }
+
+        .btn-link {
+            min-height: auto;
+            padding: 2px 4px;
+            border: 0;
+            background: transparent;
+            color: var(--accent-foreground);
+        }
+
+        // Composite inputs: many2one, autocomplete, date/time, monetary suffix.
+        .o_input_dropdown,
+        .o_datepicker {
+            position: relative;
+            display: flex;
+            width: 100%;
+            min-width: 0;
+            height: var(--Workspace-control-height);
+            min-height: var(--Workspace-control-height);
+            align-items: center;
+        }
+
+        .o_field_many2one_selection {
+            position: relative;
+            display: flex;
+            width: 100%;
+            min-width: 0;
+            height: var(--Workspace-control-height);
+            min-height: var(--Workspace-control-height);
+            align-items: center;
+            gap: 0;
+            overflow: hidden;
+            border: 1px solid var(--input);
+            border-radius: var(--Workspace-control-radius);
+            background: var(--background);
+            transition: border-color 120ms ease, background-color 120ms ease;
+
+            &:hover {
+                border-color: var(--muted-border);
+            }
+
+            &:focus-within {
+                border-color: var(--focus-border);
+            }
+        }
+
+        .o_field_many2one_selection > .o_input_dropdown {
+            min-width: 0;
+            height: 100%;
+            min-height: 0;
+            flex: 1 1 0;
+        }
+
+        .o_field_many2one_extra {
+            width: 100%;
+            margin-top: 3px;
+            color: var(--muted-foreground);
+            font-size: 11px;
+            line-height: 1.35;
+
+            &:empty {
+                display: none;
+                width: 0;
+                height: 0;
+                margin: 0;
+            }
+        }
+
+        .o_input_dropdown > input.o_input,
+        .o_datepicker > input.o_input {
+            width: 100%;
+            padding-right: 32px;
+        }
+
+        .o_field_many2one_selection input.o_input {
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            padding-right: 32px;
+            border: 0 !important;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none !important;
+        }
+
+        .o_dropdown_button,
+        .o_datepicker_button {
+            position: absolute;
+            top: 50%;
+            right: 7px;
+            display: grid;
+            width: 20px;
+            height: 20px;
+            min-height: 20px;
+            place-items: center;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: var(--muted-foreground);
+            transform: translateY(-50%);
+        }
+
+        .o_dropdown_button::after {
+            margin: 0;
+        }
+
+        .o_datepicker_button::after {
+            font-size: var(--Workspace-control-icon-size);
+        }
+
+        .o_field_many2one_selection {
+            > .btn,
+            .o_external_button,
+            .o_barcode {
+                position: static;
+                width: calc(var(--Workspace-control-height) - 2px);
+                min-width: calc(var(--Workspace-control-height) - 2px);
+                height: calc(var(--Workspace-control-height) - 2px);
+                min-height: calc(var(--Workspace-control-height) - 2px);
+                flex: 0 0 calc(var(--Workspace-control-height) - 2px);
+                margin: 0 !important;
+                padding: 0 !important;
+                border: 0;
+                border-left: 1px solid var(--border);
+                border-radius: 0;
+                background: transparent;
+                color: var(--muted-foreground);
+
+                &:hover,
+                &:focus {
+                    background: var(--muted);
+                    color: var(--foreground);
+                }
+            }
+        }
+
+        .o_field_monetary,
+        .o_field_percentage,
+        .o_field_float_percentage {
+            display: inline-flex;
+            min-width: 0;
+            align-items: center;
+            gap: 6px;
+
+            input {
+                min-width: 0;
+            }
+        }
+
+        // Tags and multiple selection
+        .o_field_tags.o_tags_input,
+        .o_field_many2many_tags .o_tags_input,
+        .o_field_many2many_tags_avatar .o_tags_input {
+            display: flex;
+            width: 100%;
+            height: auto;
+            min-height: var(--Workspace-control-height);
+            align-items: center;
+            gap: 4px;
+            padding: 4px 7px;
+            border: 1px solid var(--input);
+            border-radius: var(--Workspace-control-radius);
+            background: var(--background);
+            line-height: normal;
+
+            &:hover {
+                border-color: var(--muted-border);
+            }
+
+            &:focus-within {
+                border-color: var(--focus-border);
+            }
+        }
+
+        .o_field_many2many_selection {
+            min-width: 72px;
+            flex: 1 1 72px;
+
+            .o_input_dropdown,
+            .o-autocomplete {
+                border: 0 !important;
+                border-radius: 0;
+                background: transparent;
+                box-shadow: none !important;
+            }
+
+            input.o_input,
+            input.o-autocomplete--input {
+                height: 24px;
+                min-height: 24px;
+                padding: 0 24px 0 3px;
+                border: 0 !important;
+                border-radius: 0;
+                background: transparent !important;
+                line-height: 24px;
+                box-shadow: none !important;
+            }
+        }
+
+        .o_tag,
+        .badge,
+        .o_selection_badge {
+            display: inline-flex;
+            min-height: 24px;
+            align-items: center;
+            gap: 4px;
+            margin: 0;
+            padding: 2px 8px;
+            border: 0;
+            border-radius: 999px;
+            background: var(--muted);
+            color: var(--foreground);
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        .o_tag .o_delete,
+        .badge .o_delete {
+            display: grid;
+            width: 16px;
+            height: 16px;
+            place-items: center;
+            padding: 0;
+            color: var(--muted-foreground);
+            line-height: 1;
+        }
+
+        // Checkbox, radio, and switch
+        .form-check,
+        .o_radio_item.form-check {
+            display: inline-flex;
+            width: fit-content;
+            min-height: 24px;
+            align-items: center;
+            gap: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .form-check-input {
+            position: static;
+            float: none;
+            width: 16px;
+            height: 16px;
+            min-height: 16px;
+            flex: 0 0 16px;
+            align-self: center;
+            margin: 0 !important;
+            padding: 0;
+            border: 1px solid var(--input);
+            background-color: var(--background);
+            box-shadow: none;
+
+            &:checked {
+                border-color: var(--primary);
+                background-color: var(--primary);
+            }
+
+            &:focus {
+                border-color: var(--focus-border);
+                box-shadow: none;
+            }
+        }
+
+        .form-check-input + .form-check-label {
+            display: inline-flex;
+            min-height: 16px;
+            align-items: center;
+            align-self: center;
+            margin: 0 0 0 8px !important;
+            padding: 0 !important;
+            color: var(--foreground);
+            font-size: var(--Workspace-control-font);
+            font-weight: 400;
+            line-height: 16px;
+        }
+
+        // Custom checkbox owns its geometry; Bootstrap checkbox layout is bypassed.
+        .o_workspace_checkbox {
+            position: relative;
+            display: inline-flex;
+            width: fit-content;
+            min-height: 24px;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .o_workspace_checkbox_input {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            min-height: 1px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            clip-path: inset(50%);
+            border: 0 !important;
+            opacity: 0;
+            white-space: nowrap;
+        }
+
+        .o_workspace_checkbox_label {
+            display: inline-flex !important;
+            min-height: 24px !important;
+            align-items: center !important;
+            gap: 8px;
+            margin: 0 !important;
+            padding: 0 !important;
+            color: var(--foreground);
+            font-size: var(--Workspace-control-font);
+            font-weight: 400;
+            line-height: 16px !important;
+            cursor: pointer;
+        }
+
+        .o_workspace_checkbox_mark {
+            position: relative;
+            display: inline-grid;
+            width: 16px;
+            height: 16px;
+            min-width: 16px;
+            flex: 0 0 16px;
+            place-items: center;
+            align-self: center;
+            border: 1px solid var(--input);
+            border-radius: 4px;
+            background: var(--background);
+            color: var(--primary-foreground);
+            transition: border-color 120ms ease, background-color 120ms ease;
+        }
+
+        .o_workspace_checkbox_text {
+            display: inline-flex;
+            min-height: 16px;
+            align-items: center;
+            line-height: 16px;
+        }
+
+        .o_workspace_checkbox_input:checked + .o_workspace_checkbox_label .o_workspace_checkbox_mark {
+            border-color: var(--primary);
+            background: var(--primary);
+
+            &::after {
+                content: "\f00c";
+                font: 10px/1 FontAwesome;
+            }
+        }
+
+        .o_workspace_checkbox_input:focus-visible + .o_workspace_checkbox_label .o_workspace_checkbox_mark {
+            border-color: var(--focus-border);
+            box-shadow: 0 0 0 2px var(--ring-focus);
+        }
+
+        .o_workspace_checkbox_input:disabled + .o_workspace_checkbox_label {
+            cursor: not-allowed;
+            opacity: .55;
+        }
+
+        .form-switch .form-check-input {
+            width: 30px;
+            flex-basis: 30px;
+            border-radius: 999px;
+        }
+
+        .o_field_radio .o_horizontal {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+
+            .o_radio_item {
+                margin: 0;
+            }
+        }
+
+        .o_field_radio .o_vertical {
+            display: flex;
+            gap: 7px;
+
+            .o_radio_item {
+                margin: 0;
+            }
+        }
+
+        .o_workspace_section_notebook,
+        .o_workspace_form_context {
+            input.o_input,
+            select.o_input,
+            textarea.o_input,
+            .o_input_dropdown,
+            .o_datepicker,
+            .o_tags_input,
+            .o_field_many2one_selection,
+            .o_field_many2many_tags,
+            .o_field_many2many_tags_avatar {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+            .o_field_boolean,
+            .o-checkbox,
+            .form-check {
+                width: fit-content;
+            }
+        }
+
+        // Readonly values should look like document content, not disabled controls.
+        &.o_form_readonly .o_field_widget:not(.o_field_boolean):not(.o_field_image):not(.o_field_binary),
+        .o_readonly_modifier {
+            color: var(--foreground);
+            line-height: 1.55;
+        }
+
+        &.o_form_readonly .o_field_empty:empty::before,
+        .o_readonly_modifier.o_field_empty:empty::before {
+            content: "Not set";
+            color: var(--muted-foreground);
+            font-style: italic;
+        }
+
+        .o_form_uri {
+            color: var(--accent-foreground);
+            text-decoration: none;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+
+        // Validation and requirement states
+        .o_field_invalid input.o_input,
+        .o_field_invalid select.o_input,
+        .o_field_invalid textarea.o_input,
+        .o_invalid_cell input.o_input,
+        input.o_input:invalid,
+        select.o_input:invalid,
+        textarea.o_input:invalid {
+            border-color: var(--destructive) !important;
+            background: var(--background);
+        }
+
+        .o_required_modifier input.o_input:not(:focus),
+        .o_required_modifier select.o_input:not(:focus),
+        .o_required_modifier textarea.o_input:not(:focus) {
+            border-left-color: var(--ring-border);
+        }
+
+        // Field roots use available form width. Intrinsic widgets opt out below.
+        .o_field_widget:not(.o_field_boolean):not(.o_field_image):not(.o_field_signature):not(.o_field_priority):not(.o_field_color):not(.o_field_color_picker):not(.o_field_statusbar) {
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        // Autocomplete, relational, selection, reference, date and range controls.
+        .o-autocomplete,
+        .o-autocomplete > input,
+        .o_field_many2one,
+        .o_field_many2one > div,
+        .o_field_selection,
+        .o_field_reference,
+        .o_field_date,
+        .o_field_datetime,
+        .o_field_daterange {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .o_field_many2one_avatar > div {
+            width: 100%;
+            min-width: 0;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .o_field_many2one_avatar .o_m2o_avatar {
+            width: 26px;
+            height: 26px;
+            flex: 0 0 26px;
+        }
+
+        .o_field_many2one_avatar .o_m2o_avatar > img,
+        .o_field_many2one_avatar .o_m2o_avatar > .o_m2o_avatar_empty {
+            width: 26px;
+            height: 26px;
+            margin: 0;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .o_field_reference > .o_row {
+            display: grid;
+            width: 100%;
+            grid-template-columns: minmax(120px, .7fr) minmax(180px, 1.3fr);
+            gap: 6px;
+        }
+
+        .o_field_reference > .o_row > * {
+            width: 100% !important;
+            min-width: 0;
+            margin: 0 !important;
+        }
+
+        .o_datepicker_input {
+            padding-right: 34px !important;
+            cursor: pointer;
+        }
+
+        .o_datepicker_button {
+            pointer-events: none;
+        }
+
+        .o_datepicker_button::after {
+            content: "\f073";
+            display: block;
+            border: 0 !important;
+            color: var(--muted-foreground);
+            font: 12px/1 FontAwesome;
+        }
+
+        .o_datepicker_warning {
+            top: 50% !important;
+            right: 30px !important;
+            transform: translateY(-50%);
+        }
+
+        // Tags and multi-select keep one input shell and grow only when wrapping.
+        .o_field_tags.o_tags_input,
+        .o_field_many2many_tags .o_tags_input,
+        .o_field_many2many_tags_avatar .o_tags_input {
+            align-content: center;
+            row-gap: 4px;
+        }
+
+        .o_field_many2many_tags:not(.o_readonly_modifier),
+        .o_field_many2many_tags_avatar:not(.o_readonly_modifier) {
+            width: 100%;
+        }
+
+        .o_field_many2many_tags .o_field_many2many_selection,
+        .o_field_many2many_tags_avatar .o_field_many2many_selection {
+            width: auto !important;
+            min-width: 96px;
+            flex: 1 1 96px;
+        }
+
+        .o_field_many2many_tags .o_input_dropdown,
+        .o_field_many2many_tags_avatar .o_input_dropdown {
+            height: 24px;
+            min-height: 24px;
+        }
+
+        .o_field_many2many_tags_avatar .o_tag img,
+        .o_field_many2many_tags_avatar .badge img {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .o_field_many2many_checkboxes > div,
+        .o_field_widget.o_field_many2many_checkboxes > div {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 6px 16px;
+        }
+
+        .o_field_many2many_checkboxes .form-check {
+            min-height: 28px;
+        }
+
+        // File and binary controls.
+        .o_field_binary_file,
+        .o_field_binary {
+            > div,
+            .w-100,
+            .o_file_uploader {
+                min-width: 0;
+            }
+
+            .w-100.d-inline-flex {
+                align-items: center;
+                gap: 6px;
+            }
+
+            input.o_input[readonly] {
+                min-width: 0;
+                flex: 1 1 auto;
+                border-color: var(--input);
+                background: var(--background);
+                color: var(--foreground);
+                cursor: default;
+                opacity: 1;
+            }
+
+            .o_select_file_button,
+            .o_clear_file_button,
+            .fa-download {
+                width: var(--Workspace-control-height);
+                min-width: var(--Workspace-control-height);
+                height: var(--Workspace-control-height);
+                min-height: var(--Workspace-control-height);
+                flex: 0 0 var(--Workspace-control-height);
+                margin: 0 !important;
+                padding: 0;
+            }
+
+            > .o_select_file_button {
+                width: auto;
+                padding: 0 12px;
+            }
+        }
+
+        .oe_fileupload {
+            width: 100%;
+
+            .o_attachments {
+                display: grid;
+                width: 100%;
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 6px;
+            }
+
+            .o_attachment.o_attachment_many2many {
+                width: 100%;
+                min-width: 0;
+                padding: 0;
+            }
+
+            .o_attachment_wrap {
+                min-height: 48px;
+                padding: 5px 36px 5px 5px;
+                border: 1px solid var(--border);
+                border-radius: var(--Workspace-control-radius);
+                background: var(--background);
+            }
+
+            .o_attachment .o_image {
+                width: 36px;
+                height: 36px;
+                border-radius: 4px;
+            }
+
+            .oe_add {
+                margin-top: 6px;
+            }
+        }
+
+        // Images and signatures retain content aspect ratio, controls use shared sizing.
+        .o_field_image {
+            overflow: hidden;
+            border-radius: 8px;
+
+            img.img {
+                max-width: 100%;
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                background: var(--muted);
+                object-fit: cover;
+            }
+
+            .o_select_file_button,
+            .o_clear_file_button {
+                width: 28px;
+                min-width: 28px;
+                height: 28px;
+                min-height: 28px;
+                padding: 0;
+            }
+        }
+
+        .o_attachment_image img {
+            display: block;
+            max-width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .o_field_signature .o_signature,
+        .o_signature {
+            max-width: 100%;
+            overflow: hidden;
+            border: 1px solid var(--input);
+            border-radius: 8px;
+            outline: 0;
+            background: var(--background);
+        }
+
+        // Choice widgets.
+        .o_field_radio .o_horizontal {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 18px;
+        }
+
+        .o_field_radio .o_vertical {
+            display: grid;
+            gap: 6px;
+        }
+
+        .o_field_radio .o_radio_item,
+        .o_field_many2many_checkboxes .form-check {
+            margin: 0;
+            padding: 0;
+        }
+
+        .o_field_badge,
+        .o_field_badge_selection,
+        .o_field_label_selection,
+        .o_selection_badge {
+            max-width: 100%;
+        }
+
+        .o_field_float_toggle {
+            min-width: 64px;
+            height: var(--Workspace-control-height);
+            padding: 0 10px;
+            border: 1px solid var(--input);
+            border-radius: var(--Workspace-control-radius);
+            background: var(--background);
+            color: var(--foreground);
+            font-size: var(--Workspace-control-font);
+        }
+
+        .o_field_color {
+            width: var(--Workspace-control-height) !important;
+            height: var(--Workspace-control-height);
+            min-height: var(--Workspace-control-height);
+            overflow: hidden;
+            border: 1px solid var(--input);
+            border-radius: var(--Workspace-control-radius);
+        }
+
+        // Progress and status-like widgets.
+        .o_progressbar {
+            min-height: var(--Workspace-control-height);
+            gap: 8px;
+
+            .o_progress {
+                width: 100%;
+                min-width: 80px;
+                height: 7px;
+                overflow: hidden;
+                border: 0;
+                border-radius: 999px;
+                background: var(--muted);
+
+                > div {
+                    border-radius: inherit;
+                    background: var(--primary);
+                }
+            }
+
+            .o_progressbar_value {
+                min-height: 28px;
+                align-items: center;
+                white-space: nowrap;
+            }
+
+            .o_progressbar_value input {
+                width: 56px;
+                min-width: 56px;
+                height: 28px;
+                min-height: 28px;
+            }
+        }
+
+        .o_priority {
+            display: inline-flex;
+            min-height: 28px;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .o_priority_star {
+            padding: 3px;
+            color: var(--muted-foreground);
+            text-decoration: none;
+        }
+
+        .o_priority_star.fa-star {
+            color: #d99b25;
+        }
+
+        // Structured editors and complex fields.
+        .o_field_x2many,
+        .o_field_one2many,
+        .o_field_many2many,
+        .o_field_html,
+        .o_field_ace,
+        .o_field_domain,
+        .o_field_properties,
+        .o_field_pdf_viewer,
+        .o_field_iframe {
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        .o_x2m_control_panel {
+            min-height: 38px;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 0;
+
+            &:empty {
+                display: none;
+                min-height: 0;
+                padding: 0;
+            }
+
+            .o_cp_buttons,
+            .o_cp_buttons > div {
+                margin: 0;
+            }
+
+            .o_cp_pager {
+                margin-left: auto;
+            }
+        }
+
+        .o_field_html .note-editor,
+        .o_field_ace .ace_editor,
+        .o_field_domain_panel,
+        .o_field_properties {
+            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--background);
+            box-shadow: none;
+        }
+
+        .o_field_domain_panel {
+            display: flex;
+            min-height: 34px;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+            padding: 4px 8px;
+        }
+
+        .o_field_properties {
+            padding: 10px;
+        }
+
+        // Copy/domain/property and icon buttons
+        .o_field_CopyClipboardText,
+        .o_field_CopyClipboardURL,
+        .o_field_CopyClipboardChar {
+            gap: 5px;
+
+            .btn {
+                width: var(--Workspace-control-height);
+                min-width: var(--Workspace-control-height);
+                padding: 0;
+            }
+        }
+
+        .o_field_domain_panel,
+        .o_field_properties {
+            border-color: var(--border);
+            border-radius: 8px;
+            background: transparent;
+        }
+
+        .o_field_property_add {
+            margin-left: 0;
+            color: var(--accent-foreground);
+        }
+    }
+
+    // Search option chains behave as menus, never as form action buttons.
+    .o_refine_menu_dropdown {
+        .o-dropdown,
+        .btn-group {
+            width: 100%;
+        }
+
+        .dropdown-toggle,
+        .o_menu_item,
+        .dropdown-item {
+            display: flex;
+            width: 100%;
+            min-height: 32px;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 7px;
+            padding: 6px 9px;
+            border: 0;
+            border-radius: 5px;
+            background: transparent;
+            color: var(--foreground);
+            font-size: 12px;
+            line-height: 1.3;
+            text-align: left;
+            white-space: nowrap;
+
+            &:hover,
+            &:focus,
+            &[aria-expanded="true"] {
+                background: var(--muted);
+                color: var(--foreground);
+            }
+        }
+
+        .dropdown-toggle::after {
+            margin-left: auto;
+        }
+
+        .dropdown-item.active,
+        .dropdown-item.selected,
+        .dropdown-toggle.selected {
+            position: relative;
+            padding-left: 30px;
+
+            &::before {
+                content: "\f00c";
+                position: absolute;
+                top: 50%;
+                left: 10px;
+                display: block;
+                width: 12px;
+                border: 0;
+                color: var(--primary);
+                font: 10px/1 FontAwesome;
+                transform: translateY(-50%);
+            }
+        }
+
+        .dropdown-menu {
+            min-width: 220px;
+            overflow: visible;
+        }
+    }
+
+    // Editable tables use cells as controls; nested form chrome would misalign rows.
+    .o_list_renderer .o_selected_row {
+        height: 38px !important;
+
+        > td {
+            box-sizing: border-box;
+            height: 38px !important;
+            min-height: 38px;
+            padding: 6px 8px !important;
+            vertical-align: middle !important;
+        }
+
+        > td.o_data_cell:has(> .o_field_widget:not(.o_readonly_modifier):not(.o_invisible_modifier)) {
+            padding: 0 !important;
+            overflow: visible;
+            background: transparent !important;
+
+            &:focus-within {
+                background: transparent !important;
+                box-shadow: inset 0 -2px var(--primary);
+            }
+        }
+
+        > td.o_list_record_selector,
+        > td.o_handle_cell,
+        > td.o_list_record_remove,
+        > td.o_list_button {
+            padding-right: 4px !important;
+            padding-left: 4px !important;
+        }
+    }
+
+    .o_list_renderer .o_selected_row .o_data_cell > .o_field_widget:not(.o_readonly_modifier):not(.o_invisible_modifier) {
+        box-sizing: border-box;
+        display: flex !important;
+        width: 100% !important;
+        max-width: none !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        align-items: center;
+        margin: 0 !important;
+        padding: 0 8px;
+        overflow: visible;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        color: inherit;
+        font-size: var(--workspace-font-content);
+        line-height: 38px;
+        box-shadow: none !important;
+        vertical-align: middle !important;
+
+        > .o_input,
+        > input.o_input,
+        > select.o_input,
+        > textarea.o_input,
+        .o_input_dropdown,
+        .o_datepicker,
+        .o_field_many2one_selection {
+            box-sizing: border-box;
+            width: 100% !important;
+            max-width: none !important;
+            height: 38px !important;
+            min-height: 38px !important;
+            margin: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            background-color: transparent !important;
+            line-height: 38px;
+            box-shadow: none !important;
+            appearance: none;
+        }
+
+        > .o_input,
+        > input.o_input,
+        > select.o_input,
+        > textarea.o_input {
+            padding-right: 0 !important;
+            padding-left: 0 !important;
+            font-size: var(--workspace-font-content);
+        }
+
+        // TextField auto-resize writes 50px inline heights to both wrapper and textarea.
+        // Inline table editors are single-line cells, so reset the complete component tree.
+        &.o_field_text,
+        &.o_field_text > div,
+        &.o_field_text > div > textarea.o_input {
+            box-sizing: border-box;
+            width: 100% !important;
+            max-width: none !important;
+            height: 38px !important;
+            min-height: 38px !important;
+            max-height: 38px !important;
+            margin: 0 !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        &.o_field_text > div {
+            display: flex !important;
+            align-items: center;
+            padding: 0 !important;
+            overflow: hidden;
+        }
+
+        textarea.o_input,
+        &.o_field_text > div > textarea.o_input {
+            display: block;
+            padding: 0 !important;
+            overflow: hidden !important;
+            font: inherit;
+            line-height: 38px !important;
+            white-space: nowrap;
+            vertical-align: middle !important;
+            resize: none !important;
+            appearance: none;
+        }
+
+        .o-autocomplete {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .o_field_many2one_selection {
+            padding-left: 0 !important;
+            background: transparent !important;
+        }
+
+        .o_field_many2one_selection input.o_input,
+        .o_datepicker > input.o_input,
+        .o_input_dropdown > input.o_input {
+            height: 38px !important;
+            min-height: 38px !important;
+            padding-left: 0 !important;
+            border: 0 !important;
+            background: transparent !important;
+            background-color: transparent !important;
+            line-height: 38px;
+        }
+
+        .o_field_many2one_selection > .btn,
+        .o_field_many2one_selection > .o_external_button,
+        .o_field_many2one_selection > .o_barcode {
+            width: 30px;
+            min-width: 30px;
+            height: 38px;
+            min-height: 38px;
+            flex-basis: 30px;
+            border: 0;
+            border-radius: 0;
+        }
+
+        .o_dropdown_button,
+        .o_datepicker_button {
+            right: 0;
+            margin: 0 !important;
+        }
+
+        .o_field_tags.o_tags_input,
+        .o_tags_input {
+            height: 38px;
+            min-height: 38px;
+            padding: 7px 0;
+            overflow: hidden;
+            border: 0 !important;
+            border-radius: 0;
+            background: transparent;
+            flex-wrap: nowrap;
+            box-shadow: none !important;
+        }
+
+        .o_field_many2many_selection,
+        .o_field_many2many_selection .o_input_dropdown,
+        .o_field_many2many_selection input.o_input {
+            height: 24px !important;
+            min-height: 24px !important;
+            line-height: 24px;
+        }
+
+        .o_tag,
+        .badge,
+        .o_selection_badge {
+            min-height: 22px;
+            padding-top: 1px;
+            padding-bottom: 1px;
+        }
+
+        &.o_field_boolean,
+        &.o_field_priority,
+        &.o_field_handle,
+        &.o_field_badge {
+            width: 100% !important;
+            justify-content: center;
+        }
+    }
+}

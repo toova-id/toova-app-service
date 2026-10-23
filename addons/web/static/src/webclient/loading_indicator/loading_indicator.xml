@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.LoadingIndicator" owl="1">
+        <Transition visible="state.show" name="'o-fade'" t-slot-scope="transition" leaveDuration="400">
+            <div class="o_loading_indicator" t-att-class="transition.className" role="status" aria-live="polite" aria-label="Loading">
+                <span class="o_loading_indicator_spinner" aria-hidden="true"/>
+            </div>
+        </Transition>
+    </t>
+
+</templates>

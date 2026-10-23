@@ -1,0 +1,290 @@
+name: Build Odoo 16 Engine
+
+on:
+  push:
+    branches: [master, 'feat/**']
+    paths:
+      - '.github/workflows/build-engine.yml'
+      - 'odoo/**'
+      - 'addons/**'
+      - 'docker/**'
+      - 'requirements.txt'
+  pull_request:
+    branches: [master]
+    paths:
+      - '.github/workflows/build-engine.yml'
+      - 'odoo/**'
+      - 'addons/**'
+      - 'docker/**'
+      - 'requirements.txt'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Image tag (e.g., v16.0.1)'
+        required: false
+        default: ''
+      platforms:
+        description: 'Target platforms'
+        required: false
+        default: 'linux/amd64'
+      build-args:
+        description: 'Additional build arguments'
+        required: false
+        default: ''
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  PYTHON_VERSION: 3.12
+
+jobs:
+  # ------------------------------------------------------------
+  # Build and push image
+  # ------------------------------------------------------------
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write  # For cosign signing
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+    steps:
+      # Checkout
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Login to GHCR
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Docker metadata
+      - name: Get Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=${{ github.sha }}
+          labels: |
+            org.opencontainers.image.title=Odoo 16 Engine
+            org.opencontainers.image.description=Odoo 16 Community Engine Optimization
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+
+      # Build and push
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          platforms: ${{ github.event.inputs.platforms || 'linux/amd64' }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,push=${{ github.event_name != 'pull_request' }}
+          build-args: |
+            PYTHON_VERSION=${{ env.PYTHON_VERSION }}
+            ODOO_LOCALES=id,en_US
+            ODOO_STRIP_TESTS=1
+            VCS_REF=${{ github.sha }}
+            IMAGE_VERSION=${{ github.event.inputs.tag || github.ref_name }}
+            ${{ github.event.inputs.build-args }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          no-default-filters: true
+          tags: ${{ steps.meta.outputs.tags }}
+
+      # Security scan with Trivy
+      - name: Run Trivy vulnerability scanner
+        if: github.event_name != 'pull_request'
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+          exit-code: '0'
+
+      # Preserve Trivy results without requiring GitHub Advanced Security.
+      - name: Upload Trivy report
+        if: github.event_name != 'pull_request' && always() && hashFiles('trivy-results.sarif') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-${{ github.sha }}
+          path: trivy-results.sarif
+          retention-days: 30
+
+      # Sign image with Cosign
+      - name: Sign image with Cosign
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+        uses: sigstore/cosign-installer@v3
+      - name: Sign with Cosign
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+        run: |
+          cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      # Create release tag
+      - name: Create release tag
+        if: github.event.inputs.tag != '' && github.event_name == 'workflow_dispatch'
+        env:
+          RELEASE_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Tag $RELEASE_TAG already exists; skipping"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "4189828+github-actions[bot]@users.noreply.github.com"
+          git tag --annotate "$RELEASE_TAG" --message "Release $RELEASE_TAG"
+          git push origin "refs/tags/$RELEASE_TAG"
+
+  # ------------------------------------------------------------
+  # Test image
+  # ------------------------------------------------------------
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build test image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          platforms: linux/amd64
+          load: true
+          tags: odoo16-engine:test
+          build-args: |
+            PYTHON_VERSION=${{ env.PYTHON_VERSION }}
+            ODOO_LOCALES=id,en_US
+            ODOO_STRIP_TESTS=0
+            VCS_REF=${{ github.sha }}
+            IMAGE_VERSION=ci-${{ github.sha }}
+          cache-from: type=gha
+
+      - name: Check image size
+        run: |
+          SIZE=$(docker image inspect odoo16-engine:test --format='{{.Size}}' | awk '{print int($1/1024/1024)}')
+          echo "Image size: ${SIZE} MB"
+          if [ "$SIZE" -gt 900 ]; then
+            echo "ERROR: Image too large (${SIZE} MB > 900 MB)"
+            exit 1
+          fi
+
+      - name: Start PostgreSQL
+        run: |
+          docker network create odoo-ci
+          docker volume create odoo-ci-data
+          docker run --rm -v odoo-ci-data:/data alpine:3.20 chown -R 101:101 /data
+          docker run -d --name db --network odoo-ci \
+            -e POSTGRES_USER=odoo \
+            -e POSTGRES_PASSWORD=odoo \
+            -e POSTGRES_DB=test_ci \
+            --health-cmd='pg_isready -U odoo -d test_ci' \
+            --health-interval=2s --health-timeout=3s --health-retries=30 \
+            postgres:15-alpine
+          for i in $(seq 1 60); do
+            [ "$(docker inspect --format='{{.State.Health.Status}}' db)" = healthy ] && exit 0
+            sleep 1
+          done
+          docker logs db
+          exit 1
+
+      - name: Run regression suites
+        run: |
+          docker run --rm --network odoo-ci \
+            -v odoo-ci-data:/var/lib/odoo \
+            -v "$PWD/docker/odoo.conf:/etc/odoo/odoo.conf:ro" \
+            odoo16-engine:test \
+            --config=/etc/odoo/odoo.conf --database=test_ci \
+            --init=base,test_http,web,mail,sale,account,stock --stop-after-init \
+            --without-demo=all --workers=0 --max-cron-threads=0 \
+            --test-tags '/base,-/base:TestQWebBasic.test_render_barcode,-/base:TestRunnerLogging.test_assertQueryCount,/test_http,/web,/mail,/sale,/account,/stock' \
+            --log-level=test
+
+      - name: Start Odoo and test health endpoint
+        run: |
+          docker run -d --name odoo-test --network odoo-ci \
+            -p 8069:8069 \
+            -v odoo-ci-data:/var/lib/odoo \
+            -v "$PWD/docker/odoo.conf:/etc/odoo/odoo.conf:ro" \
+            odoo16-engine:test \
+            --config=/etc/odoo/odoo.conf --database=test_ci \
+            --workers=0 --max-cron-threads=0
+          curl --fail --show-error --silent --retry 30 --retry-delay 2 \
+            http://localhost:8069/web/health
+          docker exec odoo-test test -f /opt/odoo/addons/web/__manifest__.py
+          docker exec odoo-test test -f /opt/odoo/addons/mail/__manifest__.py
+          docker exec odoo-test test -f /opt/odoo/addons/sale/__manifest__.py
+          docker exec odoo-test test -f /opt/odoo/addons/account/__manifest__.py
+          docker exec odoo-test test -f /opt/odoo/addons/stock/__manifest__.py
+          docker exec odoo-test test -f /opt/odoo/addons/crm/__manifest__.py
+          docker exec odoo-test test -f /opt/odoo/addons/website/__manifest__.py
+          docker exec odoo-test python -c 'import sys; assert sys.flags.optimize == 0'
+          docker exec odoo-test wkhtmltopdf --version
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker logs odoo-test || true
+          docker rm -f odoo-test || true
+          docker rm -f db || true
+          docker volume rm odoo-ci-data || true
+          docker network rm odoo-ci || true
+
+  # ------------------------------------------------------------
+  # SBOM generation
+  # ------------------------------------------------------------
+  sbom:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          output-file: sbom.spdx.json
+          format: spdx-json
+          output-sbom: true
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.spdx.json
+          retention-days: 30

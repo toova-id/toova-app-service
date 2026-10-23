@@ -1,0 +1,47 @@
+[options]
+data_dir = /var/lib/odoo
+addons_path = /opt/odoo/odoo/addons,/opt/odoo/addons,/mnt/extra-addons
+proxy_mode = True
+list_db = False
+workers = 1
+max_cron_threads = 0
+db_maxconn = 4
+; Per-role default: one HTTP worker; run realtime, cron, and broker separately.
+limit_memory_soft = 167772160
+limit_memory_hard = 201326592
+limit_memory_metric = rss
+limit_memory_pressure = 0.90
+limit_request = 4000
+limit_request_jitter = 800
+limit_time_worker = 3600
+limit_time_worker_jitter = 600
+; HTTP requests get a short budget; long jobs belong to the cron role.
+limit_time_cpu = 120
+limit_time_real = 180
+limit_time_real_cron = 900
+limit_time_worker_cron = 0
+registry_signaling = event
+registry_signaling_reconcile_seconds = 60
+; Stateless replicas (optional):
+; attachment_store = s3
+; s3_bucket = private-odoo-attachments
+; s3_prefix = odoo
+; s3_region = ap-southeast-3
+; s3_endpoint_url =
+; s3_download_url_seconds = 300
+; session_store = redis
+; redis_url = redis://redis:6379/0
+; Set exactly one role per deployment: http, realtime, cron, or broker.
+; Realtime command must start with `odoo-bin gevent` and use workers=0.
+; Dedicated broker pod only:
+; runtime_role = broker
+; broker_provider = nsq
+; broker_database = production
+; nsq_discovery = lookupd
+; nsqd_tcp_addresses = nsqd:4150
+; nsqlookupd_http_addresses = http://nsqlookupd:4161
+http_max_inflight = 1
+preload_gc_freeze = True
+log_performance_sample_rate = 0.01
+log_performance_slow_ms = 1000
+gevent_port = 8072

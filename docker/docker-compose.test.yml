@@ -1,0 +1,222 @@
+# Local build + stress test harness.
+# Matches GKE production config: isolated HTTP, cron, and broker workloads.
+# Build:  docker compose -f docker/docker-compose.test.yml build
+# Init:   docker compose -f docker/docker-compose.test.yml run --rm --no-deps odoo-init
+# Run one replica per role:
+#        docker compose -f docker/docker-compose.test.yml up -d \
+#          db redis nsqlookupd nsqd odoo-test odoo-realtime odoo-cron odoo-broker
+# Stress: python3 scripts/stress_test_odoo.py
+# Teardown: docker compose -f docker/docker-compose.test.yml down -v
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+      POSTGRES_DB: test_ci
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+
+  nsqlookupd:
+    image: nsqio/nsq:latest
+    command: ["/usr/local/bin/nsqlookupd"]
+
+  nsqd:
+    image: nsqio/nsq:latest
+    depends_on:
+      - nsqlookupd
+    command:
+      - /usr/local/bin/nsqd
+      - --lookupd-tcp-address=nsqlookupd:4160
+      - --broadcast-address=nsqd
+
+  odoo-init:
+    env_file:
+      - .env.r2
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        ODOO_STRIP_TESTS: "0"
+    image: odoo16-engine:test
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      nsqd:
+        condition: service_started
+    volumes:
+      - ./odoo.conf:/etc/odoo/odoo.conf:ro
+    entrypoint: ["/opt/odoo/odoo-bin"]
+    command:
+      - --config=/etc/odoo/odoo.conf
+      - --database=test_ci
+      - --init=base,web
+      - --stop-after-init
+      - --workers=0
+      - --max-cron-threads=0
+
+  odoo-broker:
+    env_file:
+      - .env.r2
+    image: odoo16-engine:test
+    depends_on:
+      odoo-init:
+        condition: service_completed_successfully
+      nsqd:
+        condition: service_started
+    volumes:
+      - ./odoo.conf:/etc/odoo/odoo.conf:ro
+    entrypoint: ["/opt/odoo/odoo-bin"]
+    command:
+      - --config=/etc/odoo/odoo.conf
+      - --database=test_ci
+      - --runtime-role=broker
+      - --broker-provider=nsq
+      - --broker-database=test_ci
+      - --nsq-discovery=lookupd
+      - --nsqd-tcp-addresses=nsqd:4150
+      - --nsqlookupd-http-addresses=http://nsqlookupd:4161
+      - --workers=0
+      - --no-http
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os,time; assert time.time()-os.path.getmtime('/tmp/odoo-broker-health') < 30"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    mem_limit: 96m
+    mem_reservation: 64m
+
+  odoo-cron:
+    env_file:
+      - .env.r2
+    image: odoo16-engine:test
+    depends_on:
+      odoo-init:
+        condition: service_completed_successfully
+    volumes:
+      - ./odoo.conf:/etc/odoo/odoo.conf:ro
+    entrypoint: ["/opt/odoo/odoo-bin"]
+    command:
+      - --config=/etc/odoo/odoo.conf
+      - --database=test_ci
+      - --runtime-role=cron
+      - --workers=1
+      - --max-cron-threads=1
+      - --no-http
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os,time; assert time.time()-os.path.getmtime('/tmp/odoo-cron-health') < 15"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+    mem_limit: 128m
+    mem_reservation: 96m
+
+  odoo-realtime:
+    env_file:
+      - .env.r2
+    image: odoo16-engine:test
+    depends_on:
+      odoo-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+    volumes:
+      - ./odoo.conf:/etc/odoo/odoo.conf:ro
+    ports:
+      - "8072:8072"
+    entrypoint: ["/opt/odoo/odoo-bin"]
+    command:
+      - gevent
+      - --config=/etc/odoo/odoo.conf
+      - --database=test_ci
+      - --runtime-role=realtime
+      - --workers=0
+      - --max-cron-threads=0
+      - --session-store=redis
+      - --redis-url=redis://redis:6379/0
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; assert urllib.request.urlopen('http://127.0.0.1:8072/websocket/health', timeout=2).status == 200"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    mem_limit: 128m
+    mem_reservation: 64m
+
+  odoo-test:
+    env_file:
+      - .env.r2
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        ODOO_STRIP_TESTS: "0"
+    image: odoo16-engine:test
+    depends_on:
+      odoo-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+    volumes:
+      - ./odoo.conf:/etc/odoo/odoo.conf:ro
+    ports:
+      - "8069:8069"
+    # Asset compilation peaks above steady-state RSS; keep one worker, allow build headroom.
+    mem_limit: 384m
+    mem_reservation: 128m
+    cpus: 1.50
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; assert urllib.request.urlopen('http://127.0.0.1:8069/web/health', timeout=2).status == 200"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    entrypoint: ["/opt/odoo/odoo-bin"]
+    command:
+      - --config=/etc/odoo/odoo.conf
+      - --database=test_ci
+      - --runtime-role=http
+      - --workers=1
+      - --max-cron-threads=0
+      - --limit-memory-soft=301989888
+      - --limit-memory-hard=369098752
+      - --session-store=redis
+      - --redis-url=redis://redis:6379/0
+
+  odoo-http-2:
+    env_file:
+      - .env.r2
+    image: odoo16-engine:test
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./odoo.conf:/etc/odoo/odoo.conf:ro
+    ports:
+      - "8068:8069"
+    mem_limit: 192m
+    mem_reservation: 96m
+    entrypoint: ["/opt/odoo/odoo-bin"]
+    command:
+      - --config=/etc/odoo/odoo.conf
+      - --database=test_ci
+      - --runtime-role=http
+      - --workers=1
+      - --max-cron-threads=0
+      - --session-store=redis
+      - --redis-url=redis://redis:6379/0
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; assert urllib.request.urlopen('http://127.0.0.1:8069/web/health', timeout=2).status == 200"]
+      interval: 10s
+      timeout: 3s
+      retries: 3

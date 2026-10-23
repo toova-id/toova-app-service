@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-inherit="web.FormView" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('o_form_view_container')]" position="after">
+            <t t-if="mailTemplate and state.activityOpen">
+                <div class="o_workspace_activity_backdrop" t-on-click="closeActivity"/>
+                <aside class="o_workspace_activity_drawer">
+                    <button type="button" class="o_workspace_activity_close" aria-label="Close activity" t-on-click="closeActivity">
+                        <i class="oi oi-close" aria-hidden="true"/>
+                    </button>
+                    <t t-call="{{ mailTemplate }}" />
+                </aside>
+            </t>
+        </xpath>
+        <xpath expr="//t[@t-set-slot='control-panel-action-menu']" position="inside">
+            <button
+                t-if="hasChatter"
+                type="button"
+                class="btn btn-light o_workspace_activity_trigger"
+                t-att-class="{ active: state.activityOpen }"
+                t-on-click="toggleActivity"
+            >
+                <i class="fa fa-comments-o me-1" aria-hidden="true"/>
+                Activity
+            </button>
+        </xpath>
+        <xpath expr="//Layout/t[@t-component='props.Renderer']" position="attributes">
+            <attribute name="chatter">chatter</attribute>
+            <attribute name="hasAttachmentViewerInArch">hasAttachmentViewerInArch</attribute>
+            <attribute name="hasAttachmentViewer">hasAttachmentViewer()</attribute>
+            <attribute name="saveButtonClicked">() => this.saveButtonClicked()</attribute>
+        </xpath>
+    </t>
+
+</templates>

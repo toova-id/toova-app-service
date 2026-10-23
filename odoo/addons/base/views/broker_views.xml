@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="broker_topic_view_search" model="ir.ui.view">
+        <field name="name">broker.topic.search</field>
+        <field name="model">broker.topic</field>
+        <field name="arch" type="xml">
+            <search string="Broker Topics">
+                <field name="name"/>
+                <field name="physical_topic"/>
+                <filter string="Inbound" name="inbound" domain="[('direction', 'in', ('inbound', 'both'))]"/>
+                <filter string="Outbound" name="outbound" domain="[('direction', 'in', ('outbound', 'both'))]"/>
+                <filter string="External" name="external" domain="[('ownership', '=', 'external')]"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Direction" name="group_direction" context="{'group_by': 'direction'}"/>
+                    <filter string="Ownership" name="group_ownership" context="{'group_by': 'ownership'}"/>
+                    <filter string="Format" name="group_format" context="{'group_by': 'message_format'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="broker_topic_view_tree" model="ir.ui.view">
+        <field name="name">broker.topic.tree</field>
+        <field name="model">broker.topic</field>
+        <field name="arch" type="xml">
+            <tree decoration-muted="not active">
+                <field name="name"/>
+                <field name="physical_topic_display"/>
+                <field name="direction"/>
+                <field name="ownership"/>
+                <field name="message_format"/>
+                <field name="subscription_count"/>
+                <field name="outbox_failed_count"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="broker_topic_view_form" model="ir.ui.view">
+        <field name="name">broker.topic.form</field>
+        <field name="model">broker.topic</field>
+        <field name="arch" type="xml">
+            <form string="Broker Topic">
+                <header>
+                    <field name="active" widget="boolean_toggle"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_open_channels" icon="fa-random">
+                            <field name="subscription_count" widget="statinfo" string="Channels"/>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_open_outbox" icon="fa-paper-plane">
+                            <field name="outbox_count" widget="statinfo" string="Outbox"/>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_open_failed_outbox" icon="fa-exclamation-triangle">
+                            <field name="outbox_failed_count" widget="statinfo" string="Publish Failed"/>
+                        </button>
+                    </div>
+                    <div class="oe_title"><label for="name"/><h1><field name="name" placeholder="order.created.v1"/></h1></div>
+                    <group>
+                        <group string="Contract">
+                            <field name="ownership"/>
+                            <field name="direction"/>
+                            <field name="message_format"/>
+                            <field name="provider"/>
+                        </group>
+                        <group string="Transport">
+                            <field name="physical_name_mode"/>
+                            <field name="physical_topic" attrs="{'required': [('physical_name_mode', '=', 'exact')]}"/>
+                            <field name="physical_topic_display" readonly="1"/>
+                            <field name="max_payload_bytes"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Input Contract" attrs="{'invisible': [('message_format', '=', 'odoo')]}">
+                            <group>
+                                <field name="message_id_path" placeholder="event.id"/>
+                                <field name="event_type_path" placeholder="event.type"/>
+                                <field name="payload_path" placeholder="data"/>
+                                <field name="store_payload"/>
+                            </group>
+                            <div class="alert alert-info" role="alert">
+                                Paths use dot-separated keys. Stable external message ID strongly recommended for idempotency.
+                            </div>
+                        </page>
+                        <page string="Delivery Policy">
+                            <group>
+                                <field name="max_retries"/>
+                                <field name="retry_delay"/>
+                                <field name="dead_letter_topic"/>
+                            </group>
+                        </page>
+                        <page string="Channels">
+                            <field name="subscription_ids" context="{'default_topic_id': active_id}">
+                                <tree>
+                                    <field name="channel"/>
+                                    <field name="handler_type"/>
+                                    <field name="handler" attrs="{'invisible': [('handler_type', '!=', 'registry')]}"/>
+                                    <field name="model_id" attrs="{'invisible': [('handler_type', '!=', 'code')]}"/>
+                                    <field name="max_in_flight"/>
+                                    <field name="delivery_count"/>
+                                    <field name="failed_count"/>
+                                    <field name="dead_count"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Description"><field name="description" placeholder="Contract ownership, producer, consumers, and operational notes..."/></page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="broker_topic_view_kanban" model="ir.ui.view">
+        <field name="name">broker.topic.kanban</field>
+        <field name="model">broker.topic</field>
+        <field name="arch" type="xml">
+            <kanban create="false" default_group_by="direction" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="physical_topic_display"/>
+                <field name="ownership"/>
+                <field name="direction"/>
+                <field name="message_format"/>
+                <field name="subscription_count"/>
+                <field name="outbox_count"/>
+                <field name="outbox_failed_count"/>
+                <field name="active"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click o_kanban_record {{ !record.active.raw_value ? 'text-muted' : '' }}">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title"><field name="name"/></strong>
+                                    <span class="text-muted"><field name="physical_topic_display"/></span>
+                                </div>
+                                <span class="badge rounded-pill text-bg-light"><field name="message_format"/></span>
+                            </div>
+                            <div class="mt-3 d-flex justify-content-between text-muted">
+                                <span><i class="fa fa-random me-1"/><field name="subscription_count"/> channels</span>
+                                <span><i class="fa fa-paper-plane me-1"/><field name="outbox_count"/> outbound</span>
+                            </div>
+                            <div t-if="record.outbox_failed_count.raw_value" class="mt-2 text-danger">
+                                <i class="fa fa-exclamation-triangle me-1"/><field name="outbox_failed_count"/> publish failures
+                            </div>
+                            <div class="mt-2"><field name="ownership"/></div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="broker_overview_action" model="ir.actions.act_window">
+        <field name="name">Broker Overview</field>
+        <field name="res_model">broker.topic</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_id" ref="broker_topic_view_kanban"/>
+        <field name="search_view_id" ref="broker_topic_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Configure first broker topic</p>
+            <p>External topics use exact transport names. Add channels to consume and process messages.</p>
+        </field>
+    </record>
+
+    <record id="broker_topic_action" model="ir.actions.act_window">
+        <field name="name">Topics</field>
+        <field name="res_model">broker.topic</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="broker_topic_view_search"/>
+    </record>
+
+    <record id="broker_subscription_view_search" model="ir.ui.view">
+        <field name="name">broker.subscription.search</field>
+        <field name="model">broker.subscription</field>
+        <field name="arch" type="xml">
+            <search string="Broker Channels">
+                <field name="channel"/>
+                <field name="topic_id"/>
+                <field name="model_id"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Topic" name="group_topic" context="{'group_by': 'topic_id'}"/>
+                    <filter string="Handler" name="group_handler" context="{'group_by': 'handler_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="broker_subscription_view_tree" model="ir.ui.view">
+        <field name="name">broker.subscription.tree</field>
+        <field name="model">broker.subscription</field>
+        <field name="arch" type="xml">
+            <tree decoration-muted="not active" decoration-danger="dead_count &gt; 0" decoration-warning="failed_count &gt; 0">
+                <field name="topic_id"/>
+                <field name="channel"/>
+                <field name="handler_type"/>
+                <field name="model_id" optional="show"/>
+                <field name="max_in_flight"/>
+                <field name="delivery_count"/>
+                <field name="failed_count"/>
+                <field name="dead_count"/>
+                <field name="last_received_at"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="broker_subscription_view_form" model="ir.ui.view">
+        <field name="name">broker.subscription.form</field>
+        <field name="model">broker.subscription</field>
+        <field name="arch" type="xml">
+            <form string="Broker Channel">
+                <header><field name="active" widget="boolean_toggle"/></header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_open_deliveries" icon="fa-inbox">
+                            <field name="delivery_count" widget="statinfo" string="Deliveries"/>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_open_failed" icon="fa-exclamation-circle">
+                            <field name="failed_count" widget="statinfo" string="Failed"/>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_open_dead" icon="fa-ban">
+                            <field name="dead_count" widget="statinfo" string="Dead Letter"/>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_open_logs" icon="fa-list-alt" string="Logs"/>
+                    </div>
+                    <div class="oe_title"><label for="channel"/><h1><field name="channel" placeholder="odoo-orders"/></h1></div>
+                    <group>
+                        <group string="Connection">
+                            <field name="topic_id"/>
+                            <field name="max_in_flight"/>
+                            <field name="last_received_at" readonly="1"/>
+                        </group>
+                        <group string="Execution Identity">
+                            <field name="user_id"/>
+                            <field name="company_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Processing">
+                            <group>
+                                <field name="handler_type"/>
+                                <field name="handler" attrs="{'required': [('handler_type', '=', 'registry')], 'invisible': [('handler_type', '!=', 'registry')]}" placeholder="addon.handler.v1"/>
+                                <field name="model_id" attrs="{'required': [('handler_type', '=', 'code')], 'invisible': [('handler_type', '!=', 'code')]}"/>
+                            </group>
+                            <field name="code" widget="ace" options="{'mode': 'python'}" attrs="{'invisible': [('handler_type', '!=', 'code')]}"/>
+                            <div class="alert alert-warning" role="alert" attrs="{'invisible': [('handler_type', '!=', 'code')]}">
+                                Python code runs as configured user and company. Only trusted administrators may edit it.
+                            </div>
+                        </page>
+                        <page string="Deliveries">
+                            <field name="inbox_ids" readonly="1">
+                                <tree create="false" edit="false" delete="false" decoration-danger="state == 'dead'" decoration-warning="state == 'failed'" decoration-success="state == 'done'">
+                                    <field name="received_at"/>
+                                    <field name="message_id"/>
+                                    <field name="event_type"/>
+                                    <field name="state"/>
+                                    <field name="attempt_count"/>
+                                    <field name="duration_ms"/>
+                                    <field name="last_error"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="broker_subscription_action" model="ir.actions.act_window">
+        <field name="name">Broker Channels</field>
+        <field name="res_model">broker.subscription</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="broker_subscription_view_search"/>
+    </record>
+
+    <record id="broker_outbox_view_search" model="ir.ui.view">
+        <field name="name">broker.outbox.search</field>
+        <field name="model">broker.outbox</field>
+        <field name="arch" type="xml">
+            <search string="Broker Outbox">
+                <field name="message_id"/>
+                <field name="topic_id"/>
+                <filter string="Pending" name="pending" domain="[('state', '=', 'pending')]"/>
+                <filter string="Failed" name="failed" domain="[('state', '=', 'failed')]"/>
+                <filter string="Published" name="published" domain="[('state', '=', 'published')]"/>
+                <group expand="0" string="Group By"><filter string="Topic" name="group_topic" context="{'group_by': 'topic_id'}"/><filter string="State" name="group_state" context="{'group_by': 'state'}"/></group>
+            </search>
+        </field>
+    </record>
+
+    <record id="broker_outbox_view_tree" model="ir.ui.view">
+        <field name="name">broker.outbox.tree</field><field name="model">broker.outbox</field>
+        <field name="arch" type="xml">
+            <tree create="false" edit="false" delete="false" decoration-danger="state == 'failed'" decoration-success="state == 'published'">
+                <field name="create_date"/><field name="message_id"/><field name="topic_id"/><field name="state"/><field name="attempt_count"/><field name="next_attempt_at"/><field name="published_at"/><field name="last_error"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="broker_outbox_view_form" model="ir.ui.view">
+        <field name="name">broker.outbox.form</field><field name="model">broker.outbox</field>
+        <field name="arch" type="xml">
+            <form string="Outbound Message" create="false" edit="false" delete="false"><sheet>
+                <group><group><field name="message_id"/><field name="topic_id"/><field name="state"/><field name="key"/></group><group><field name="create_date"/><field name="published_at"/><field name="attempt_count"/><field name="next_attempt_at"/></group></group>
+                <notebook><page string="Payload"><field name="payload_display" nolabel="1" readonly="1" class="font-monospace"/></page><page string="Records"><field name="record_ids_display" nolabel="1" readonly="1" class="font-monospace"/></page><page string="Error"><field name="last_error" nolabel="1"/></page></notebook>
+            </sheet></form>
+        </field>
+    </record>
+
+    <record id="broker_outbox_action" model="ir.actions.act_window">
+        <field name="name">Broker Outbox</field><field name="res_model">broker.outbox</field><field name="view_mode">tree,form</field><field name="search_view_id" ref="broker_outbox_view_search"/>
+    </record>
+
+    <record id="broker_inbox_view_search" model="ir.ui.view">
+        <field name="name">broker.inbox.search</field><field name="model">broker.inbox</field>
+        <field name="arch" type="xml">
+            <search string="Broker Deliveries">
+                <field name="message_id"/><field name="transport_message_id"/><field name="subscription_id"/><field name="topic_id"/><field name="event_type"/>
+                <filter string="Processing" name="processing" domain="[('state', '=', 'processing')]"/><filter string="Done" name="done" domain="[('state', '=', 'done')]"/><filter string="Failed" name="failed" domain="[('state', '=', 'failed')]"/><filter string="Dead Letter" name="dead" domain="[('state', '=', 'dead')]"/>
+                <group expand="0" string="Group By"><filter string="Topic" name="group_topic" context="{'group_by': 'topic_id'}"/><filter string="Channel" name="group_channel" context="{'group_by': 'subscription_id'}"/><filter string="State" name="group_state" context="{'group_by': 'state'}"/><filter string="Received" name="group_received" context="{'group_by': 'received_at:day'}"/></group>
+            </search>
+        </field>
+    </record>
+
+    <record id="broker_inbox_view_tree" model="ir.ui.view">
+        <field name="name">broker.inbox.tree</field><field name="model">broker.inbox</field>
+        <field name="arch" type="xml">
+            <tree create="false" edit="false" delete="false" decoration-danger="state == 'dead'" decoration-warning="state == 'failed'" decoration-success="state == 'done'">
+                <field name="received_at"/><field name="message_id"/><field name="topic_id"/><field name="subscription_id"/><field name="event_type"/><field name="state"/><field name="attempt_count"/><field name="duration_ms"/><field name="processed_at"/><field name="last_error"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="broker_inbox_view_form" model="ir.ui.view">
+        <field name="name">broker.inbox.form</field><field name="model">broker.inbox</field>
+        <field name="arch" type="xml">
+            <form string="Inbound Delivery" create="false" edit="false" delete="false">
+                <header><button name="action_requeue" type="object" string="Requeue" class="oe_highlight" attrs="{'invisible': [('state', 'not in', ('failed', 'dead'))]}"/></header>
+                <sheet>
+                <group><group><field name="message_id"/><field name="transport_message_id"/><field name="topic_id"/><field name="subscription_id"/><field name="physical_topic"/><field name="event_type"/></group><group><field name="state"/><field name="attempt_count"/><field name="payload_size"/><field name="replayable"/><field name="received_at"/><field name="last_attempt_at"/><field name="processed_at"/><field name="duration_ms"/></group></group>
+                <notebook><page string="Payload"><field name="payload_display" nolabel="1" readonly="1" class="font-monospace"/></page><page string="Raw Body"><field name="raw_body" nolabel="1" class="font-monospace"/></page><page string="Error"><field name="last_error" nolabel="1"/></page></notebook>
+            </sheet></form>
+        </field>
+    </record>
+
+    <record id="broker_inbox_action" model="ir.actions.act_window">
+        <field name="name">Broker Deliveries</field><field name="res_model">broker.inbox</field><field name="view_mode">tree,form</field><field name="search_view_id" ref="broker_inbox_view_search"/>
+    </record>
+
+    <record id="broker_failed_action" model="ir.actions.act_window">
+        <field name="name">Failed Deliveries</field><field name="res_model">broker.inbox</field><field name="view_mode">tree,form</field><field name="domain">[('state', '=', 'failed')]</field><field name="search_view_id" ref="broker_inbox_view_search"/>
+    </record>
+
+    <record id="broker_dead_action" model="ir.actions.act_window">
+        <field name="name">Dead Letter</field><field name="res_model">broker.inbox</field><field name="view_mode">tree,form</field><field name="domain">[('state', '=', 'dead')]</field><field name="search_view_id" ref="broker_inbox_view_search"/>
+    </record>
+
+    <record id="broker_failed_outbox_action" model="ir.actions.act_window">
+        <field name="name">Publish Failures</field><field name="res_model">broker.outbox</field><field name="view_mode">tree,form</field><field name="domain">[('state', '=', 'failed')]</field><field name="search_view_id" ref="broker_outbox_view_search"/>
+    </record>
+
+    <menuitem id="menu_broker" name="Message Broker" parent="base.menu_custom" action="broker_overview_action" sequence="20" groups="base.group_system"/>
+    <menuitem id="menu_broker_overview" name="Overview" parent="menu_broker" action="broker_overview_action" sequence="10"/>
+
+    <menuitem id="menu_broker_configuration" name="Configuration" parent="menu_broker" action="broker_topic_action" sequence="20"/>
+    <menuitem id="menu_broker_topics" name="Topics" parent="menu_broker_configuration" action="broker_topic_action" sequence="10"/>
+    <menuitem id="menu_broker_channels" name="Channels" parent="menu_broker_configuration" action="broker_subscription_action" sequence="20"/>
+
+    <menuitem id="menu_broker_monitoring" name="Monitoring" parent="menu_broker" action="broker_inbox_action" sequence="30"/>
+    <menuitem id="menu_broker_deliveries" name="All Deliveries" parent="menu_broker_monitoring" action="broker_inbox_action" sequence="10"/>
+    <menuitem id="menu_broker_failed" name="Failed Deliveries" parent="menu_broker_monitoring" action="broker_failed_action" sequence="20"/>
+    <menuitem id="menu_broker_dead" name="Dead Letter" parent="menu_broker_monitoring" action="broker_dead_action" sequence="30"/>
+    <menuitem id="menu_broker_outbox" name="Outbox" parent="menu_broker_monitoring" action="broker_outbox_action" sequence="40"/>
+    <menuitem id="menu_broker_failed_outbox" name="Publish Failures" parent="menu_broker_monitoring" action="broker_failed_outbox_action" sequence="50"/>
+</odoo>
