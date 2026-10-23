@@ -14,8 +14,6 @@ for path in removed_paths:
 
 checks = {
     'addons/mail/data/ir_cron_data.xml': ('ir_cron_module_update_notification', 'publisher_warranty'),
-    'addons/l10n_fr/__init__.py': ('publisher_warranty', 'update_notification'),
-    'addons/l10n_fr_pos_cert/__init__.py': ('publisher_warranty', 'update_notification'),
     'odoo/tools/config.py': ('publisher_warranty_url', 'services.openerp.com'),
 }
 for path, forbidden in checks.items():
@@ -23,11 +21,7 @@ for path, forbidden in checks.items():
     for value in forbidden:
         assert value not in source, f'{value} remains in {path}'
 
-for path in (
-    'addons/crm/models/res_config_settings.py',
-    'addons/crm_iap_enrich/__init__.py',
-    'addons/crm_iap_enrich/models/crm_lead.py',
-):
-    assert "'manual'" in (ROOT / path).read_text(), f'manual opt-in missing from {path}'
+assert "'manual'" in (ROOT / 'addons/crm/models/res_config_settings.py').read_text(), \
+    'manual opt-in missing from addons/crm/models/res_config_settings.py'
 
 print('Odoo telemetry removal self-check passed')

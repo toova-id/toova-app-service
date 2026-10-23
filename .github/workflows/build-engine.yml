@@ -161,6 +161,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Verify managed addon scope
+        run: python3 scripts/test_managed_addon_scope.py
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -237,7 +240,8 @@ jobs:
           docker exec odoo-test test -f /opt/odoo/addons/account/__manifest__.py
           docker exec odoo-test test -f /opt/odoo/addons/stock/__manifest__.py
           docker exec odoo-test test -f /opt/odoo/addons/crm/__manifest__.py
-          docker exec odoo-test test -f /opt/odoo/addons/website/__manifest__.py
+          docker exec odoo-test test -f /opt/odoo/addons/l10n_id/__manifest__.py
+          docker exec odoo-test test ! -e /opt/odoo/addons/website/__manifest__.py
           docker exec odoo-test python -c 'import sys; assert sys.flags.optimize == 0'
           docker exec odoo-test wkhtmltopdf --version
 

@@ -84,7 +84,7 @@ Quick Start
 -----------
 ### Build
 
-Default build keeps runtime Community addons, `id` translation, source `en_US`, and removes test-only addons/files.
+Default build keeps managed ERP addon scope, `id` translation, source `en_US`, and removes test files. See [addon scope](docs/managed-erp-addon-scope.md).
 
 ```bash
 # Build with BuildKit cache

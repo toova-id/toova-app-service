@@ -33,7 +33,7 @@ docker buildx build --platform linux/arm64 \
   -t odoo16-engine:id .
 ```
 
-Network access to `github.com/wkhtmltopdf/packaging` is required during build. Base image intentionally keeps full Community runtime catalog and common Odoo dependencies; client repositories own private dependency installation. Test-only addons and test directories are excluded from release image.
+Network access to `github.com/wkhtmltopdf/packaging` is required during build. Base image keeps managed ERP product addons and their complete manifest dependency closure; client repositories own private dependency installation. Foreign localizations, unrelated product modules, test-only addons, and test directories are excluded.
 
 Recommended common config:
 

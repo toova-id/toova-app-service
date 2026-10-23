@@ -243,7 +243,7 @@ cold import odoo: RSS 76.4MiB -> 72.5MiB; modules 796 -> 758; PyPDF2 30 -> 0
 ### 3.8 Production image and regression gate corrections
 
 ```text
-Community addons             included in image; no runtime source bind mount required
+managed ERP addons           product roots plus complete manifest dependency closure included
 base-image contract          clients inherit immutable digest and add code under /mnt/extra-addons
 locale catalog               Indonesian plus source English only by default
 source-prune stage           removed files never remain in lower runtime layers
@@ -251,7 +251,7 @@ Python assertions            enabled; PYTHONOPTIMIZE removed from production ima
 Dockerfile                   docker/Dockerfile is the single build definition
 pull requests                build a test image and run regression suites
 regression modules           base, test_http, web, mail, sale, account, stock
-image smoke                  verifies key addon manifests, assertions, health, and wkhtmltopdf
+image smoke                  verifies retained/removed addon manifests, assertions, health, and wkhtmltopdf
 ```
 
 Speculative targeted cache, flush, and recompute patches without dedicated tests or
