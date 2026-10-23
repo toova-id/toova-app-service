@@ -34,12 +34,12 @@ setup/win32/static/wkhtmltopdf/
 setup/win32/static/postgresql*.exe
 
 # js tooling
-node_modules
-jsconfig.json
-tsconfig.json
-package-lock.json
-package.json
-.husky
+node_modules/
+*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+addons/web/static/app/
+.husky/
 
 # various virtualenv
 /bin/

@@ -45,4 +45,12 @@ missing_dependencies = {
 }
 assert not missing_dependencies, f'missing dependencies: {sorted(missing_dependencies)}'
 
+base_manifest = modules['base'][0]
+assert 'data/ir_module_module.xml' not in base_manifest['data'], \
+    'upstream Enterprise upsell catalog must not load in managed ERP'
+payment_providers = (ROOT / 'addons/payment/data/payment_provider_data.xml').read_text()
+assert 'base.module_payment_custom' in payment_providers
+assert 'base.module_payment_paypal' not in payment_providers, \
+    'removed foreign providers must not remain in payment seed data'
+
 print(f'managed addon scope self-check passed: {len(modules)} modules')

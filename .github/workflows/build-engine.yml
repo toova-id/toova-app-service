@@ -167,6 +167,14 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Verify frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm audit
+          npm run check
+          npm run build
+
       - name: Build test image
         uses: docker/build-push-action@v5
         with:
@@ -218,9 +226,9 @@ jobs:
             -v "$PWD/docker/odoo.conf:/etc/odoo/odoo.conf:ro" \
             odoo16-engine:test \
             --config=/etc/odoo/odoo.conf --database=test_ci \
-            --init=base,test_http,web,mail,sale,account,stock --stop-after-init \
+            --init=base,test_http,web,mail,sale,account,stock,l10n_id --stop-after-init \
             --without-demo=all --workers=0 --max-cron-threads=0 \
-            --test-tags '/base,-/base:TestQWebBasic.test_render_barcode,-/base:TestRunnerLogging.test_assertQueryCount,/test_http,/web,/mail,/sale,/account,/stock' \
+            --test-tags '/base,-/base:TestQWebBasic.test_render_barcode,-/base:TestRunnerLogging.test_assertQueryCount,/test_http,/web,/mail,/sale,/account,/stock,/l10n_id' \
             --log-level=test
 
       - name: Start Odoo and test health endpoint

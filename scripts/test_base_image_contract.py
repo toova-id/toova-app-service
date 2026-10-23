@@ -9,7 +9,10 @@ workflow = (ROOT / '.github/workflows/build-engine.yml').read_text()
 
 assert 'ARG ODOO_LOCALES=id,en_US' in dockerfile
 assert 'AS source-pruner' in dockerfile
+assert 'AS frontend-builder' in dockerfile
+assert 'RUN --mount=type=cache,target=/root/.npm npm ci' in dockerfile
 assert 'COPY --from=source-pruner --chown=odoo:odoo /src /opt/odoo' in dockerfile
+assert 'COPY --from=frontend-builder --chown=odoo:odoo /src/addons/web/static/app' in dockerfile
 assert '/mnt/extra-addons' in dockerfile
 assert 'USER odoo' in dockerfile
 assert 'RUN if [ "${ODOO_STRIP_TESTS}" = "0" ]' not in dockerfile

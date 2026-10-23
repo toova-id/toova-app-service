@@ -41,7 +41,18 @@ FROM node:22-slim AS node-builder
 RUN npm install -g rtlcss@4
 
 # ============================================================
-# Stage 3: Runtime (minimal)
+# Stage 3: Managed React client
+# ============================================================
+FROM node:22-slim AS frontend-builder
+WORKDIR /src/frontend
+COPY frontend/package.json frontend/package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm npm ci
+COPY frontend/ ./
+COPY addons/sale/frontend/ /src/addons/sale/frontend/
+RUN npm run build
+
+# ============================================================
+# Stage 4: Runtime (minimal)
 # ============================================================
 FROM python:${PYTHON_VERSION}-slim-bookworm AS runtime
 ARG TARGETARCH
@@ -137,6 +148,7 @@ LABEL org.opencontainers.image.title="Odoo 16 Engine Base" \
       org.opencontainers.image.licenses="LGPL-3.0-only"
 WORKDIR /opt/odoo
 COPY --from=source-pruner --chown=odoo:odoo /src /opt/odoo
+COPY --from=frontend-builder --chown=odoo:odoo /src/addons/web/static/app /opt/odoo/addons/web/static/app
 # Precompile immutable application code. Runtime still cannot write new bytecode.
 RUN python -m compileall -q /opt/odoo
 

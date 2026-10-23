@@ -10,6 +10,7 @@
 coverage.xml
 htmlcov
 node_modules
+addons/web/static/app
 doc
 debian
 setup/win32
