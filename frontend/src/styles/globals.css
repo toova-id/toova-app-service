@@ -263,15 +263,13 @@
   .workspace-image-value img { @apply h-12 w-12 object-cover transition-transform hover:scale-105; }
   .luma-image-upload { @apply w-full max-w-md; }
   .luma-image-upload.is-dragging { @apply rounded-md ring-2 ring-primary/30 ring-offset-2; }
-  .luma-image-empty { @apply grid min-h-36 w-full place-items-center content-center gap-1 rounded-md border border-dashed border-input bg-muted/20 px-4 py-5 text-center outline-none transition-colors hover:border-[var(--focus-border)] hover:bg-muted/40 focus-visible:ring-1 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50; }
-  .luma-image-empty > span { @apply mb-1 grid h-9 w-9 place-items-center rounded-md border bg-background text-muted-foreground shadow-[var(--shadow-control)]; }
-  .luma-image-empty svg { @apply h-4 w-4; }
-  .luma-image-empty strong { @apply text-xs font-medium; }
-  .luma-image-empty small { @apply text-[10px] text-muted-foreground; }
-  .luma-image-empty em { @apply mt-1 text-[9px] not-italic text-muted-foreground/80; }
-  .luma-image-preview { @apply overflow-hidden rounded-md border bg-muted/20 shadow-[var(--shadow-control)]; }
-  .luma-image-preview > img { @apply h-48 w-full bg-[linear-gradient(45deg,hsl(var(--muted))_25%,transparent_25%,transparent_75%,hsl(var(--muted))_75%),linear-gradient(45deg,hsl(var(--muted))_25%,transparent_25%,transparent_75%,hsl(var(--muted))_75%)] bg-[length:16px_16px] bg-[position:0_0,8px_8px] object-contain; }
-  .luma-image-preview > div { @apply flex items-center justify-end gap-1 border-t bg-background p-2; }
+  .luma-image-empty { @apply flex min-h-28 w-full flex-col items-center justify-center gap-1.5 rounded-md border border-dashed border-input bg-muted/10 px-4 py-4 text-center outline-none transition-colors hover:border-[var(--focus-border)] hover:bg-muted/30 focus-visible:ring-1 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50; }
+  .luma-image-empty svg { @apply mb-1 h-5 w-5 text-muted-foreground; }
+  .luma-image-empty strong { @apply text-[11px] font-medium; }
+  .luma-image-empty small { @apply text-[9px] text-muted-foreground; }
+  .luma-image-preview { @apply relative overflow-hidden rounded-md border bg-muted/10 shadow-[var(--shadow-control)]; }
+  .luma-image-preview > img { @apply h-40 w-full object-contain; }
+  .luma-image-preview > div { @apply absolute bottom-2 right-2 flex items-center gap-0.5 rounded-md border bg-background/95 p-0.5 shadow-[var(--shadow-control)] backdrop-blur; }
   .luma-image-preview svg { @apply h-3.5 w-3.5; }
   .luma-image-upload > p { @apply mt-1.5 text-[10px] text-destructive; }
   .workspace-field-link { @apply inline-flex items-center gap-1 text-accent-foreground underline-offset-2 hover:underline; }
