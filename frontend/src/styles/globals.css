@@ -263,12 +263,12 @@
   .workspace-image-value img { @apply h-12 w-12 object-cover transition-transform hover:scale-105; }
   .luma-image-upload { @apply w-full max-w-md; }
   .luma-image-upload.is-dragging { @apply rounded-md ring-2 ring-primary/30 ring-offset-2; }
-  .luma-image-empty { @apply flex min-h-28 w-full flex-col items-center justify-center gap-1.5 rounded-md border border-dashed border-input bg-muted/10 px-4 py-4 text-center outline-none transition-colors hover:border-[var(--focus-border)] hover:bg-muted/30 focus-visible:ring-1 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50; }
+  .luma-image-empty { @apply flex aspect-square w-full flex-col items-center justify-center gap-1.5 rounded-md border border-dashed border-input bg-muted/10 px-4 py-4 text-center outline-none transition-colors hover:border-[var(--focus-border)] hover:bg-muted/30 focus-visible:ring-1 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50; }
   .luma-image-empty svg { @apply mb-1 h-5 w-5 text-muted-foreground; }
   .luma-image-empty strong { @apply text-[11px] font-medium; }
   .luma-image-empty small { @apply text-[9px] text-muted-foreground; }
   .luma-image-preview { @apply relative overflow-hidden rounded-md border bg-muted/10 shadow-[var(--shadow-control)]; }
-  .luma-image-preview > img { @apply h-40 w-full object-contain; }
+  .luma-image-preview > img { @apply aspect-square w-full object-contain; }
   .luma-image-preview > div { @apply absolute bottom-2 right-2 flex items-center gap-0.5 rounded-md border bg-background/95 p-0.5 shadow-[var(--shadow-control)] backdrop-blur; }
   .luma-image-preview svg { @apply h-3.5 w-3.5; }
   .luma-image-upload > p { @apply mt-1.5 text-[10px] text-destructive; }
