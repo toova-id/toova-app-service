@@ -42,8 +42,9 @@
     --radius: .375rem;
     --focus-border: #65736a;
     --muted-border: rgba(100, 116, 106, .28);
-    --shadow-low: 0 1px 1px rgba(10, 24, 16, .018);
-    --shadow-floating: 0 3px 12px rgba(10, 24, 16, .045);
+    --shadow-control: 0 1px 2px rgba(10, 24, 16, .025);
+    --shadow-low: 0 1px 2px rgba(10, 24, 16, .03);
+    --shadow-floating: 0 6px 18px rgba(10, 24, 16, .07);
   }
 
   .dark {
@@ -65,8 +66,9 @@
     --input: 145 9% 21%;
     --focus-border: #718078;
     --muted-border: rgba(150, 165, 156, .26);
-    --shadow-low: 0 1px 1px rgba(0, 0, 0, .08);
-    --shadow-floating: 0 3px 12px rgba(0, 0, 0, .18);
+    --shadow-control: 0 1px 2px rgba(0, 0, 0, .12);
+    --shadow-low: 0 1px 2px rgba(0, 0, 0, .12);
+    --shadow-floating: 0 6px 18px rgba(0, 0, 0, .22);
     color-scheme: dark;
   }
 
@@ -192,7 +194,7 @@
   .workspace-list tbody tr { @apply cursor-pointer hover:bg-muted/60; }
   .workspace-list tbody tr.workspace-row-selected { @apply bg-accent/50; }
   .workspace-select-cell { @apply w-10 px-3 text-center; }
-  .workspace-select-cell input { @apply h-3.5 w-3.5 accent-[#00ce7c]; }
+  .workspace-select-cell > button { @apply mx-auto; }
   .workspace-list-empty { @apply grid min-h-[240px] place-items-center content-center gap-2 text-[10px] text-muted-foreground; }
   .workspace-list-empty svg { @apply h-5 w-5; }
   .workspace-list-empty strong { @apply text-xs font-medium text-foreground; }
@@ -206,38 +208,99 @@
   .workspace-form-commandbar li { @apply relative min-w-20 border-r px-3 py-1.5 text-center text-[10px] text-muted-foreground last:border-r-0; }
   .workspace-form-commandbar li.active { @apply bg-accent font-semibold text-accent-foreground; }
   .workspace-form-sheet { @apply my-0 w-full bg-background; }
-  .workspace-form-sheet section { @apply border-b px-6 py-5 last:border-b-0; }
-  .workspace-form-sheet h2 { @apply mb-4 text-xs font-semibold tracking-[-.01em]; }
-  .workspace-form-grid { @apply grid grid-cols-1 gap-x-10 gap-y-3 lg:grid-cols-2 2xl:grid-cols-3; }
-  .workspace-form-grid label { @apply grid grid-cols-[minmax(110px,.42fr)_minmax(0,1fr)] items-center gap-3; }
-  .workspace-form-grid label > span { @apply text-[11px] text-muted-foreground; }
-  .workspace-form-grid label > span b { @apply ml-0.5 text-primary; }
+  .workspace-form-sheet section { @apply border-b px-6 py-4 last:border-b-0; }
+  .workspace-form-sheet h2 { @apply mb-3 text-xs font-semibold tracking-[-.01em]; }
+  .workspace-form-grid { @apply grid grid-cols-1 gap-x-8 gap-y-2.5 lg:grid-cols-2 2xl:grid-cols-3; }
+  .workspace-form-grid > label { @apply grid grid-cols-[minmax(110px,.42fr)_minmax(0,1fr)] items-center gap-3; }
+  .workspace-form-grid > label > span { @apply text-[11px] text-muted-foreground; }
+  .workspace-form-grid > label > span b { @apply ml-0.5 text-primary; }
   .workspace-form-wide { @apply lg:col-span-2 2xl:col-span-3; }
-  .workspace-form-control { @apply min-h-[34px] min-w-0 text-[13px]; }
-  .workspace-form-control input:not([type=checkbox]), .workspace-form-control select, .workspace-form-control textarea { @apply h-[34px] w-full rounded-md border border-input bg-background px-2.5 text-[13px] outline-none focus:border-[var(--focus-border)]; }
-  .workspace-form-control textarea { @apply min-h-20 py-2; }
-  .workspace-form-control input[type=checkbox] { @apply h-4 w-4 accent-[#00ce7c]; }
-  .workspace-switch { @apply relative inline-flex h-5 w-9 cursor-pointer items-center; }
-  .workspace-switch input { @apply sr-only; }
-  .workspace-switch span { @apply h-5 w-9 rounded-full bg-muted transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-background after:shadow-[var(--shadow-low)] after:transition-transform; }
-  .workspace-switch input:checked + span { @apply bg-primary after:translate-x-4; }
-  .workspace-radio-group { @apply flex flex-wrap gap-3; }
-  .workspace-radio-group label { @apply flex cursor-pointer items-center gap-1.5 text-[11px]; }
-  .workspace-radio-group input { @apply h-3.5 w-3.5 accent-[#00ce7c]; }
-  .workspace-file-input { @apply inline-flex h-8 cursor-pointer items-center rounded-md border border-input px-2.5 text-[11px] hover:bg-muted; }
+  .workspace-form-control { @apply flex min-h-8 min-w-0 items-center text-xs; }
+  .workspace-form-control > :is(input,textarea,button,select,div) { @apply min-w-0; }
+  .workspace-form-control > div { @apply w-full; }
+  .workspace-form-control input:not([type=checkbox]), .workspace-form-control select, .workspace-form-control textarea { @apply text-xs; }
+  .workspace-form-control textarea { @apply min-h-16; }
+  .workspace-form-control input[type=checkbox] { @apply h-4 w-4; }
+  .workspace-datetime { @apply grid grid-cols-[minmax(0,1fr)_130px] gap-2; }
+  .luma-time-picker { @apply grid grid-cols-[14px_minmax(0,1fr)_4px_minmax(0,1fr)] items-center gap-1; }
+  .luma-time-picker > svg { @apply h-3.5 w-3.5 text-muted-foreground; }
+  .luma-time-picker > span { @apply text-center text-xs text-muted-foreground; }
+  .luma-time-picker button { @apply px-2; }
+  .luma-date-clear { @apply absolute right-1 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-foreground; }
+  .luma-date-clear svg { @apply h-3 w-3; }
+  .workspace-radio-option { @apply flex cursor-pointer items-center gap-1.5 text-[11px]; }
+  .workspace-checkbox-group { @apply grid max-h-48 gap-2 overflow-y-auto rounded-md border p-3 sm:grid-cols-2; }
+  .workspace-checkbox-group label { @apply flex cursor-pointer items-center gap-2 text-[11px]; }
+  .workspace-json-editor { @apply grid gap-1; }
+  .workspace-json-editor textarea { @apply min-h-32 font-mono text-[11px]; }
+  .workspace-json-editor textarea[aria-invalid=true] { @apply border-destructive ring-1 ring-destructive; }
+  .workspace-json-editor > span { @apply text-[10px] text-destructive; }
+  .workspace-json-value { @apply max-h-40 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-2 font-mono text-[10px]; }
+  .workspace-distribution { @apply flex flex-wrap gap-1; }
+  .workspace-distribution > span { @apply inline-flex items-center gap-1 rounded bg-muted px-1.5 py-0.5 text-[10px]; }
+  .workspace-distribution b { @apply font-medium; }
+  .workspace-distribution i { @apply not-italic text-muted-foreground; }
+  .workspace-file-input { @apply inline-flex h-8 cursor-pointer items-center gap-2 rounded-md border border-input px-2.5 text-[11px] shadow-[var(--shadow-control)] hover:bg-muted; }
   .workspace-file-input input { @apply sr-only; }
-  .workspace-tags-editor { @apply relative min-h-8 rounded-md border border-input bg-background px-1.5 py-1; }
+  .workspace-file-input svg { @apply h-3.5 w-3.5; }
+  .workspace-file-input svg:last-child { @apply text-primary; }
+  .workspace-file-download { @apply inline-flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-[11px] hover:bg-muted; }
+  .workspace-file-download svg { @apply h-3.5 w-3.5; }
+  .workspace-image-value { @apply inline-block overflow-hidden rounded-md border bg-muted shadow-[var(--shadow-control)]; }
+  .workspace-image-value img { @apply h-12 w-12 object-cover transition-transform hover:scale-105; }
+  .luma-image-upload { @apply w-full max-w-md; }
+  .luma-image-upload.is-dragging { @apply rounded-md ring-2 ring-primary/30 ring-offset-2; }
+  .luma-image-empty { @apply grid min-h-36 w-full place-items-center content-center gap-1 rounded-md border border-dashed border-input bg-muted/20 px-4 py-5 text-center outline-none transition-colors hover:border-[var(--focus-border)] hover:bg-muted/40 focus-visible:ring-1 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50; }
+  .luma-image-empty > span { @apply mb-1 grid h-9 w-9 place-items-center rounded-md border bg-background text-muted-foreground shadow-[var(--shadow-control)]; }
+  .luma-image-empty svg { @apply h-4 w-4; }
+  .luma-image-empty strong { @apply text-xs font-medium; }
+  .luma-image-empty small { @apply text-[10px] text-muted-foreground; }
+  .luma-image-empty em { @apply mt-1 text-[9px] not-italic text-muted-foreground/80; }
+  .luma-image-preview { @apply overflow-hidden rounded-md border bg-muted/20 shadow-[var(--shadow-control)]; }
+  .luma-image-preview > img { @apply h-48 w-full bg-[linear-gradient(45deg,hsl(var(--muted))_25%,transparent_25%,transparent_75%,hsl(var(--muted))_75%),linear-gradient(45deg,hsl(var(--muted))_25%,transparent_25%,transparent_75%,hsl(var(--muted))_75%)] bg-[length:16px_16px] bg-[position:0_0,8px_8px] object-contain; }
+  .luma-image-preview > div { @apply flex items-center justify-end gap-1 border-t bg-background p-2; }
+  .luma-image-preview svg { @apply h-3.5 w-3.5; }
+  .luma-image-upload > p { @apply mt-1.5 text-[10px] text-destructive; }
+  .workspace-field-link { @apply inline-flex items-center gap-1 text-accent-foreground underline-offset-2 hover:underline; }
+  .workspace-field-link svg { @apply h-3 w-3; }
+  .workspace-copy-value { @apply inline-flex items-center gap-2; }
+  .workspace-copy-value button { @apply grid h-6 w-6 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-foreground; }
+  .workspace-copy-value svg { @apply h-3 w-3; }
+  .workspace-tags-editor { @apply relative min-h-8 rounded-md border border-input bg-background px-1.5 py-1 shadow-[var(--shadow-control)]; }
   .workspace-tags-editor > div { @apply flex flex-wrap gap-1; }
   .workspace-tags-editor > div > span { @apply inline-flex items-center gap-1 rounded bg-accent px-1.5 py-0.5 text-[10px] text-accent-foreground; }
   .workspace-tags-editor > div button { @apply text-muted-foreground hover:text-destructive; }
   .workspace-tags-editor > input { @apply mt-1 h-6 border-0 px-1 text-[11px] focus:border-0; }
   .workspace-tags-editor > ul { @apply absolute left-0 right-0 top-full z-20 max-h-40 overflow-auto rounded-b border bg-background p-1 shadow-[var(--shadow-floating)]; }
   .workspace-tags-editor > ul button { @apply w-full rounded px-2 py-1 text-left text-[10px] hover:bg-muted; }
+  .luma-multi-select { @apply min-h-8 w-full rounded-md border border-input bg-background shadow-[var(--shadow-control)] transition-colors focus-within:border-[var(--focus-border)] focus-within:ring-1 focus-within:ring-ring/20; }
+  .luma-multi-select-values { @apply flex min-h-[30px] flex-wrap items-center gap-1 px-1.5 py-1; }
+  .luma-multi-select-values > span { @apply inline-flex h-5 max-w-full items-center gap-1 rounded bg-accent px-1.5 text-[10px] text-accent-foreground; }
+  .luma-multi-select-values > span button { @apply text-muted-foreground hover:text-destructive; }
+  .luma-multi-select-values > span svg { @apply h-2.5 w-2.5; }
+  .luma-multi-select-trigger { @apply flex h-5 min-w-20 flex-1 items-center justify-between gap-2 px-1 text-left text-[11px] text-muted-foreground outline-none; }
+  .luma-multi-select-trigger svg { @apply h-3 w-3 shrink-0; }
+  .luma-multi-select-options { @apply max-h-52 overflow-y-auto; }
+  .luma-multi-select-options > button { @apply flex min-h-7 w-full items-center gap-2 rounded-sm px-2 py-1 text-left text-xs outline-none hover:bg-accent hover:text-accent-foreground; }
+  .luma-multi-select-options > button > svg { @apply ml-auto h-3.5 w-3.5; }
+  .luma-multi-select-empty { @apply block px-2 py-5 text-center text-[10px] text-muted-foreground; }
+  .luma-combobox-trigger { @apply flex h-8 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-2.5 text-left text-xs shadow-[var(--shadow-control)] outline-none transition-colors hover:border-[var(--focus-border)] focus:border-[var(--focus-border)] focus:ring-1 focus:ring-ring/20; }
+  .luma-combobox-trigger > span { @apply min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap; }
+  .luma-combobox-trigger > svg { @apply h-3.5 w-3.5 shrink-0 text-muted-foreground; }
+  .luma-combobox-clear { @apply absolute right-1 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-foreground; }
+  .luma-combobox-clear svg { @apply h-3 w-3; }
+  .luma-combobox-options { @apply mt-1 max-h-52 overflow-y-auto; }
+  .luma-combobox-options > button { @apply flex min-h-7 w-full items-center justify-between gap-2 rounded-sm px-2 py-1 text-left text-xs outline-none hover:bg-accent hover:text-accent-foreground; }
+  .luma-combobox-options > button svg { @apply h-3.5 w-3.5; }
+  .luma-combobox-options > span { @apply block px-2 py-5 text-center text-[10px] text-muted-foreground; }
   .workspace-priority { @apply flex items-center gap-0.5; }
   .workspace-priority button { @apply text-sm text-muted-foreground/40; }
   .workspace-priority button.active { @apply text-primary; }
   .workspace-priority-read { @apply text-primary; }
   .workspace-color { @apply inline-block h-3 w-3 rounded-full; }
+  .workspace-color-picker { @apply flex flex-wrap gap-1.5; }
+  .workspace-color-picker button { @apply h-6 w-6 rounded-full border-2 border-background shadow-sm ring-1 ring-border transition-transform hover:scale-110; }
+  .workspace-color-picker button.active { @apply ring-2 ring-ring ring-offset-2 ring-offset-background; }
   .workspace-badge { @apply inline-flex rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium; }
   .workspace-tags { @apply text-[10px] text-muted-foreground; }
   .workspace-boolean-on { @apply text-accent-foreground; }
@@ -249,7 +312,17 @@
   .workspace-relation th { @apply h-8 border-b bg-muted/40 px-2 text-left text-[9px] font-medium uppercase tracking-[.02em] text-muted-foreground; }
   .workspace-relation td { @apply min-w-28 border-b px-2 py-1.5 align-middle; }
   .workspace-relation tr:last-child td { @apply border-b-0; }
-  .workspace-relation td input:not([type=checkbox]), .workspace-relation td select { @apply h-7 min-w-24 px-2 text-[11px]; }
+  .workspace-relation td input:not([type=checkbox]), .workspace-relation td select, .workspace-relation td textarea { @apply h-7 min-h-7 min-w-24 px-2 py-1 text-[11px]; }
+  .workspace-relation td textarea { @apply resize-none overflow-hidden; }
+  .workspace-relation .luma-image-upload { @apply min-w-28; }
+  .workspace-relation .luma-image-empty { @apply min-h-7 grid-cols-[14px_1fr] content-center gap-1 border-solid px-2 py-1 text-left; }
+  .workspace-relation .luma-image-empty > span { @apply m-0 h-auto w-auto border-0 bg-transparent shadow-none; }
+  .workspace-relation .luma-image-empty strong { @apply text-[10px]; }
+  .workspace-relation .luma-image-empty small, .workspace-relation .luma-image-empty em { @apply hidden; }
+  .workspace-relation .luma-image-preview { @apply flex h-7 items-center overflow-visible border-0 bg-transparent shadow-none; }
+  .workspace-relation .luma-image-preview > img { @apply h-7 w-7 rounded object-cover; }
+  .workspace-relation .luma-image-preview > div { @apply gap-0 border-0 bg-transparent p-0; }
+  .workspace-relation .luma-image-preview > div > :first-child { @apply px-2; }
   .workspace-relation-delete { @apply w-8 min-w-8 text-right; }
   .workspace-relation-delete button { @apply grid h-6 w-6 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-destructive; }
   .workspace-relation-delete svg { @apply h-3 w-3; }
@@ -313,9 +386,9 @@
   .luma-modal > header { @apply sticky top-0 z-10 flex h-11 items-center justify-between border-b bg-background px-4; }
   .luma-modal > header h2 { @apply text-sm font-semibold; }
   .luma-modal > main { @apply grid gap-3 p-4; }
-  .luma-modal > main label { @apply grid grid-cols-[130px_minmax(0,1fr)] items-center gap-3; }
-  .luma-modal > main label > span { @apply text-[10px] text-muted-foreground; }
-  .luma-modal > main label > span b { @apply ml-0.5 text-primary; }
+  .luma-modal > main > label { @apply grid grid-cols-[130px_minmax(0,1fr)] items-center gap-3; }
+  .luma-modal > main > label > span { @apply text-[10px] text-muted-foreground; }
+  .luma-modal > main > label > span b { @apply ml-0.5 text-primary; }
   .luma-modal > main input:not([type=checkbox]), .luma-modal > main select, .luma-modal > main textarea { @apply h-8 w-full rounded-md border border-input bg-background px-2.5 text-xs outline-none focus:border-[var(--focus-border)]; }
   .luma-modal > footer { @apply flex justify-end gap-1 border-t p-3; }
   .luma-modal-error { @apply p-4 text-xs text-destructive; }

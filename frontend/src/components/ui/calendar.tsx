@@ -1,0 +1,8 @@
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { DayPicker, type DayPickerProps } from "react-day-picker";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "./button";
+
+export function Calendar({ className, classNames, showOutsideDays = true, ...props }: DayPickerProps) {
+  return <DayPicker showOutsideDays={showOutsideDays} className={cn("p-3", className)} classNames={{ months: "flex flex-col gap-4 sm:flex-row", month: "space-y-3", month_caption: "relative flex h-7 items-center justify-center", caption_label: "text-xs font-medium", nav: "absolute inset-x-0 top-3 z-10 flex items-center justify-between px-3 pointer-events-none", button_previous: cn(buttonVariants({ variant: "ghost", size: "icon" }), "pointer-events-auto h-7 w-7"), button_next: cn(buttonVariants({ variant: "ghost", size: "icon" }), "pointer-events-auto h-7 w-7"), month_grid: "w-full border-collapse", weekdays: "flex", weekday: "w-8 text-center text-[10px] font-normal text-muted-foreground", week: "mt-1 flex w-full", day: "relative h-8 w-8 p-0 text-center text-xs", day_button: cn(buttonVariants({ variant: "ghost" }), "h-8 w-8 p-0 font-normal aria-selected:opacity-100"), selected: "rounded-md bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground", today: "rounded-md bg-accent text-accent-foreground", outside: "text-muted-foreground opacity-40", disabled: "text-muted-foreground opacity-40", hidden: "invisible", ...classNames }} components={{ Chevron: ({ orientation }) => orientation === "left" ? <ChevronLeft className="h-3.5 w-3.5"/> : <ChevronRight className="h-3.5 w-3.5"/> }} {...props}/>;
+}
