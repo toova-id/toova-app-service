@@ -559,7 +559,7 @@ def _normalize_form_values(values, schema):
             continue
         allowed = {column['name'] for column in relation_view['columns']}
         existing_ids = [row['id'] for row in rows if isinstance(row.get('id'), int)]
-        if field.get('widget') == 'managed_contacts':
+        if field.get('widget') in ('managed_contacts', 'managed_bank_accounts'):
             commands = []
         else:
             commands = [(6, 0, existing_ids)]

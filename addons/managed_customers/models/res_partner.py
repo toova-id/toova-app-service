@@ -19,6 +19,7 @@ class ResPartner(models.Model):
             'l10n_id_tku', 'l10n_id_buyer_document_type', 'l10n_id_buyer_document_number', 'l10n_id_tax_name',
             'l10n_id_tax_address', 'l10n_id_kode_transaksi', 'user_id', 'property_product_pricelist',
             'property_payment_term_id', 'property_supplier_payment_term_id', 'property_purchase_currency_id',
+            'property_account_position_id', 'receipt_reminder_email', 'reminder_date_before_receipt', 'bank_ids',
             'category_id', 'lang', 'comment', 'managed_address_ids', 'child_ids', 'is_company', 'active',
         ) if name in fields_by_name]
         fields = []
@@ -47,6 +48,18 @@ class ResPartner(models.Model):
                         'editable': True,
                         'inverse_field': 'parent_id',
                         'columns': ['name', 'function', 'email', 'phone', 'mobile', 'active'],
+                    },
+                })
+            elif name == 'bank_ids':
+                config.update({
+                    'widget': 'managed_bank_accounts',
+                    'relation': {
+                        'editable': True,
+                        'inverse_field': 'partner_id',
+                        'columns': [
+                            'bank_name', 'bank_bic', 'acc_number', 'acc_holder_name',
+                            'currency_id', 'allow_out_payment', 'active',
+                        ],
                     },
                 })
             fields.append(config)
