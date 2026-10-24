@@ -1,6 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
+import mimetypes
+from pathlib import PurePosixPath
 
 from odoo import http
 from odoo.exceptions import AccessError
@@ -33,14 +35,30 @@ class ManagedApp(http.Controller):
         request.update_env(user=request.session.uid)
         entry = self._manifest()['src/main.tsx']
         assets = {
-            'script': '/web/static/app/' + entry['file'],
-            'styles': ['/web/static/app/' + path for path in entry.get('css', [])],
+            'script': '/app-assets/' + entry['file'],
+            'styles': ['/app-assets/' + path for path in entry.get('css', [])],
         }
         response = request.render('web.managed_app', assets)
         response.headers['Cache-Control'] = 'no-store'
         response.headers['X-Frame-Options'] = 'DENY'
         response.headers['Content-Security-Policy'] = "frame-ancestors 'none'"
         return response
+
+    @http.route('/app-assets/<path:asset>', type='http', auth='none', methods=['GET'], save_session=False)
+    def assets(self, asset):
+        path = PurePosixPath(asset)
+        if path.is_absolute() or '..' in path.parts or path.suffix not in ('.js', '.css', '.map'):
+            return request.not_found()
+        try:
+            with file_open('web/static/app/' + path.as_posix(), 'rb') as asset_file:
+                content = asset_file.read()
+        except FileNotFoundError:
+            return request.not_found()
+        return request.make_response(content, [
+            ('Content-Type', mimetypes.guess_type(path.name)[0] or 'application/octet-stream'),
+            ('Cache-Control', 'no-store, max-age=0'),
+            ('X-Content-Type-Options', 'nosniff'),
+        ])
 
     @http.route('/api/v1/session', type='http', auth='user', methods=['GET'])
     def session(self):

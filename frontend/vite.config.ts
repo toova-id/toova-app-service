@@ -21,6 +21,7 @@ function addonFrontends(): Plugin {
 }
 
 export default defineConfig({
+  base: "/app-assets/",
   plugins: [addonFrontends(), react()],
   resolve: {
     preserveSymlinks: true,
@@ -40,9 +41,9 @@ export default defineConfig({
     rollupOptions: {
       input: path.resolve(__dirname, "src/main.tsx"),
       output: {
-        entryFileNames: "assets/app-[hash].js",
-        chunkFileNames: "assets/chunk-[hash].js",
-        assetFileNames: "assets/[name]-[hash][extname]",
+        entryFileNames: "assets/app.js",
+        chunkFileNames: "assets/[name].js",
+        assetFileNames: "assets/[name][extname]",
       },
     },
   },

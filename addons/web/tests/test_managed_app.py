@@ -16,7 +16,10 @@ class TestManagedApp(HttpCase):
         app = self.url_open('/app')
         self.assertEqual(app.status_code, 200)
         self.assertIn('id="root"', app.text)
-        self.assertIn('/web/static/app/assets/app-', app.text)
+        self.assertIn('/app-assets/assets/app.js', app.text)
+        asset = self.url_open('/app-assets/assets/app.js')
+        self.assertEqual(asset.status_code, 200)
+        self.assertEqual(asset.headers['Cache-Control'], 'no-store, max-age=0')
 
         session = self.url_open('/api/v1/session')
         self.assertEqual(session.status_code, 200)

@@ -35,13 +35,13 @@ export function evaluateDomain(domain: Domain, values: Values): boolean {
   let cursor = 0;
   const parse = (): boolean => {
     const token = domain[cursor++];
-    if (token === "|") return parse() || parse();
-    if (token === "&") return parse() && parse();
+    if (token === "|") { const left = parse(); const right = parse(); return left || right; }
+    if (token === "&") { const left = parse(); const right = parse(); return left && right; }
     if (token === "!") return !parse();
     return evaluateDomain(token, values);
   };
   let result = parse();
-  while (cursor < domain.length) result = result && parse();
+  while (cursor < domain.length) { const next = parse(); result = result && next; }
   return result;
 }
 
