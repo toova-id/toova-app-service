@@ -20,6 +20,20 @@ export function findMenuByPath(items: ServerNavigationItem[], pathname: string):
   return best;
 }
 
+function visibleLeafCount(item: ServerNavigationItem): number {
+  if (item.path) return 1;
+  return item.children.reduce((count, child) => count + visibleLeafCount(child), 0);
+}
+
+export function flattenNavigationChildren(items: ServerNavigationItem[]): ServerNavigationItem[] {
+  const result: ServerNavigationItem[] = [];
+  for (const item of items) {
+    if (!item.path && visibleLeafCount(item) <= 2) result.push(...flattenNavigationChildren(item.children));
+    else result.push({ ...item, children: flattenNavigationChildren(item.children) });
+  }
+  return result;
+}
+
 export function findTrail(items: ServerNavigationItem[], menuId: number): number[] {
   for (const item of items) {
     if (item.id === menuId) return [item.id];

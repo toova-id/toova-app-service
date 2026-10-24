@@ -1,8 +1,8 @@
 import { Bell, ChevronDown, ChevronRight, LogOut, Menu, Moon, PanelLeftClose, PanelLeftOpen, Search, Sun } from "lucide-react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { findMenuByPath, findTrail, firstAction, useNavigation } from "./navigation";
+import { findMenuByPath, findTrail, firstAction, flattenNavigationChildren, useNavigation } from "./navigation";
 import { useSession } from "./session";
 import type { ServerNavigationItem } from "./types";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -38,12 +38,16 @@ export function AppShell() {
     const action = firstAction(item);
     if (!action) return null;
     const hasChildren = item.children.length > 0;
-    return <div key={item.id}>
-      <div className="luma-submenu-row" style={{ paddingLeft: `${12 + depth * 10}px` }}>
-        <NavLink to={action.path!} className={cn("luma-submenu-link", activeTrail.includes(item.id) && "luma-submenu-link-active", item.id === activeMenu?.id && "luma-submenu-link-current")}>{item.label}</NavLink>
-        {hasChildren && <button type="button" onClick={() => toggleApp(item.id)} aria-label={`Buka ${item.label}`}><ChevronRight className={cn("h-3 w-3 transition-transform", openApps.includes(item.id) && "rotate-90")}/></button>}
+    const open = openApps.includes(item.id);
+    const active = activeTrail.includes(item.id);
+    const current = item.id === activeMenu?.id;
+    const style = { "--menu-depth": depth } as CSSProperties;
+    return <div key={item.id} className="luma-submenu-item">
+      <div className={cn("luma-submenu-row", hasChildren && !item.path && "luma-submenu-folder-row", active && "luma-submenu-row-active", current && "luma-submenu-row-current")} style={style}>
+        {item.path ? <NavLink to={item.path} className="luma-submenu-link" onClick={() => setMobileOpen(false)}><i/>{item.label}</NavLink> : <button type="button" className="luma-submenu-folder" onClick={() => toggleApp(item.id)} aria-expanded={open}><span>{item.label}</span><ChevronRight className={cn("transition-transform", open && "rotate-90")}/></button>}
+        {item.path && hasChildren && <button type="button" className="luma-submenu-expand" onClick={() => toggleApp(item.id)} aria-label={`${open ? "Tutup" : "Buka"} submenu ${item.label}`} aria-expanded={open}><ChevronRight className={cn("transition-transform", open && "rotate-90")}/></button>}
       </div>
-      {hasChildren && openApps.includes(item.id) && <div>{item.children.map((child) => renderChild(child, depth + 1))}</div>}
+      {hasChildren && open && <div className="luma-submenu-branch">{item.children.map((child) => renderChild(child, depth + 1))}</div>}
     </div>;
   };
 
@@ -52,18 +56,20 @@ export function AppShell() {
     <aside className={cn("luma-sidebar", mobileOpen && "luma-sidebar-mobile-open")}>
       <NavLink to="/app" className="luma-brand" title="Luma"><span className="luma-brand-mark"/><strong>Luma</strong></NavLink>
       <nav className="luma-navigation" aria-label="Navigasi utama">
+        <span className="luma-navigation-title">Menu utama</span>
         {navigation.map((item) => {
           const action = firstAction(item); if (!action) return null;
           const Icon = getNavigationIcon(item.module, item.xmlid);
           const active = activeTrail.includes(item.id);
           const current = item.id === activeMenu?.id;
           const open = openApps.includes(item.id);
+          const children = flattenNavigationChildren(item.children);
           return <div key={item.id} className="luma-nav-group">
             <div className={cn("luma-nav-row", active && "luma-nav-row-active", current && "luma-nav-row-current")}>
               <NavLink to={action.path!} title={item.label} onClick={() => setMobileOpen(false)}><span className="luma-nav-icon">{Icon ? <Icon/> : initials(item.label)}</span><span className="luma-nav-label">{item.label}</span></NavLink>
-              {expanded && item.children.length > 0 && <button type="button" onClick={() => toggleApp(item.id)} aria-label={`Buka submenu ${item.label}`}><ChevronRight className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-90")}/></button>}
+              {expanded && children.length > 0 && <button type="button" onClick={() => toggleApp(item.id)} aria-label={`${open ? "Tutup" : "Buka"} submenu ${item.label}`} aria-expanded={open}><ChevronRight className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-90")}/></button>}
             </div>
-            {expanded && open && item.children.length > 0 && <div className="luma-submenus">{item.children.map((child) => renderChild(child))}</div>}
+            {expanded && open && children.length > 0 && <div className="luma-submenus">{children.map((child) => renderChild(child))}</div>}
           </div>;
         })}
       </nav>

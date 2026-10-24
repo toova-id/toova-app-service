@@ -1,6 +1,6 @@
 import { Check, Clipboard, Download, ExternalLink, FileText, Plus, Trash2, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { api } from "@/lib/api";
+import { api, apiMutation } from "@/lib/api";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Combobox } from "@/components/ui/combobox";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -17,7 +17,7 @@ import type { FieldSchema } from "./types";
 
 type Value = unknown;
 type DisplayProps = { field: FieldSchema; value: Value; record: Record<string, unknown> };
-type EditorProps = { actionId: number; field: FieldSchema; value: Value; onChange: (value: Value) => void };
+type EditorProps = { actionId: number; field: FieldSchema; value: Value; onChange: (value: Value) => void; parentValues?: Record<string, unknown> };
 type Renderer = (props: DisplayProps) => JSX.Element;
 type Editor = (props: EditorProps) => JSX.Element;
 const display: Record<string, Renderer> = {};
@@ -63,11 +63,21 @@ registerFieldRenderer("url", ({ value }) => value ? <a className="workspace-fiel
 registerFieldRenderer("email", ({ value }) => value ? <a className="workspace-field-link" href={`mailto:${String(value)}`}>{String(value)}</a> : <>—</>);
 registerFieldRenderer("phone", ({ value }) => value ? <a className="workspace-field-link" href={`tel:${String(value)}`}>{String(value)}</a> : <>—</>);
 registerFieldRenderer("CopyClipboardChar", ({ value }) => value ? <span className="workspace-copy-value">{String(value)}<button type="button" aria-label="Salin" onClick={() => navigator.clipboard.writeText(String(value))}><Clipboard/></button></span> : <>—</>);
-function RelationTable({ actionId, field, value, onChange, editing }: EditorProps & { editing: boolean }) {
+function RelationTable({ actionId, field, value, onChange, editing, parentValues = {} }: EditorProps & { editing: boolean }) {
   const rows = Array.isArray(value) ? value as Record<string, unknown>[] : [];
   const columns = field.relationView?.columns || [];
   if (!field.relationView) return <span className="workspace-tags">{rows.length ? `${rows.length} item` : "—"}</span>;
-  const update = (index: number, name: string, nextValue: unknown) => onChange(rows.map((row, rowIndex) => rowIndex === index ? { ...row, [name]: nextValue } : row));
+  const sequence = useRef(0);
+  const update = async (index: number, name: string, nextValue: unknown) => {
+    const nextRows = rows.map((row, rowIndex) => rowIndex === index ? { ...row, [name]: nextValue } : row);
+    onChange(nextRows);
+    if (field.relationView?.onchange?.[name] !== "1") return;
+    const request = ++sequence.current;
+    try {
+      const result = await apiMutation<{ values: Record<string, unknown> }>(`/api/v1/ui/actions/${actionId}/relations/${field.name}/onchange`, "POST", { values: nextRows[index], parentValues, field: name });
+      if (request === sequence.current) onChange(nextRows.map((row, rowIndex) => rowIndex === index ? { ...row, ...result.values } : row));
+    } catch { /* Parent save still validates server-side. */ }
+  };
   return <div className="workspace-relation"><div className="overflow-x-auto"><table><thead><tr>{columns.map((column) => <th key={column.name}>{column.label}</th>)}{editing && <th/>}</tr></thead><tbody>{rows.map((row, index) => <tr key={String(row.id || `new-${index}`)}>{columns.map((column) => <td key={column.name}>{editing && field.relationView?.editable ? <FieldEditor actionId={actionId} field={column} value={row[column.name]} onChange={(nextValue) => update(index, column.name, nextValue)}/> : <FieldValue field={column} value={row[column.name]} record={row}/>}</td>)}{editing && <td className="workspace-relation-delete"><button type="button" onClick={() => onChange(rows.filter((_, rowIndex) => rowIndex !== index))}><Trash2/></button></td>}</tr>)}</tbody></table></div>{editing && field.relationView.editable && <button type="button" className="workspace-relation-add" onClick={() => onChange([...rows, {}])}><Plus/>Tambah baris</button>}{!rows.length && !editing && <span className="workspace-relation-empty">Belum ada baris</span>}</div>;
 }
 registerFieldRenderer("many2many", (props) => <RelationTable actionId={0} {...props} onChange={() => undefined} editing={false}/>);

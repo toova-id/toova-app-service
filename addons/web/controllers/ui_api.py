@@ -215,12 +215,23 @@ def _contract_field(metadata, item, parent=None):
         if not relation or field.get('type') not in ('one2many', 'many2many'):
             raise ValidationError(f'Field {name} does not support relation columns.')
         relation_metadata = request.env[relation].fields_get(attributes=_FIELD_ATTRIBUTES)
+        columns = [
+            _contract_field(relation_metadata, column, parent=name)
+            for column in relation_config.get('columns', [])
+        ]
+        relation_model = request.env[relation]
+        relation_fields = [relation_model._fields[column['name']] for column in columns]
+        inverse_field = relation_config.get('inverse_field')
+        if inverse_field and inverse_field not in relation_metadata:
+            raise ValidationError(f'Invalid inverse field: {inverse_field}.')
         field['relationView'] = {
             'editable': bool(relation_config.get('editable')),
-            'columns': [
-                _contract_field(relation_metadata, column, parent=name)
-                for column in relation_config.get('columns', [])
-            ],
+            'inverseField': inverse_field,
+            'onchange': {
+                column.name: '1' if relation_model._has_onchange(column, relation_fields) else ''
+                for column in relation_fields
+            },
+            'columns': columns,
         }
     return field
 
@@ -690,6 +701,50 @@ class ManagedUiApi(http.Controller):
             result = model.onchange(values, field_name, spec)
             return request.make_json_response({
                 'values': result.get('value', {}),
+                'warnings': result.get('warning') or result.get('warnings') or [],
+                'domain': result.get('domain', {}),
+            })
+        except (AccessError, MissingError) as error:
+            return _error(error, 'forbidden', 403)
+        except (UserError, ValidationError, ValueError) as error:
+            return _error(error)
+
+    @http.route('/api/v1/ui/actions/<int:action_id>/relations/<string:field_name>/onchange', type='http', auth='user', methods=['POST'])
+    def relation_onchange(self, action_id, field_name):
+        try:
+            action = _visible_action(action_id)
+            schema = _view_schema(action)
+            field = _form_fields(schema).get(field_name)
+            relation_view = (field or {}).get('relationView')
+            payload = _json_body()
+            values = payload.get('values', {})
+            parent_values = payload.get('parentValues', {})
+            changed_field = payload.get('field')
+            onchange_spec = (relation_view or {}).get('onchange', {})
+            columns = {column['name']: column for column in (relation_view or {}).get('columns', [])}
+            if not relation_view or changed_field not in columns or not onchange_spec.get(changed_field) or not isinstance(values, dict) or not isinstance(parent_values, dict):
+                raise ValidationError('Invalid relation onchange request.')
+            relation_model = request.env[field['relation']]
+            allowed = set(columns)
+            line_values = {
+                name: value[0] if isinstance(value, (list, tuple)) and columns[name].get('type') == 'many2one' and value else value
+                for name, value in values.items() if name in allowed
+            }
+            inverse_field = relation_view.get('inverseField')
+            if inverse_field:
+                parent_allowed = set(_allowed_fields(schema, 'form'))
+                parent = {
+                    name: value[0] if isinstance(value, (list, tuple)) and _form_fields(schema).get(name, {}).get('type') == 'many2one' and value else value
+                    for name, value in parent_values.items() if name in parent_allowed and name != field_name
+                }
+                line_values[inverse_field] = parent
+            result = relation_model.with_context(**_eval_action(action)[0]).onchange(
+                line_values, changed_field, onchange_spec,
+            )
+            changed = result.get('value', {})
+            changed.pop(inverse_field, None)
+            return request.make_json_response({
+                'values': changed,
                 'warnings': result.get('warning') or result.get('warnings') or [],
                 'domain': result.get('domain', {}),
             })

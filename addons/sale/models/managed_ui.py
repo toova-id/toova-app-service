@@ -52,6 +52,7 @@ class SaleOrder(models.Model):
                 'modifiers': locked,
                 'relation': {
                     'editable': True,
+                    'inverse_field': 'order_id',
                     'columns': [
                         {'name': 'product_id', 'widget': 'sol_product_many2one'},
                         'name', 'product_uom_qty', 'product_uom', 'price_unit',

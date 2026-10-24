@@ -15,7 +15,7 @@ export interface FieldSchema {
   placeholder?: string;
   options?: Record<string, unknown>;
   parent?: string;
-  relationView?: { editable: boolean; columns: FieldSchema[] } | null;
+  relationView?: { editable: boolean; inverseField?: string; onchange?: Record<string, string>; columns: FieldSchema[] } | null;
   accept?: string;
   modifiers?: Record<string, unknown>;
 }

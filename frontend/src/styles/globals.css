@@ -85,18 +85,20 @@
 
 @layer components {
   .luma-shell { @apply min-h-screen bg-background text-foreground; --luma-sidebar-width: 56px; }
-  .luma-sidebar-expanded { --luma-sidebar-width: 216px; }
+  .luma-sidebar-expanded { --luma-sidebar-width: 248px; }
   .luma-sidebar { @apply fixed inset-y-0 left-0 z-50 flex w-14 flex-col border-r bg-background text-muted-foreground transition-[width,transform] duration-200; }
-  .luma-sidebar-expanded .luma-sidebar { @apply w-[216px]; }
+  .luma-sidebar-expanded .luma-sidebar { @apply w-[248px]; }
   .luma-brand { @apply flex h-11 shrink-0 items-center gap-3 border-b px-[18px] text-foreground; }
   .luma-brand-mark { @apply h-[10px] w-[10px] shrink-0 rounded-[3px] bg-primary; box-shadow: 5px 5px 0 rgb(0 206 124 / .24); }
   .luma-brand strong { @apply hidden text-[13px] font-semibold tracking-[-.02em]; }
   .luma-sidebar-expanded .luma-brand strong { @apply block; }
-  .luma-navigation { @apply flex-1 overflow-y-auto overflow-x-hidden py-2; }
-  .luma-nav-group { @apply px-1.5; }
+  .luma-navigation { @apply flex-1 overflow-y-auto overflow-x-hidden px-2 py-3; }
+  .luma-navigation-title { @apply mb-2 hidden px-2 text-[10px] font-semibold uppercase tracking-[.08em] text-muted-foreground/70; }
+  .luma-sidebar-expanded .luma-navigation-title { @apply block; }
+  .luma-nav-group { @apply mb-0.5; }
   .luma-nav-row { @apply relative flex h-10 items-center rounded-md; }
-  .luma-nav-row > a { @apply flex h-full min-w-0 flex-1 items-center gap-3 px-[11px] text-[11px] font-medium; }
-  .luma-nav-row > button { @apply mr-1 hidden h-7 w-7 place-items-center rounded hover:bg-muted; }
+  .luma-nav-row > a { @apply flex h-full min-w-0 flex-1 items-center gap-3 px-2.5 text-[13px] font-medium; }
+  .luma-nav-row > button { @apply mr-1 hidden h-7 w-7 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-foreground; }
   .luma-sidebar-expanded .luma-nav-row > button { @apply grid; }
   .luma-nav-row:hover { @apply bg-muted text-foreground; }
   .luma-nav-row-active { @apply bg-accent/60 text-accent-foreground; }
@@ -107,13 +109,22 @@
   .luma-nav-row-active .luma-nav-icon { @apply bg-primary text-primary-foreground; }
   .luma-nav-label { @apply hidden min-w-0 overflow-hidden text-ellipsis whitespace-nowrap; }
   .luma-sidebar-expanded .luma-nav-label { @apply block; }
-  .luma-submenus { @apply mb-1 ml-[22px] border-l py-1; }
-  .luma-submenu-row { @apply flex min-h-7 items-center pr-1; }
-  .luma-submenu-link { @apply min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap py-1 text-[10px] text-muted-foreground hover:text-foreground; }
-  .luma-submenu-link-active { @apply font-medium text-accent-foreground; }
-  .luma-submenu-link-current { @apply font-semibold text-primary; }
-  .luma-submenu-row > button { @apply grid h-6 w-6 place-items-center rounded hover:bg-muted; }
-  .luma-sidebar-toggle { @apply flex h-11 shrink-0 items-center gap-3 border-t px-[18px] text-[10px] hover:bg-muted hover:text-foreground; }
+  .luma-submenus { @apply mb-2 ml-[19px] border-l border-border/80 pb-1 pt-0.5; }
+  .luma-submenu-item { @apply relative; }
+  .luma-submenu-row { @apply relative flex min-h-8 items-center rounded-md pr-1 text-muted-foreground; padding-left: calc(8px + var(--menu-depth, 0) * 12px); }
+  .luma-submenu-row:hover { @apply bg-muted/70 text-foreground; }
+  .luma-submenu-row-active { @apply text-foreground; }
+  .luma-submenu-row-current { @apply bg-accent text-accent-foreground; }
+  .luma-submenu-row-current::before { content: ""; @apply absolute -left-px top-2 bottom-2 w-0.5 rounded-full bg-primary; }
+  .luma-submenu-link { @apply flex min-w-0 flex-1 items-center overflow-hidden text-ellipsis whitespace-nowrap py-1.5 text-[12px] font-medium; }
+  .luma-submenu-link > i { @apply hidden; }
+  .luma-submenu-folder-row { @apply mt-1; }
+  .luma-submenu-folder { @apply flex min-w-0 flex-1 items-center justify-between gap-2 py-1.5 text-left text-[12px] font-medium text-muted-foreground; }
+  .luma-submenu-folder span { @apply min-w-0 overflow-hidden text-ellipsis whitespace-nowrap; }
+  .luma-submenu-folder svg, .luma-submenu-expand svg { @apply h-3.5 w-3.5 shrink-0; }
+  .luma-submenu-expand { @apply grid h-7 w-7 shrink-0 place-items-center rounded hover:bg-background; }
+  .luma-submenu-branch { @apply relative; }
+  .luma-sidebar-toggle { @apply flex h-11 shrink-0 items-center gap-3 border-t px-[18px] text-[12px] hover:bg-muted hover:text-foreground; }
   .luma-sidebar-toggle svg { @apply h-4 w-4 shrink-0; }
   .luma-sidebar-toggle span { @apply hidden; }
   .luma-sidebar-expanded .luma-sidebar-toggle span { @apply block; }
@@ -275,13 +286,15 @@
   .workspace-tags-editor > input { @apply mt-1 h-6 border-0 px-1 text-[11px] focus:border-0; }
   .workspace-tags-editor > ul { @apply absolute left-0 right-0 top-full z-20 max-h-40 overflow-auto rounded-b border bg-background p-1 shadow-[var(--shadow-floating)]; }
   .workspace-tags-editor > ul button { @apply w-full rounded px-2 py-1 text-left text-[10px] hover:bg-muted; }
-  .luma-multi-select { @apply min-h-8 w-full rounded-md border border-input bg-background shadow-[var(--shadow-control)] transition-colors focus-within:border-[var(--focus-border)] focus-within:ring-1 focus-within:ring-ring/20; }
-  .luma-multi-select-values { @apply flex min-h-[30px] flex-wrap items-center gap-1 px-1.5 py-1; }
-  .luma-multi-select-values > span { @apply inline-flex h-5 max-w-full items-center gap-1 rounded bg-accent px-1.5 text-[10px] text-accent-foreground; }
-  .luma-multi-select-values > span button { @apply text-muted-foreground hover:text-destructive; }
+  .luma-multi-select { @apply h-8 w-full overflow-hidden rounded-md border border-input bg-background shadow-[var(--shadow-control)] transition-colors focus-within:border-[var(--focus-border)] focus-within:ring-1 focus-within:ring-ring/20; }
+  .luma-multi-select-trigger { @apply flex h-full w-full min-w-0 items-center gap-1.5 px-1.5 text-left outline-none; }
+  .luma-multi-select-trigger > svg { @apply ml-auto h-3 w-3 shrink-0 text-muted-foreground; }
+  .luma-multi-select-values { @apply flex min-w-0 flex-1 items-center gap-1 overflow-hidden; }
+  .luma-multi-select-values > span:not(.luma-multi-select-placeholder) { @apply inline-flex h-5 max-w-28 shrink-0 items-center gap-1 rounded bg-accent px-1.5 text-[10px] text-accent-foreground; }
+  .luma-multi-select-values > span > span:first-child { @apply min-w-0 overflow-hidden text-ellipsis whitespace-nowrap; }
+  .luma-multi-select-values > span > span[role=button] { @apply shrink-0 text-muted-foreground hover:text-destructive; }
   .luma-multi-select-values > span svg { @apply h-2.5 w-2.5; }
-  .luma-multi-select-trigger { @apply flex h-5 min-w-20 flex-1 items-center justify-between gap-2 px-1 text-left text-[11px] text-muted-foreground outline-none; }
-  .luma-multi-select-trigger svg { @apply h-3 w-3 shrink-0; }
+  .luma-multi-select-placeholder { @apply overflow-hidden text-ellipsis whitespace-nowrap px-1 text-[11px] text-muted-foreground; }
   .luma-multi-select-options { @apply max-h-52 overflow-y-auto; }
   .luma-multi-select-options > button { @apply flex min-h-7 w-full items-center gap-2 rounded-sm px-2 py-1 text-left text-xs outline-none hover:bg-accent hover:text-accent-foreground; }
   .luma-multi-select-options > button > svg { @apply ml-auto h-3.5 w-3.5; }
@@ -346,14 +359,19 @@
   .luma-document-status li.active { @apply font-semibold text-accent-foreground; }
   .luma-document-status li.active i { @apply border-primary bg-primary; }
   .luma-document-body { @apply w-full; }
-  .luma-document-overview { @apply grid min-h-40 grid-cols-1 gap-10 border-b px-8 py-7 lg:grid-cols-[minmax(0,1.25fr)_minmax(380px,.75fr)]; }
+  .luma-document-overview { @apply grid min-h-40 grid-cols-1 gap-8 border-b px-8 py-7 xl:grid-cols-[minmax(360px,.85fr)_minmax(620px,1.15fr)]; }
   .luma-document-primary { @apply min-w-0; }
   .luma-document-eyebrow { @apply mb-2 block text-[9px] font-medium uppercase tracking-[.08em] text-muted-foreground; }
-  .luma-document-meta { @apply grid grid-cols-2 content-start gap-x-8 gap-y-3; }
-  .luma-document-field { @apply grid grid-cols-[120px_minmax(0,1fr)] items-center gap-3; }
+  .luma-document-addresses { @apply grid gap-3 xl:grid-cols-2; }
+  .luma-document-addresses .luma-document-field { @apply grid-cols-1 items-start gap-1; }
+  .luma-document-meta { @apply grid min-w-0 grid-cols-1 content-start gap-x-6 gap-y-3 md:grid-cols-2; }
+  .luma-document-meta-wide { @apply md:col-span-2; }
+  .luma-document-field { @apply grid min-w-0 grid-cols-[108px_minmax(0,1fr)] items-center gap-3; }
   .luma-document-field > span { @apply text-[10px] text-muted-foreground; }
   .luma-document-field > span b { @apply ml-0.5 text-primary; }
   .luma-document-field > div { @apply min-w-0 text-xs; }
+  .luma-document-field > div > * { @apply min-w-0; }
+  .luma-document-meta .workspace-datetime { @apply grid-cols-[minmax(210px,1fr)_130px]; }
   .luma-document-hero { @apply mb-4 grid-cols-1 gap-1; }
   .luma-document-hero > span { @apply sr-only; }
   .luma-document-hero > div { @apply text-xl font-semibold tracking-[-.02em]; }
@@ -399,7 +417,7 @@
 
 @media (max-width: 767px) {
   .luma-shell, .luma-sidebar-expanded { --luma-sidebar-width: 0px; }
-  .luma-sidebar, .luma-sidebar-expanded .luma-sidebar { @apply w-[216px] -translate-x-full; }
+  .luma-sidebar, .luma-sidebar-expanded .luma-sidebar { @apply w-[248px] -translate-x-full; }
   .luma-sidebar-mobile-open { @apply translate-x-0; }
   .luma-sidebar .luma-brand strong, .luma-sidebar .luma-nav-label, .luma-sidebar .luma-sidebar-toggle span { @apply block; }
   .luma-sidebar .luma-nav-row > button { @apply grid; }
@@ -411,4 +429,6 @@
   .workspace-control-panel { @apply h-auto min-h-[108px] grid-cols-1 py-3; }
   .workspace-search { @apply col-span-1 row-start-2; }
   .workspace-control-actions { @apply absolute right-4 top-[55px]; }
+  .luma-document-overview, .luma-document-section, .luma-document-summary { @apply px-4; }
+  .luma-document-meta .workspace-datetime { @apply grid-cols-1; }
 }

@@ -20,7 +20,7 @@ export default function SaleOrderForm({ schema, basePath, id, values, editing, s
     const required = Boolean(meta.required) || modifierActive(meta.modifiers, "required", values);
     return <label className={`luma-document-field ${className}`} title={meta.help}>
       <span>{meta.label}{required && <b>*</b>}</span>
-      <div>{editing && !readonly ? <FieldEditor actionId={schema.id} field={meta} value={values[name]} onChange={(value) => onChange(name, value)}/> : <FieldValue field={meta} value={values[name]} record={values}/>}</div>
+      <div>{editing && !readonly ? <FieldEditor actionId={schema.id} field={meta} value={values[name]} parentValues={values} onChange={(value) => onChange(name, value)}/> : <FieldValue field={meta} value={values[name]} record={values}/>}</div>
     </label>;
   };
 
@@ -34,8 +34,8 @@ export default function SaleOrderForm({ schema, basePath, id, values, editing, s
 
     <main className="luma-document-body">
       <section className="luma-document-overview">
-        <div className="luma-document-primary"><span className="luma-document-eyebrow">Pelanggan</span>{field("partner_id", "luma-document-hero")}{field("partner_invoice_id")}{field("partner_shipping_id")}</div>
-        <div className="luma-document-meta">{field("date_order")}{field("validity_date")}{field("commitment_date")}{field("client_order_ref")}{field("user_id")}{field("team_id")}</div>
+        <div className="luma-document-primary"><span className="luma-document-eyebrow">Pelanggan</span>{field("partner_id", "luma-document-hero")}<div className="luma-document-addresses">{field("partner_invoice_id")}{field("partner_shipping_id")}</div></div>
+        <div className="luma-document-meta">{field("date_order", "luma-document-meta-wide")}{field("validity_date")}{field("client_order_ref")}{field("commitment_date", "luma-document-meta-wide")}{field("user_id")}{field("team_id")}</div>
       </section>
 
       <section className="luma-document-section"><header><h2>Detail komersial</h2><span>Harga, pembayaran, dan pemenuhan</span></header><div className="luma-document-fields">{field("pricelist_id")}{field("payment_term_id")}{field("fiscal_position_id")}{field("warehouse_id")}{field("picking_policy")}{field("incoterm")}</div></section>
