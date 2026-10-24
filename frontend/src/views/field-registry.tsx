@@ -73,8 +73,32 @@ function ManagedRelationCards({ actionId, field, value, onChange, editing }: Edi
   const isAddress = field.widget === "managed_addresses";
   const isBank = field.widget === "managed_bank_accounts";
   const activeRows = rows.filter((row) => row.active !== false);
+  const countryLabel = (row: Record<string, unknown>) => Array.isArray(row.country_id) ? String(row.country_id[1]) : "";
+  const visibleColumn = (column: FieldSchema) => {
+    if (!isAddress) return column.name !== "active";
+    if (column.name === "active") return false;
+    const indonesia = countryLabel(draft || {}) === "Indonesia";
+    if (["indonesia_regency_id", "indonesia_district_id", "indonesia_village_id"].includes(column.name)) return indonesia;
+    if (["city"].includes(column.name)) return !indonesia;
+    return true;
+  };
   const updateDraft = async (name: string, nextValue: unknown) => {
     const next = { ...(draft || {}), [name]: nextValue };
+    if (isAddress && name === "country_id") {
+      next.state_id = false;
+      next.indonesia_regency_id = false;
+      next.indonesia_district_id = false;
+      next.indonesia_village_id = false;
+      next.city = false;
+      next.zip = false;
+    }
+    if (isAddress && name === "state_id") {
+      next.indonesia_regency_id = false;
+      next.indonesia_district_id = false;
+      next.indonesia_village_id = false;
+      next.city = false;
+      next.zip = false;
+    }
     if (isAddress && name === "is_default_billing" && nextValue === true) next.use_for_billing = true;
     if (isAddress && name === "is_default_shipping" && nextValue === true) next.use_for_shipping = true;
     setDraft(next);
@@ -86,7 +110,7 @@ function ManagedRelationCards({ actionId, field, value, onChange, editing }: Edi
     } catch { /* Main form save remains server-validated. */ }
   };
   const edit = (index: number) => { setOpen(index); setDraft({ ...rows[index] }); };
-  const add = () => { setOpen(rows.length); setDraft({ active: true }); };
+  const add = () => { setOpen(rows.length); setDraft({ active: true, country_id: false }); };
   const close = () => { setOpen(undefined); setDraft(undefined); };
   const saveDraft = () => {
     if (open === undefined || !draft) return;
@@ -102,13 +126,13 @@ function ManagedRelationCards({ actionId, field, value, onChange, editing }: Edi
   const archive = (index: number) => onChange(rows.map((row, rowIndex) => rowIndex === index ? { ...row, active: false, is_default_billing: false, is_default_shipping: false } : row));
   const label = (row: Record<string, unknown>) => String(row.label || row.name || row.bank_name || (isAddress ? "Alamat baru" : isBank ? "Rekening baru" : "Kontak baru"));
   const summary = (row: Record<string, unknown>) => isAddress
-    ? [row.street, row.street2, row.city, Array.isArray(row.state_id) ? row.state_id[1] : false, row.zip, Array.isArray(row.country_id) ? row.country_id[1] : false].filter(Boolean).join(", ")
+    ? [row.managed_address_text, Array.isArray(row.indonesia_village_id) ? row.indonesia_village_id[1] : false, Array.isArray(row.indonesia_district_id) ? row.indonesia_district_id[1] : false, Array.isArray(row.indonesia_regency_id) ? row.indonesia_regency_id[1] : row.city, Array.isArray(row.state_id) ? row.state_id[1] : false, row.zip, Array.isArray(row.country_id) ? row.country_id[1] : false].filter(Boolean).join(", ")
     : isBank ? [row.acc_number, row.acc_holder_name, Array.isArray(row.currency_id) ? row.currency_id[1] : false].filter(Boolean).join(" · ")
     : [row.function, row.email, row.mobile || row.phone].filter(Boolean).join(" · ");
   return <div className="managed-relation-cards">
     <div className="managed-relation-list">{activeRows.map((row) => { const index = rows.indexOf(row); return <article key={String(row.id || `new-${index}`)} className="managed-relation-card"><div className="managed-relation-card-icon">{isAddress ? <MapPin/> : isBank ? <Landmark/> : <UserRound/>}</div><div className="managed-relation-card-copy"><strong>{label(row)}</strong><span>{summary(row) || (isAddress ? "Alamat belum lengkap" : "Kontak belum lengkap")}</span>{isAddress && <div className="managed-address-badges">{Boolean(row.use_for_billing) && <i>Billing</i>}{Boolean(row.use_for_shipping) && <i>Shipping</i>}{Boolean(row.is_default_billing) && <i className="primary">Default billing</i>}{Boolean(row.is_default_shipping) && <i className="primary">Default shipping</i>}</div>}</div>{editing && <div className="managed-relation-card-actions"><button type="button" onClick={() => edit(index)} aria-label={`Edit ${label(row)}`}><Pencil/></button><button type="button" onClick={() => archive(index)} aria-label={`Arsipkan ${label(row)}`}><Trash2/></button></div>}</article>; })}{!activeRows.length && <div className="managed-relation-card-empty">{isAddress ? "Belum ada alamat khusus. Alamat utama masih menjadi fallback." : isBank ? "Belum ada rekening pembayaran." : "Belum ada PIC."}</div>}</div>
     {editing && <button type="button" className="workspace-relation-add" onClick={add}><Plus/>{isAddress ? "Tambah alamat" : isBank ? "Tambah rekening" : "Tambah PIC"}</button>}
-    {open !== undefined && draft && <div className="managed-relation-editor-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}><section className="managed-relation-editor" role="dialog" aria-modal="true"><header><div><h3>{isAddress ? "Alamat bisnis" : isBank ? "Rekening pembayaran" : "Kontak/PIC"}</h3><p>{isAddress ? "Atur lokasi, penerima, penggunaan, dan default transaksi." : isBank ? "Simpan rekening resmi untuk pembayaran vendor." : "Simpan orang yang dapat dihubungi pada organisasi ini."}</p></div><button type="button" onClick={close} aria-label="Tutup"><X/></button></header><main>{columns.filter((column) => column.name !== "active").map((column) => <label key={column.name} className={["street", "street2"].includes(column.name) ? "wide" : undefined}><span>{column.label}{column.required && <b>*</b>}</span><FieldEditor actionId={actionId} field={column} value={draft[column.name]} parentValues={draft} onChange={(next) => updateDraft(column.name, next)}/></label>)}</main><footer><Button type="button" variant="ghost" onClick={close}>Batal</Button><Button type="button" onClick={saveDraft}>Simpan</Button></footer></section></div>}
+    {open !== undefined && draft && <div className="managed-relation-editor-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}><section className="managed-relation-editor" role="dialog" aria-modal="true"><header><div><h3>{isAddress ? "Alamat bisnis" : isBank ? "Rekening pembayaran" : "Kontak/PIC"}</h3><p>{isAddress ? "Atur lokasi, penerima, penggunaan, dan default transaksi." : isBank ? "Simpan rekening resmi untuk pembayaran vendor." : "Simpan orang yang dapat dihubungi pada organisasi ini."}</p></div><button type="button" onClick={close} aria-label="Tutup"><X/></button></header><main>{columns.filter(visibleColumn).map((column) => <label key={column.name} className={column.name === "managed_address_text" ? "wide" : undefined}><span>{column.label}{column.required && <b>*</b>}</span><FieldEditor actionId={actionId} field={column} value={draft[column.name]} parentValues={draft} onChange={(next) => updateDraft(column.name, next)}/></label>)}</main><footer><Button type="button" variant="ghost" onClick={close}>Batal</Button><Button type="button" onClick={saveDraft}>Simpan</Button></footer></section></div>}
   </div>;
 }
 

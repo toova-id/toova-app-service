@@ -126,6 +126,9 @@ def _relation_domain(field, parent_values):
         'indonesia_regency_id': ('state_id', 'state_id', 'regency'),
         'indonesia_district_id': ('parent_id', 'indonesia_regency_id', 'district'),
         'indonesia_village_id': ('parent_id', 'indonesia_district_id', 'village'),
+        'managed_indonesia_regency_id': ('state_id', 'state_id', 'regency'),
+        'managed_indonesia_district_id': ('parent_id', 'managed_indonesia_regency_id', 'district'),
+        'managed_indonesia_village_id': ('parent_id', 'managed_indonesia_district_id', 'village'),
     }
     target, parent_name, level = mapping.get(field['name'], (None, None, None))
     if level:

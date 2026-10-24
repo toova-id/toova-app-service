@@ -35,6 +35,8 @@ export default function PartyForm(props: CustomFormViewProps & { kind: Kind }) {
   const section = (title: string, description: string, content: JSX.Element) => <section className="luma-customer-section"><header><h2>{title}</h2><p>{description}</p></header>{content}</section>;
   const image = fields.image_1920 ? <div className="luma-customer-field"><span className="sr-only">Logo</span><div>{editing ? <FieldEditor actionId={schema.id} field={fields.image_1920} value={values.image_1920} onChange={(value) => onChange("image_1920", value)}/> : <FieldValue field={fields.image_1920} value={values.image_1920} record={values}/>}</div></div> : null;
   const tabs: [Tab, string, number?][] = [["summary", "Ringkasan"], ["addresses", "Alamat", addressCount], ["contacts", "Kontak/PIC", contactCount], ["commercial", customer ? "Penjualan & Keuangan" : "Pembelian & Keuangan"], ["tax", customer ? "Pajak & Coretax" : "Pajak & Bank", customer ? undefined : bankCount]];
+  const indonesia = Array.isArray(values.country_id) && values.country_id[1] === "Indonesia";
+  const addressFields = <div className="luma-customer-grid">{field("managed_address_text", "wide")}{field("country_id")}{field("state_id")}{indonesia && field("managed_indonesia_regency_id")}{indonesia && field("managed_indonesia_district_id")}{indonesia && field("managed_indonesia_village_id")}{!indonesia && field("city")}{field("zip")}</div>;
 
   return <div className="luma-customer">
     <header className="luma-customer-header">
@@ -47,7 +49,7 @@ export default function PartyForm(props: CustomFormViewProps & { kind: Kind }) {
     <main className="luma-customer-body">
       {tab === "summary" && <>
         {section(`Identitas ${noun.toLowerCase()}`, `Identitas legal dan kanal komunikasi utama ${noun.toLowerCase()}.`, <div className="luma-customer-overview"><div className="luma-customer-logo">{image}</div><div className="luma-customer-grid">{field("company_type")}{field("name")}{field("email")}{field("phone")}{field("mobile")}{field("website")}{field("lang")}{field("category_id")}</div></div>)}
-        {section("Alamat utama", customer ? "Fallback penagihan dan pengiriman jika belum ada alamat khusus." : "Alamat legal dan korespondensi utama untuk purchase order dan vendor bill.", <div className="luma-customer-grid">{field("street", "wide")}{field("street2", "wide")}{field("country_id")}{field("state_id")}{field("city")}{field("zip")}</div>)}
+        {section("Alamat utama", customer ? "Fallback penagihan dan pengiriman jika belum ada alamat khusus." : "Alamat legal dan korespondensi utama untuk purchase order dan vendor bill.", addressFields)}
         {section("Catatan internal", `Informasi operasional yang tidak dicetak ke dokumen ${noun.toLowerCase()}.`, <div className="luma-customer-grid">{field("comment", "wide")}</div>)}
       </>}
       {tab === "addresses" && <>

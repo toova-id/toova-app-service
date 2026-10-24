@@ -47,8 +47,7 @@ class ManagedPartnerAddress(models.Model):
     recipient_name = fields.Char(related='address_partner_id.name', readonly=False, required=True)
     recipient_phone = fields.Char(related='address_partner_id.phone', readonly=False)
     recipient_email = fields.Char(related='address_partner_id.email', readonly=False)
-    street = fields.Char(related='address_partner_id.street', readonly=False)
-    street2 = fields.Char(related='address_partner_id.street2', readonly=False)
+    managed_address_text = fields.Text(related='address_partner_id.managed_address_text', readonly=False, string='Full Address')
     city = fields.Char(related='address_partner_id.city', readonly=False)
     state_id = fields.Many2one(related='address_partner_id.state_id', readonly=False)
     zip = fields.Char(related='address_partner_id.zip', readonly=False)
@@ -171,10 +170,20 @@ class ManagedPartnerAddress(models.Model):
                 if other:
                     raise ValidationError(_('Only one default shipping address is allowed.'))
 
+    @api.onchange('country_id')
+    def _onchange_country(self):
+        if self.country_id.code != 'ID':
+            self.indonesia_regency_id = False
+            self.indonesia_district_id = False
+            self.indonesia_village_id = False
+
     @api.onchange('indonesia_regency_id')
     def _onchange_indonesia_regency(self):
         self.indonesia_district_id = False
         self.indonesia_village_id = False
+        if self.indonesia_regency_id:
+            self.city = self.indonesia_regency_id.name
+            self.state_id = self.indonesia_regency_id.state_id
 
     @api.onchange('indonesia_district_id')
     def _onchange_indonesia_district(self):
@@ -183,7 +192,10 @@ class ManagedPartnerAddress(models.Model):
     @api.onchange('indonesia_village_id')
     def _onchange_indonesia_village(self):
         if self.indonesia_village_id:
+            regency = self.indonesia_village_id.parent_id.parent_id
             self.zip = self.indonesia_village_id.postal_code
+            self.city = regency.name
+            self.state_id = regency.state_id
 
     def _sync_address_partner(self):
         for address in self:
@@ -217,6 +229,57 @@ class ResPartner(models.Model):
     managed_nik_normalized = fields.Char(compute='_compute_managed_identity', store=True, index=True)
     managed_role_ids = fields.One2many('managed.partner.role', 'partner_id')
     managed_address_ids = fields.One2many('managed.partner.address', 'account_id')
+    managed_address_text = fields.Text(compute='_compute_managed_address_text', inverse='_inverse_managed_address_text', string='Full Address')
+    managed_indonesia_regency_id = fields.Many2one(
+        'managed.indonesia.region', string='Regency/City', ondelete='restrict',
+        domain="[('level', '=', 'regency'), ('state_id', '=', state_id)]",
+    )
+    managed_indonesia_district_id = fields.Many2one(
+        'managed.indonesia.region', string='District', ondelete='restrict',
+        domain="[('level', '=', 'district'), ('parent_id', '=', managed_indonesia_regency_id)]",
+    )
+    managed_indonesia_village_id = fields.Many2one(
+        'managed.indonesia.region', string='Village', ondelete='restrict',
+        domain="[('level', '=', 'village'), ('parent_id', '=', managed_indonesia_district_id)]",
+    )
+
+    @api.depends('street', 'street2')
+    def _compute_managed_address_text(self):
+        for partner in self:
+            partner.managed_address_text = '\n'.join(filter(None, (partner.street, partner.street2)))
+
+    def _inverse_managed_address_text(self):
+        for partner in self:
+            lines = [line.strip() for line in (partner.managed_address_text or '').splitlines() if line.strip()]
+            partner.street = lines[0] if lines else False
+            partner.street2 = '\n'.join(lines[1:]) or False
+
+    @api.onchange('country_id')
+    def _onchange_managed_country(self):
+        if self.country_id.code != 'ID':
+            self.managed_indonesia_regency_id = False
+            self.managed_indonesia_district_id = False
+            self.managed_indonesia_village_id = False
+
+    @api.onchange('managed_indonesia_regency_id')
+    def _onchange_managed_regency(self):
+        self.managed_indonesia_district_id = False
+        self.managed_indonesia_village_id = False
+        if self.managed_indonesia_regency_id:
+            self.city = self.managed_indonesia_regency_id.name
+            self.state_id = self.managed_indonesia_regency_id.state_id
+
+    @api.onchange('managed_indonesia_district_id')
+    def _onchange_managed_district(self):
+        self.managed_indonesia_village_id = False
+
+    @api.onchange('managed_indonesia_village_id')
+    def _onchange_managed_village(self):
+        if self.managed_indonesia_village_id:
+            regency = self.managed_indonesia_village_id.parent_id.parent_id
+            self.zip = self.managed_indonesia_village_id.postal_code
+            self.city = regency.name
+            self.state_id = regency.state_id
 
     @api.depends('email', 'phone', 'mobile', 'vat', 'l10n_id_nik', 'country_id.code')
     def _compute_managed_identity(self):
@@ -290,15 +353,33 @@ class ResPartner(models.Model):
         self.filtered(lambda partner: not partner.parent_id)._ensure_managed_role(role)
         self.filtered(lambda partner: partner.parent_id and partner.type == 'contact')._ensure_managed_role('contact')
 
+    @api.model
+    def _prepare_managed_address_vals(self, vals):
+        vals = dict(vals)
+        if 'managed_address_text' in vals:
+            lines = [line.strip() for line in (vals.pop('managed_address_text') or '').splitlines() if line.strip()]
+            vals['street'] = lines[0] if lines else False
+            vals['street2'] = '\n'.join(lines[1:]) or False
+        village_id = vals.get('managed_indonesia_village_id')
+        regency_id = vals.get('managed_indonesia_regency_id')
+        if village_id:
+            village = self.env['managed.indonesia.region'].browse(village_id)
+            regency = village.parent_id.parent_id
+            vals.update({'city': regency.name, 'state_id': regency.state_id.id, 'zip': village.postal_code})
+        elif regency_id:
+            regency = self.env['managed.indonesia.region'].browse(regency_id)
+            vals.update({'city': regency.name, 'state_id': regency.state_id.id})
+        return vals
+
     @api.model_create_multi
     def create(self, vals_list):
-        partners = super().create(vals_list)
+        partners = super().create([self._prepare_managed_address_vals(vals) for vals in vals_list])
         partners._check_managed_duplicate()
         partners._ensure_managed_context_role()
         return partners
 
     def write(self, vals):
-        result = super().write(vals)
+        result = super().write(self._prepare_managed_address_vals(vals))
         self._check_managed_duplicate()
         self._ensure_managed_context_role()
         return result

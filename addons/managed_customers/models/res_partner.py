@@ -15,7 +15,9 @@ class ResPartner(models.Model):
         fields_by_name = self._fields
         names = [name for name in (
             'image_1920', 'company_type', 'name', 'parent_id', 'function', 'email', 'phone', 'mobile', 'website',
-            'street', 'street2', 'city', 'state_id', 'zip', 'country_id', 'vat', 'l10n_id_pkp', 'l10n_id_nik',
+            'managed_address_text', 'city', 'state_id', 'zip', 'country_id',
+            'managed_indonesia_regency_id', 'managed_indonesia_district_id', 'managed_indonesia_village_id',
+            'vat', 'l10n_id_pkp', 'l10n_id_nik',
             'l10n_id_tku', 'l10n_id_buyer_document_type', 'l10n_id_buyer_document_number', 'l10n_id_tax_name',
             'l10n_id_tax_address', 'l10n_id_kode_transaksi', 'user_id', 'property_product_pricelist',
             'property_payment_term_id', 'property_supplier_payment_term_id', 'property_purchase_currency_id',
@@ -35,7 +37,7 @@ class ResPartner(models.Model):
                         'inverse_field': 'account_id',
                         'columns': [
                             'label', 'recipient_name', 'recipient_phone', 'recipient_email',
-                            'street', 'street2', 'country_id', 'state_id',
+                            'managed_address_text', 'country_id', 'state_id',
                             'indonesia_regency_id', 'indonesia_district_id', 'indonesia_village_id',
                             'city', 'zip', 'use_for_billing', 'use_for_shipping',
                             'is_default_billing', 'is_default_shipping', 'active',

@@ -21,6 +21,16 @@ class TestManagedDirectory(TransactionCase):
         partner = self.env['res.partner'].create({'name': 'Foreign', 'mobile': '020 7946 0018'})
         self.assertEqual(partner.managed_phone_normalized, '02079460018')
 
+    def test_main_address_text_maps_to_native_street_fields(self):
+        partner = self.env['res.partner'].create({
+            'name': 'Address Text', 'managed_address_text': 'Jalan Utama 1\nGedung B',
+        })
+        self.assertEqual(partner.street, 'Jalan Utama 1')
+        self.assertEqual(partner.street2, 'Gedung B')
+        partner.write({'managed_address_text': 'Alamat Baru'})
+        self.assertEqual(partner.street, 'Alamat Baru')
+        self.assertFalse(partner.street2)
+
     def test_indonesia_village_normalizes_city_state_and_postal_code(self):
         customer = self.env['res.partner'].create({'name': 'Region Customer'})
         village = self.env['managed.indonesia.region'].search([('code', '=', '32.73.01.1001')])
