@@ -5,5 +5,5 @@
     <field name="context">{'managed_party_role': 'vendor', 'default_is_company': True}</field>
     <field name="domain">[('parent_id', '=', False)]</field>
   </record>
-  <menuitem id="menu_vendors_root" name="Vendors" action="action_vendors" sequence="22" groups="base.group_user"/>
+  <menuitem id="menu_vendors_root" name="Vendors" parent="contacts.menu_contacts" action="action_vendors" sequence="20" groups="base.group_user"/>
 </odoo>

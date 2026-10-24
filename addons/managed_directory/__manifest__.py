@@ -6,7 +6,7 @@
     'category': 'Hidden',
     'summary': 'Canonical party identity, roles, addresses, and duplicate prevention',
     'depends': ['managed_core', 'contacts', 'l10n_id_efaktur_coretax'],
-    'data': ['security/ir.model.access.csv'],
+    'data': ['security/ir.model.access.csv', 'views/navigation.xml'],
     'installable': True,
     'auto_install': False,
     'license': 'LGPL-3',

@@ -25,6 +25,7 @@ export function AppShell() {
   const userInitials = initials(session.user.name);
   const activeMenu = findMenuByPath(navigation, location.pathname);
   const activeTrail = activeMenu ? findTrail(navigation, activeMenu.id) : [];
+  const rootAction = (item: ServerNavigationItem) => item.children.length ? item.children.map(firstAction).find(Boolean) : firstAction(item);
 
   useEffect(() => { localStorage.setItem("luma.sidebar.expanded", String(expanded)); }, [expanded]);
   useEffect(() => {
@@ -58,7 +59,7 @@ export function AppShell() {
       <nav className="luma-navigation" aria-label="Navigasi utama">
         <span className="luma-navigation-title">Menu utama</span>
         {navigation.map((item) => {
-          const action = firstAction(item); if (!action) return null;
+          const action = rootAction(item); if (!action) return null;
           const Icon = getNavigationIcon(item.module, item.xmlid);
           const active = activeTrail.includes(item.id);
           const current = item.id === activeMenu?.id;

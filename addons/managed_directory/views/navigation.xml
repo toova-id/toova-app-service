@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Managed UI keeps Contacts as navigation group, never generic partner CRUD. -->
+  <record id="contacts.menu_contacts" model="ir.ui.menu">
+    <field name="action" eval="False"/>
+    <field name="sequence">20</field>
+  </record>
+  <record id="contacts.res_partner_menu_contacts" model="ir.ui.menu">
+    <field name="active" eval="False"/>
+  </record>
+  <record id="contacts.res_partner_menu_config" model="ir.ui.menu">
+    <field name="active" eval="False"/>
+  </record>
+</odoo>
