@@ -13,7 +13,7 @@ PRODUCT_ROOTS = {
     'hr_timesheet', 'hr_work_entry', 'hr_work_entry_contract',
     'hr_work_entry_holidays', 'l10n_id', 'l10n_id_efaktur',
     'l10n_id_efaktur_coretax', 'maintenance', 'managed_contacts', 'managed_core', 'managed_customers',
-    'managed_directory', 'managed_people', 'managed_products', 'managed_vendors', 'mrp', 'mrp_account',
+    'managed_directory', 'managed_indonesia_regions', 'managed_people', 'managed_products', 'managed_vendors', 'mrp', 'mrp_account',
     'mrp_landed_costs', 'mrp_product_expiry', 'mrp_repair', 'mrp_subcontracting',
     'mrp_subcontracting_account', 'payment', 'payment_custom', 'product_expiry',
     'project', 'project_hr_expense', 'project_mrp', 'project_purchase', 'purchase_mrp',

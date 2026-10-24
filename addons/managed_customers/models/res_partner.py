@@ -35,8 +35,9 @@ class ResPartner(models.Model):
                         'inverse_field': 'account_id',
                         'columns': [
                             'label', 'recipient_name', 'recipient_phone', 'recipient_email',
-                            'street', 'street2', 'city', 'state_id', 'zip', 'country_id',
-                            'use_for_billing', 'use_for_shipping',
+                            'street', 'street2', 'country_id', 'state_id',
+                            'indonesia_regency_id', 'indonesia_district_id', 'indonesia_village_id',
+                            'city', 'zip', 'use_for_billing', 'use_for_shipping',
                             'is_default_billing', 'is_default_shipping', 'active',
                         ],
                     },

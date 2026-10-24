@@ -110,6 +110,30 @@ def _visible_action(action_id):
 def _action_xmlid(action):
     return action.get_external_id().get(action.id) or ''
 
+def _domain_value(value):
+    if isinstance(value, (list, tuple)):
+        return value[0] if value else False
+    return value
+
+def _relation_domain(field, parent_values):
+    domain = []
+    if field['name'] == 'state_id' and field.get('relation') == 'res.country.state':
+        country_id = _domain_value(parent_values.get('country_id'))
+        return [('country_id', '=', country_id)] if country_id else []
+    if field.get('relation') != 'managed.indonesia.region':
+        return domain
+    mapping = {
+        'indonesia_regency_id': ('state_id', 'state_id', 'regency'),
+        'indonesia_district_id': ('parent_id', 'indonesia_regency_id', 'district'),
+        'indonesia_village_id': ('parent_id', 'indonesia_district_id', 'village'),
+    }
+    target, parent_name, level = mapping.get(field['name'], (None, None, None))
+    if level:
+        domain.append(('level', '=', level))
+        parent_id = _domain_value(parent_values.get(parent_name))
+        domain.append((target, '=', parent_id or 0))
+    return domain
+
 def _eval_action(action):
     eval_context = request.env['ir.actions.actions']._get_eval_context(action)
     eval_context['context_today'] = datetime.now
@@ -943,7 +967,7 @@ class ManagedUiApi(http.Controller):
             return _error(error)
 
     @http.route('/api/v1/ui/actions/<int:action_id>/relations/<string:field_name>', type='http', auth='user', methods=['GET'])
-    def relation(self, action_id, field_name, q='', parent=None, **kw):
+    def relation(self, action_id, field_name, q='', parent=None, values=None, **kw):
         try:
             action = _visible_action(action_id)
             schema = _view_schema(action)
@@ -956,7 +980,13 @@ class ManagedUiApi(http.Controller):
                 raise ValidationError('Invalid relation field.')
             relation_model = request.env[field['relation']]
             relation_model.check_access_rights('read')
-            records = relation_model.name_search(q, limit=20)
+            try:
+                parent_values = json.loads(values or '{}')
+            except (TypeError, ValueError) as error:
+                raise ValidationError('Invalid relation values.') from error
+            if not isinstance(parent_values, dict):
+                raise ValidationError('Invalid relation values.')
+            records = relation_model.name_search(q, args=_relation_domain(field, parent_values), limit=20)
             return request.make_json_response({'items': [{'id': item_id, 'label': label} for item_id, label in records]})
         except (AccessError, MissingError) as error:
             return _error(error, 'forbidden', 403)

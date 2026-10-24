@@ -28,7 +28,7 @@ const localDateTime = (value: Value) => value ? String(value).replace(" ", "T").
 const relationId = (item: unknown) => Array.isArray(item) ? Number(item[0]) : Number(item);
 const relationLabel = (item: unknown) => Array.isArray(item) ? String(item[1]) : String(item);
 
-function relationParams(field: FieldSchema, query = "") { return new URLSearchParams({ q: query, ...(field.parent ? { parent: field.parent } : {}) }); }
+function relationParams(field: FieldSchema, query = "", parentValues?: Record<string, unknown>) { return new URLSearchParams({ q: query, ...(field.parent ? { parent: field.parent } : {}), ...(parentValues ? { values: JSON.stringify(parentValues) } : {}) }); }
 
 function TagsEditor({ actionId, field, value, onChange }: EditorProps) {
   const [query, setQuery] = useState("");
@@ -68,18 +68,37 @@ function ManagedRelationCards({ actionId, field, value, onChange, editing }: Edi
   const rows = Array.isArray(value) ? value as Record<string, unknown>[] : [];
   const columns = field.relationView?.columns || [];
   const [open, setOpen] = useState<number>();
+  const [draft, setDraft] = useState<Record<string, unknown>>();
+  const draftSequence = useRef(0);
   const isAddress = field.widget === "managed_addresses";
   const isBank = field.widget === "managed_bank_accounts";
   const activeRows = rows.filter((row) => row.active !== false);
-  const update = (index: number, name: string, nextValue: unknown) => {
-    let nextRows = rows.map((row, rowIndex) => rowIndex === index ? { ...row, [name]: nextValue } : row);
-    if (isAddress && (name === "is_default_billing" || name === "is_default_shipping") && nextValue === true) {
-      const usage = name === "is_default_billing" ? "use_for_billing" : "use_for_shipping";
-      nextRows = nextRows.map((row, rowIndex) => ({ ...row, ...(rowIndex === index ? { [usage]: true } : { [name]: false }) }));
+  const updateDraft = async (name: string, nextValue: unknown) => {
+    const next = { ...(draft || {}), [name]: nextValue };
+    if (isAddress && name === "is_default_billing" && nextValue === true) next.use_for_billing = true;
+    if (isAddress && name === "is_default_shipping" && nextValue === true) next.use_for_shipping = true;
+    setDraft(next);
+    if (field.relationView?.onchange?.[name] !== "1") return;
+    const request = ++draftSequence.current;
+    try {
+      const result = await apiMutation<{ values: Record<string, unknown> }>(`/api/v1/ui/actions/${actionId}/relations/${field.name}/onchange`, "POST", { values: next, parentValues: {}, field: name });
+      if (request === draftSequence.current) setDraft((current) => ({ ...(current || {}), ...result.values }));
+    } catch { /* Main form save remains server-validated. */ }
+  };
+  const edit = (index: number) => { setOpen(index); setDraft({ ...rows[index] }); };
+  const add = () => { setOpen(rows.length); setDraft({ active: true }); };
+  const close = () => { setOpen(undefined); setDraft(undefined); };
+  const saveDraft = () => {
+    if (open === undefined || !draft) return;
+    let nextRows = open < rows.length ? rows.map((row, index) => index === open ? draft : row) : [...rows, draft];
+    if (isAddress) {
+      for (const fieldName of ["is_default_billing", "is_default_shipping"]) {
+        if (draft[fieldName] === true) nextRows = nextRows.map((row, index) => index === open ? row : { ...row, [fieldName]: false });
+      }
     }
     onChange(nextRows);
+    close();
   };
-  const add = () => { onChange([...rows, { active: true }]); setOpen(rows.length); };
   const archive = (index: number) => onChange(rows.map((row, rowIndex) => rowIndex === index ? { ...row, active: false, is_default_billing: false, is_default_shipping: false } : row));
   const label = (row: Record<string, unknown>) => String(row.label || row.name || row.bank_name || (isAddress ? "Alamat baru" : isBank ? "Rekening baru" : "Kontak baru"));
   const summary = (row: Record<string, unknown>) => isAddress
@@ -87,9 +106,9 @@ function ManagedRelationCards({ actionId, field, value, onChange, editing }: Edi
     : isBank ? [row.acc_number, row.acc_holder_name, Array.isArray(row.currency_id) ? row.currency_id[1] : false].filter(Boolean).join(" · ")
     : [row.function, row.email, row.mobile || row.phone].filter(Boolean).join(" · ");
   return <div className="managed-relation-cards">
-    <div className="managed-relation-list">{activeRows.map((row) => { const index = rows.indexOf(row); return <article key={String(row.id || `new-${index}`)} className="managed-relation-card"><div className="managed-relation-card-icon">{isAddress ? <MapPin/> : isBank ? <Landmark/> : <UserRound/>}</div><div className="managed-relation-card-copy"><strong>{label(row)}</strong><span>{summary(row) || (isAddress ? "Alamat belum lengkap" : "Kontak belum lengkap")}</span>{isAddress && <div className="managed-address-badges">{Boolean(row.use_for_billing) && <i>Billing</i>}{Boolean(row.use_for_shipping) && <i>Shipping</i>}{Boolean(row.is_default_billing) && <i className="primary">Default billing</i>}{Boolean(row.is_default_shipping) && <i className="primary">Default shipping</i>}</div>}</div>{editing && <div className="managed-relation-card-actions"><button type="button" onClick={() => setOpen(index)} aria-label={`Edit ${label(row)}`}><Pencil/></button><button type="button" onClick={() => archive(index)} aria-label={`Arsipkan ${label(row)}`}><Trash2/></button></div>}</article>; })}{!activeRows.length && <div className="managed-relation-card-empty">{isAddress ? "Belum ada alamat khusus. Alamat utama masih menjadi fallback." : isBank ? "Belum ada rekening pembayaran." : "Belum ada PIC."}</div>}</div>
+    <div className="managed-relation-list">{activeRows.map((row) => { const index = rows.indexOf(row); return <article key={String(row.id || `new-${index}`)} className="managed-relation-card"><div className="managed-relation-card-icon">{isAddress ? <MapPin/> : isBank ? <Landmark/> : <UserRound/>}</div><div className="managed-relation-card-copy"><strong>{label(row)}</strong><span>{summary(row) || (isAddress ? "Alamat belum lengkap" : "Kontak belum lengkap")}</span>{isAddress && <div className="managed-address-badges">{Boolean(row.use_for_billing) && <i>Billing</i>}{Boolean(row.use_for_shipping) && <i>Shipping</i>}{Boolean(row.is_default_billing) && <i className="primary">Default billing</i>}{Boolean(row.is_default_shipping) && <i className="primary">Default shipping</i>}</div>}</div>{editing && <div className="managed-relation-card-actions"><button type="button" onClick={() => edit(index)} aria-label={`Edit ${label(row)}`}><Pencil/></button><button type="button" onClick={() => archive(index)} aria-label={`Arsipkan ${label(row)}`}><Trash2/></button></div>}</article>; })}{!activeRows.length && <div className="managed-relation-card-empty">{isAddress ? "Belum ada alamat khusus. Alamat utama masih menjadi fallback." : isBank ? "Belum ada rekening pembayaran." : "Belum ada PIC."}</div>}</div>
     {editing && <button type="button" className="workspace-relation-add" onClick={add}><Plus/>{isAddress ? "Tambah alamat" : isBank ? "Tambah rekening" : "Tambah PIC"}</button>}
-    {open !== undefined && rows[open] && <div className="managed-relation-editor-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(undefined); }}><section className="managed-relation-editor" role="dialog" aria-modal="true"><header><div><h3>{isAddress ? "Alamat bisnis" : isBank ? "Rekening pembayaran" : "Kontak/PIC"}</h3><p>{isAddress ? "Atur lokasi, penerima, penggunaan, dan default transaksi." : isBank ? "Simpan rekening resmi untuk pembayaran vendor." : "Simpan orang yang dapat dihubungi pada organisasi ini."}</p></div><button type="button" onClick={() => setOpen(undefined)} aria-label="Tutup"><X/></button></header><main>{columns.filter((column) => column.name !== "active").map((column) => <label key={column.name} className={["street", "street2"].includes(column.name) ? "wide" : undefined}><span>{column.label}{column.required && <b>*</b>}</span><FieldEditor actionId={actionId} field={column} value={rows[open][column.name]} onChange={(next) => update(open, column.name, next)}/></label>)}</main><footer><Button type="button" onClick={() => setOpen(undefined)}>Selesai</Button></footer></section></div>}
+    {open !== undefined && draft && <div className="managed-relation-editor-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}><section className="managed-relation-editor" role="dialog" aria-modal="true"><header><div><h3>{isAddress ? "Alamat bisnis" : isBank ? "Rekening pembayaran" : "Kontak/PIC"}</h3><p>{isAddress ? "Atur lokasi, penerima, penggunaan, dan default transaksi." : isBank ? "Simpan rekening resmi untuk pembayaran vendor." : "Simpan orang yang dapat dihubungi pada organisasi ini."}</p></div><button type="button" onClick={close} aria-label="Tutup"><X/></button></header><main>{columns.filter((column) => column.name !== "active").map((column) => <label key={column.name} className={["street", "street2"].includes(column.name) ? "wide" : undefined}><span>{column.label}{column.required && <b>*</b>}</span><FieldEditor actionId={actionId} field={column} value={draft[column.name]} parentValues={draft} onChange={(next) => updateDraft(column.name, next)}/></label>)}</main><footer><Button type="button" variant="ghost" onClick={close}>Batal</Button><Button type="button" onClick={saveDraft}>Simpan</Button></footer></section></div>}
   </div>;
 }
 
@@ -192,17 +211,17 @@ editors.many2many_binary = editors.many2many_tags;
 editors.priority = ({ field, value, onChange }) => <div className="workspace-priority">{(field.selection || [["0", "Normal"], ["1", "Penting"], ["2", "Sangat penting"]]).map(([key, label]) => <button type="button" key={key} className={String(value || "0") >= key && key !== "0" ? "active" : ""} title={label} onClick={() => onChange(key)}>★</button>)}</div>;
 editors.color = ({ value, onChange }) => <div className="workspace-color-picker">{Array.from({ length: 12 }, (_, color) => <button type="button" key={color} aria-label={`Warna ${color + 1}`} className={Number(value || 0) === color ? "active" : undefined} style={{ backgroundColor: `hsl(${color * 30} 65% 55%)` }} onClick={() => onChange(color)}/>)}</div>;
 editors.color_picker = editors.color;
-editors.many2one = function RelationEditor({ actionId, field, value, onChange }) {
+editors.many2one = function RelationEditor({ actionId, field, value, onChange, parentValues }) {
   const controller = useRef<AbortController>();
   const [items, setItems] = useState<{ id: number; label: string }[]>([]);
   const [query, setQuery] = useState("");
   useEffect(() => {
     controller.current?.abort();
     controller.current = new AbortController();
-    const params = new URLSearchParams({ q: query, ...(field.parent ? { parent: field.parent } : {}) });
+    const params = relationParams(field, query, parentValues);
     const timeout = setTimeout(() => api<{ items: { id: number; label: string }[] }>(`/api/v1/ui/actions/${actionId}/relations/${field.name}?${params}`, { signal: controller.current?.signal }).then((response) => setItems(response.items)).catch((error) => { if (error.name !== "AbortError") setItems([]); }), 120);
     return () => { clearTimeout(timeout); controller.current?.abort(); };
-  }, [actionId, field.name, field.parent, query]);
+  }, [actionId, field.name, field.parent, parentValues, query]);
   const selected = Array.isArray(value) ? { value: Number(value[0]), label: String(value[1]) } : undefined;
   return <Combobox options={items.map((item) => ({ value: item.id, label: item.label }))} value={selected} onSearch={setQuery} placeholder={field.placeholder || "Pilih..."} onChange={(next) => onChange(next ? [Number(next.value), next.label] : false)}/>;
 };

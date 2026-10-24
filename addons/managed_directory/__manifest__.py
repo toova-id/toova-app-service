@@ -5,7 +5,7 @@
     'version': '16.0.1.0.0',
     'category': 'Hidden',
     'summary': 'Canonical party identity, roles, addresses, and duplicate prevention',
-    'depends': ['managed_core', 'contacts', 'l10n_id_efaktur_coretax'],
+    'depends': ['managed_core', 'managed_indonesia_regions', 'contacts', 'l10n_id_efaktur_coretax'],
     'data': ['security/ir.model.access.csv', 'views/navigation.xml'],
     'installable': True,
     'auto_install': False,

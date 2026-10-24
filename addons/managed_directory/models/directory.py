@@ -53,6 +53,18 @@ class ManagedPartnerAddress(models.Model):
     state_id = fields.Many2one(related='address_partner_id.state_id', readonly=False)
     zip = fields.Char(related='address_partner_id.zip', readonly=False)
     country_id = fields.Many2one(related='address_partner_id.country_id', readonly=False)
+    indonesia_regency_id = fields.Many2one(
+        'managed.indonesia.region', string='Regency/City', ondelete='restrict',
+        domain="[('level', '=', 'regency'), ('state_id', '=', state_id)]",
+    )
+    indonesia_district_id = fields.Many2one(
+        'managed.indonesia.region', string='District', ondelete='restrict',
+        domain="[('level', '=', 'district'), ('parent_id', '=', indonesia_regency_id)]",
+    )
+    indonesia_village_id = fields.Many2one(
+        'managed.indonesia.region', string='Village', ondelete='restrict',
+        domain="[('level', '=', 'village'), ('parent_id', '=', indonesia_district_id)]",
+    )
     use_for_billing = fields.Boolean(string='Billing')
     use_for_shipping = fields.Boolean(string='Shipping')
     is_default_billing = fields.Boolean(string='Default Billing')
@@ -159,6 +171,20 @@ class ManagedPartnerAddress(models.Model):
                 if other:
                     raise ValidationError(_('Only one default shipping address is allowed.'))
 
+    @api.onchange('indonesia_regency_id')
+    def _onchange_indonesia_regency(self):
+        self.indonesia_district_id = False
+        self.indonesia_village_id = False
+
+    @api.onchange('indonesia_district_id')
+    def _onchange_indonesia_district(self):
+        self.indonesia_village_id = False
+
+    @api.onchange('indonesia_village_id')
+    def _onchange_indonesia_village(self):
+        if self.indonesia_village_id:
+            self.zip = self.indonesia_village_id.postal_code
+
     def _sync_address_partner(self):
         for address in self:
             vals = {
@@ -170,6 +196,12 @@ class ManagedPartnerAddress(models.Model):
                 }),
                 'active': address.active,
             }
+            if address.country_id.code == 'ID':
+                vals.update({
+                    'city': address.indonesia_regency_id.name or address.city,
+                    'state_id': address.indonesia_regency_id.state_id.id or address.state_id.id,
+                    'zip': address.indonesia_village_id.postal_code or address.zip,
+                })
             address.address_partner_id.with_context(managed_address_sync=True).write(vals)
 
     def unlink(self):

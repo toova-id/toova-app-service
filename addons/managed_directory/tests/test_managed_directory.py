@@ -20,3 +20,17 @@ class TestManagedDirectory(TransactionCase):
     def test_foreign_phone_does_not_assume_indonesia(self):
         partner = self.env['res.partner'].create({'name': 'Foreign', 'mobile': '020 7946 0018'})
         self.assertEqual(partner.managed_phone_normalized, '02079460018')
+
+    def test_indonesia_village_normalizes_city_state_and_postal_code(self):
+        customer = self.env['res.partner'].create({'name': 'Region Customer'})
+        village = self.env['managed.indonesia.region'].search([('code', '=', '32.73.01.1001')])
+        address = self.env['managed.partner.address'].create({
+            'account_id': customer.id, 'label': 'Bandung', 'recipient_name': 'Receiver',
+            'country_id': self.env.ref('base.id').id,
+            'indonesia_regency_id': village.parent_id.parent_id.id,
+            'indonesia_district_id': village.parent_id.id,
+            'indonesia_village_id': village.id,
+        })
+        self.assertEqual(address.address_partner_id.city, 'Kota Bandung')
+        self.assertEqual(address.address_partner_id.state_id.code, 'JB')
+        self.assertEqual(address.address_partner_id.zip, '40152')
