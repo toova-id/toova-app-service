@@ -117,7 +117,7 @@ def _eval_action(action):
     domain = safe_eval(action.domain or '[]', eval_context)
     if not isinstance(context, dict) or not isinstance(domain, (list, tuple)):
         raise ValidationError('Invalid action context or domain.')
-    return context, list(domain)
+    return {**context, 'managed_ui': True}, list(domain)
 
 
 def _views(action, context):
@@ -455,21 +455,38 @@ def _writable_form_fields(schema):
     return set(schema['form'].get('writeFields') or _form_fields(schema))
 
 
+def _x2many_default_values(value):
+    ids = []
+    pending = []
+    for item in value or []:
+        if isinstance(item, int):
+            ids.append(item)
+        elif isinstance(item, (list, tuple)) and item:
+            command = item[0]
+            if command == 6:
+                ids = list(item[2] or [])
+            elif command == 4:
+                ids.append(item[1])
+            elif command == 1:
+                ids.append(item[1])
+            elif command == 0 and isinstance(item[2], dict):
+                pending.append(item[2])
+            elif command == 5:
+                ids = []
+    return ids, pending
+
+
 def _serialize_form_values(model, values, schema):
     serialized = dict(values)
     for name, field in _form_fields(schema).items():
         relation_view = field.get('relationView')
         if field.get('type') not in ('one2many', 'many2many'):
             continue
-        ids = values.get(name) or []
-        ids = [item[0] if isinstance(item, (list, tuple)) else item for item in ids]
-        if not ids:
-            serialized[name] = []
-            continue
+        ids, pending = _x2many_default_values(values.get(name))
         relation = model._fields[name].comodel_name
         if relation_view:
             child_fields = [column['name'] for column in relation_view['columns']]
-            serialized[name] = request.env[relation].browse(ids).read(child_fields)
+            serialized[name] = request.env[relation].browse(ids).read(child_fields) + pending
         else:
             serialized[name] = request.env[relation].browse(ids).name_get()
     return serialized

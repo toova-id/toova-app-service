@@ -11,7 +11,7 @@
 This module contains all the common features of Sales Management and eCommerce.
     """,
     'depends': [
-        'managed_core',
+        'managed_contacts',
         'sales_team',
         'account_payment',  # -> account, payment, portal
         'utm',
