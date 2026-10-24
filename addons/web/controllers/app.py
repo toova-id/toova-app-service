@@ -68,7 +68,12 @@ class ManagedApp(http.Controller):
         modules = sorted(request.env.registry._init_modules)
         return request.make_json_response({
             'user': {'id': user.id, 'name': user.name, 'login': user.login},
-            'company': {'id': user.company_id.id, 'name': user.company_id.name},
+            'company': {
+                'id': user.company_id.id,
+                'name': user.company_id.name,
+                'profile': user.company_id.managed_profile if 'managed_profile' in user.company_id._fields else 'core_commerce',
+                'capabilities': user.company_id._managed_capabilities() if hasattr(user.company_id, '_managed_capabilities') else {},
+            },
             'companies': [
                 {'id': company.id, 'name': company.name}
                 for company in user.company_ids

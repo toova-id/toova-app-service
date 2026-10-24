@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && node scripts/self-check.mjs",
-    "check": "tsc -b --pretty false && node scripts/modifiers-self-check.mjs"
+    "check": "tsc -b --pretty false && node scripts/modifiers-self-check.mjs && node scripts/managed-navigation-self-check.mjs"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "1.1.10",

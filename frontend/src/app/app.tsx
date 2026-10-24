@@ -2,6 +2,7 @@ import { Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { api, setCsrfToken } from "@/lib/api";
 import { AppShell } from "./app-shell";
+import { applyManagedNavigation } from "./managed-navigation";
 import { routes } from "./features";
 import { NavigationProvider } from "./navigation";
 import { SessionProvider } from "./session";
@@ -19,7 +20,7 @@ export default function App() {
     Promise.all([
       api<Session>("/api/v1/session", { signal: controller.signal }),
       api<{ items: ServerNavigationItem[] }>("/api/v1/ui/navigation", { signal: controller.signal }),
-    ]).then(([currentSession, currentNavigation]) => { setCsrfToken(currentSession.csrfToken); setSession(currentSession); setNavigation(currentNavigation.items); }).catch((reason) => { if (reason.name !== "AbortError") setError(reason.message); });
+    ]).then(([currentSession, currentNavigation]) => { setCsrfToken(currentSession.csrfToken); setSession(currentSession); setNavigation(applyManagedNavigation(currentNavigation.items)); }).catch((reason) => { if (reason.name !== "AbortError") setError(reason.message); });
     return () => controller.abort();
   }, [attempt]);
   if (error) return <LoadError message={error} retry={() => setAttempt((value) => value + 1)}/>;
