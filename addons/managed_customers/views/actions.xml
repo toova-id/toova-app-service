@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="action_customers" model="ir.actions.act_window">
+    <field name="name">Customers</field><field name="res_model">res.partner</field><field name="view_mode">tree,form</field>
+    <field name="context">{'managed_party_role': 'customer', 'default_is_company': True}</field>
+    <field name="domain">[('parent_id', '=', False)]</field>
+  </record>
+  <menuitem id="menu_customers_root" name="Customers" action="action_customers" sequence="21" groups="base.group_user"/>
+</odoo>

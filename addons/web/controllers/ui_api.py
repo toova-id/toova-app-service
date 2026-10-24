@@ -117,7 +117,14 @@ def _eval_action(action):
     domain = safe_eval(action.domain or '[]', eval_context)
     if not isinstance(context, dict) or not isinstance(domain, (list, tuple)):
         raise ValidationError('Invalid action context or domain.')
-    return {**context, 'managed_ui': True}, list(domain)
+    context = {**context, 'managed_ui': True}
+    model = request.env[action.res_model].with_context(**context)
+    role = context.get('managed_party_role')
+    if role and hasattr(model, '_managed_role_domain'):
+        domain = expression.AND([list(domain), model._managed_role_domain(role)])
+    if role == 'contact' and hasattr(model, '_managed_contact_domain'):
+        domain = expression.AND([list(domain), model._managed_contact_domain()])
+    return context, list(domain)
 
 
 def _views(action, context):

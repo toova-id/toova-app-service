@@ -1,3 +1,1 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-from . import test_managed_contacts
+from . import test_contacts

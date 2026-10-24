@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="action_contact_persons" model="ir.actions.act_window">
+    <field name="name">Contact Persons</field><field name="res_model">res.partner</field><field name="view_mode">tree,form</field>
+    <field name="context">{'managed_party_role': 'contact', 'default_is_company': False, 'default_type': 'contact'}</field>
+    <field name="domain">[]</field>
+  </record>
+  <menuitem id="menu_contact_persons_root" name="Contact Persons" action="action_contact_persons" sequence="23" groups="base.group_user"/>
+</odoo>
