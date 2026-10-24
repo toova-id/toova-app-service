@@ -5,7 +5,7 @@ This repository carries only Odoo Community modules needed by the Indonesian man
 ## Product roots
 
 ```text
-Platform       managed_core managed_contacts web contacts calendar base_automation
+Platform       managed_core managed_contacts managed_products web contacts calendar base_automation
 Commercial     crm sale_management sale_stock sale_margin
 Procurement    purchase_stock purchase_requisition_stock
 Inventory      stock stock_account stock_picking_batch stock_dropshipping
