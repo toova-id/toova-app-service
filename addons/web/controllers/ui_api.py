@@ -107,6 +107,9 @@ def _visible_action(action_id):
     return action
 
 
+def _action_xmlid(action):
+    return action.get_external_id().get(action.id) or ''
+
 def _eval_action(action):
     eval_context = request.env['ir.actions.actions']._get_eval_context(action)
     eval_context['context_today'] = datetime.now
@@ -189,7 +192,109 @@ def _field_meta(metadata, node):
     return field
 
 
+def _contract_field(metadata, item, parent=None):
+    config = {'name': item} if isinstance(item, str) else dict(item)
+    name = config.pop('name', None)
+    if not name or name not in metadata:
+        raise ValidationError(f'Invalid managed UI field: {name}.')
+    relation_config = config.pop('relation', None)
+    field = {key: metadata[name].get(key) for key in _FIELD_ATTRIBUTES if key in metadata[name]}
+    field.update({
+        'name': name,
+        'label': config.pop('label', None) or field.get('string') or name.replace('_', ' ').title(),
+        'widget': config.pop('widget', None),
+        'placeholder': config.pop('placeholder', None),
+        'parent': parent,
+        'modifiers': config.pop('modifiers', {}),
+        'relationView': None,
+    })
+    if config:
+        raise ValidationError(f'Unsupported managed UI field options: {", ".join(config)}.')
+    if relation_config:
+        relation = field.get('relation')
+        if not relation or field.get('type') not in ('one2many', 'many2many'):
+            raise ValidationError(f'Field {name} does not support relation columns.')
+        relation_metadata = request.env[relation].fields_get(attributes=_FIELD_ATTRIBUTES)
+        field['relationView'] = {
+            'editable': bool(relation_config.get('editable')),
+            'columns': [
+                _contract_field(relation_metadata, column, parent=name)
+                for column in relation_config.get('columns', [])
+            ],
+        }
+    return field
+
+def _managed_view_schema(action):
+    model = request.env[action.res_model]
+    contract_getter = getattr(model, '_managed_ui_contract', None)
+    if not contract_getter:
+        return None
+    action_xmlid = _action_xmlid(action)
+    contract = contract_getter(action_xmlid)
+    if not contract:
+        return None
+    context, domain = _eval_action(action)
+    metadata = model.fields_get(attributes=_FIELD_ATTRIBUTES)
+    list_contract = contract.get('list', {})
+    form_contract = contract.get('form', {})
+    columns = [_contract_field(metadata, field) for field in list_contract.get('fields', [])]
+    form_fields = [_contract_field(metadata, field) for field in form_contract.get('fields', [])]
+    write_fields = list(form_contract.get('write_fields', [field['name'] for field in form_fields]))
+    if set(write_fields) - {field['name'] for field in form_fields}:
+        raise ValidationError('Managed UI contract contains invalid write fields.')
+    read_fields = list(dict.fromkeys(
+        [field['name'] for field in columns] + list(list_contract.get('read_fields', []))
+    ))
+    if set(read_fields) - metadata.keys():
+        raise ValidationError('Managed UI contract contains invalid read fields.')
+    status_name = form_contract.get('status_field')
+    status_field = next((field for field in form_fields if field['name'] == status_name), None)
+    onchange_fields = [model._fields[field['name']] for field in form_fields]
+    onchange = {
+        field.name: '1'
+        for field in onchange_fields
+        if model._has_onchange(field, onchange_fields)
+    }
+    return {
+        'id': action.id,
+        'actionXmlid': action_xmlid,
+        'schemaSource': 'managed',
+        'name': action.name,
+        'model': action.res_model,
+        'domain': domain,
+        'context': context,
+        'limit': action.limit or 80,
+        'list': {
+            'id': False,
+            'title': list_contract.get('title') or action.name,
+            'columns': columns,
+            'readFields': read_fields,
+            'defaultOrder': list_contract.get('default_order') or model._order,
+            'create': model.check_access_rights('create', raise_exception=False) and context.get('create', True) is not False,
+            'delete': model.check_access_rights('unlink', raise_exception=False),
+            'export': request.env.user.has_group('base.group_allow_export'),
+            'filters': list_contract.get('filters', []),
+            'actions': [],
+        },
+        'form': {
+            'id': False,
+            'title': form_contract.get('title') or action.name,
+            'sections': [{'label': 'Informasi utama', 'fields': form_fields}],
+            'allFields': form_fields,
+            'writeFields': write_fields,
+            'create': model.check_access_rights('create', raise_exception=False) and context.get('create', True) is not False,
+            'write': model.check_access_rights('write', raise_exception=False),
+            'onchange': onchange,
+            'statusField': status_field,
+            'statusVisible': form_contract.get('status_visible', []),
+            'buttons': form_contract.get('buttons', []),
+        },
+    }
+
 def _view_schema(action):
+    managed_schema = _managed_view_schema(action)
+    if managed_schema:
+        return managed_schema
     context, domain = _eval_action(action)
     views = _views(action, context)
     metadata = views['models'][action.res_model]
@@ -285,6 +390,8 @@ def _view_schema(action):
 
     return {
         'id': action.id,
+        'actionXmlid': _action_xmlid(action),
+        'schemaSource': 'xml',
         'name': action.name,
         'model': action.res_model,
         'domain': domain,
@@ -294,6 +401,7 @@ def _view_schema(action):
             'id': list_view['id'],
             'title': list_root.get('string') or action.name,
             'columns': columns,
+            'readFields': [field['name'] for field in columns],
             'defaultOrder': list_root.get('default_order'),
             'create': request.env[action.res_model].check_access_rights('create', raise_exception=False),
             'delete': request.env[action.res_model].check_access_rights('unlink', raise_exception=False),
@@ -305,6 +413,8 @@ def _view_schema(action):
             'id': form_view['id'],
             'title': form_root.get('string') or action.name,
             'sections': sections,
+            'allFields': [field for section in sections for field in section['fields']],
+            'writeFields': [field['name'] for section in sections for field in section['fields']],
             'create': request.env[action.res_model].check_access_rights('create', raise_exception=False),
             'write': request.env[action.res_model].check_access_rights('write', raise_exception=False),
             'onchange': form_onchange,
@@ -317,16 +427,21 @@ def _view_schema(action):
 
 def _allowed_fields(schema, view_type):
     if view_type == 'list':
-        return [field['name'] for field in schema['list']['columns']]
-    return [field['name'] for section in schema['form']['sections'] for field in section['fields']]
+        return schema['list'].get('readFields') or [field['name'] for field in schema['list']['columns']]
+    return [field['name'] for field in schema['form'].get('allFields', [])] or [
+        field['name'] for section in schema['form']['sections'] for field in section['fields']
+    ]
 
 
 def _form_fields(schema):
-    return {
-        field['name']: field
-        for section in schema['form']['sections']
-        for field in section['fields']
-    }
+    fields = schema['form'].get('allFields') or [
+        field for section in schema['form']['sections'] for field in section['fields']
+    ]
+    return {field['name']: field for field in fields}
+
+
+def _writable_form_fields(schema):
+    return set(schema['form'].get('writeFields') or _form_fields(schema))
 
 
 def _serialize_form_values(model, values, schema):
@@ -619,9 +734,10 @@ class ManagedUiApi(http.Controller):
             schema = _view_schema(action)
             context, _domain = _eval_action(action)
             values = _json_body().get('values', {})
-            allowed = set(_allowed_fields(schema, 'form'))
-            if not isinstance(values, dict) or set(values) - allowed:
-                raise ValidationError('Payload contains unsupported fields.')
+            allowed = _writable_form_fields(schema)
+            if not isinstance(values, dict):
+                raise ValidationError('Payload must contain field values.')
+            values = {name: value for name, value in values.items() if name in allowed}
             values = {name: value[0] if isinstance(value, (list, tuple)) and _form_fields(schema).get(name, {}).get('type') == 'many2one' and value else value for name, value in values.items()}
             values = _normalize_form_values(values, schema)
             record = request.env[action.res_model].with_context(**context).create(values)
@@ -638,12 +754,13 @@ class ManagedUiApi(http.Controller):
             schema = _view_schema(action)
             context, _domain = _eval_action(action)
             values = _json_body().get('values', {})
-            allowed = set(_allowed_fields(schema, 'form'))
-            if not isinstance(values, dict) or set(values) - allowed:
-                raise ValidationError('Payload contains unsupported fields.')
+            allowed = _writable_form_fields(schema)
+            if not isinstance(values, dict):
+                raise ValidationError('Payload must contain field values.')
             record = request.env[action.res_model].with_context(**context).browse(record_id).exists()
             if not record:
                 raise MissingError('Record not found.')
+            values = {name: value for name, value in values.items() if name in allowed}
             values = {name: value[0] if isinstance(value, (list, tuple)) and _form_fields(schema).get(name, {}).get('type') == 'many2one' and value else value for name, value in values.items()}
             record.write(_normalize_form_values(values, schema))
             return request.make_json_response({'id': record.id})

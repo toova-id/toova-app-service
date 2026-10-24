@@ -210,7 +210,9 @@
   .workspace-form-sheet { @apply my-0 w-full bg-background; }
   .workspace-form-sheet section { @apply border-b px-6 py-4 last:border-b-0; }
   .workspace-form-sheet h2 { @apply mb-3 text-xs font-semibold tracking-[-.01em]; }
-  .workspace-form-grid { @apply grid grid-cols-1 gap-x-8 gap-y-2.5 lg:grid-cols-2 2xl:grid-cols-3; }
+  .workspace-form-section-description { @apply -mt-2 mb-3 text-[10px] text-muted-foreground; }
+  .workspace-form-grid { @apply grid grid-cols-1 gap-x-8 gap-y-2.5 lg:grid-cols-2; }
+  @media (min-width: 1536px) { .workspace-form-grid { grid-template-columns: repeat(var(--form-columns, 3), minmax(0, 1fr)); } }
   .workspace-form-grid > label { @apply grid grid-cols-[minmax(110px,.42fr)_minmax(0,1fr)] items-center gap-3; }
   .workspace-form-grid > label > span { @apply text-[11px] text-muted-foreground; }
   .workspace-form-grid > label > span b { @apply ml-0.5 text-primary; }

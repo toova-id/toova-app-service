@@ -1,3 +1,4 @@
+import "./views";
 import { HandCoins } from "lucide-react";
 import { registerModuleIcon } from "@luma/features/feature-registry";
 import { registerModelFormView } from "@luma/views/view-registry";

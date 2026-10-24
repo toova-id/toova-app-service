@@ -31,10 +31,14 @@ export interface CustomFormViewProps {
   onButton: (name: string, type: "object" | "action") => void;
 }
 
-const listViews = new Map<string, ComponentType<CustomListViewProps>>();
-const formViews = new Map<string, ComponentType<CustomFormViewProps>>();
+const modelListViews = new Map<string, ComponentType<CustomListViewProps>>();
+const modelFormViews = new Map<string, ComponentType<CustomFormViewProps>>();
+const actionListViews = new Map<string, ComponentType<CustomListViewProps>>();
+const actionFormViews = new Map<string, ComponentType<CustomFormViewProps>>();
 
-export function registerModelListView(model: string, component: ComponentType<CustomListViewProps>) { listViews.set(model, component); }
-export function registerModelFormView(model: string, component: ComponentType<CustomFormViewProps>) { formViews.set(model, component); }
-export function getModelListView(model: string) { return listViews.get(model); }
-export function getModelFormView(model: string) { return formViews.get(model); }
+export function registerModelListView(model: string, component: ComponentType<CustomListViewProps>) { modelListViews.set(model, component); }
+export function registerModelFormView(model: string, component: ComponentType<CustomFormViewProps>) { modelFormViews.set(model, component); }
+export function registerActionListView(actionXmlid: string, component: ComponentType<CustomListViewProps>) { actionListViews.set(actionXmlid, component); }
+export function registerActionFormView(actionXmlid: string, component: ComponentType<CustomFormViewProps>) { actionFormViews.set(actionXmlid, component); }
+export function getListView(schema: ActionSchema) { return actionListViews.get(schema.actionXmlid) || modelListViews.get(schema.model); }
+export function getFormView(schema: ActionSchema) { return actionFormViews.get(schema.actionXmlid) || modelFormViews.get(schema.model); }

@@ -5,7 +5,8 @@ import { LoadError, ViewLoading } from "@/components/loading";
 import { ActionModal, type WindowAction } from "@/components/action-modal";
 import { FormView } from "./form-view";
 import { ListView } from "./list-view";
-import { getModelFormView, getModelListView } from "./view-registry";
+import { getFormView, getListView } from "./view-registry";
+import { applyViewMetadata } from "./view-metadata";
 import type { ActionSchema, RecordsResponse } from "./types";
 
 export default function ActionPage({ actionId, basePath }: { actionId: number; basePath: string }) {
@@ -32,7 +33,7 @@ export default function ActionPage({ actionId, basePath }: { actionId: number; b
   useEffect(() => {
     const controller = new AbortController();
     setSchema(undefined); setData(undefined); setError(undefined); setLoading(true); setSelected([]); setFilters([]); setQuery(""); setPage(1);
-    api<ActionSchema>(`/api/v1/ui/actions/${actionId}`, { signal: controller.signal }).then(setSchema).catch((reason) => { if (reason.name !== "AbortError") setError(reason.message); }).finally(() => setLoading(false));
+    api<ActionSchema>(`/api/v1/ui/actions/${actionId}`, { signal: controller.signal }).then((response) => setSchema(applyViewMetadata({ ...response, form: { ...response.form, allFields: response.form.sections.flatMap((section) => section.fields) } }))).catch((reason) => { if (reason.name !== "AbortError") setError(reason.message); }).finally(() => setLoading(false));
     return () => controller.abort();
   }, [actionId]);
 
@@ -99,9 +100,9 @@ export default function ActionPage({ actionId, basePath }: { actionId: number; b
   if (!schema) return <ViewLoading/>;
   if (recordId) {
     if (loading && !Object.keys(values).length) return <ViewLoading/>;
-    const CustomForm = getModelFormView(schema.model) || FormView;
+    const CustomForm = getFormView(schema) || FormView;
     return <><CustomForm schema={schema} basePath={basePath} id={recordId === "new" ? undefined : Number(recordId)} values={values} editing={editing} saving={saving} onEdit={() => setEditing(true)} onChange={changeField} onSave={save} onButton={runButton}/>{loading && <div className="workspace-form-loading"/>}{modal && <ActionModal action={modal} onClose={() => setModal(undefined)} onDone={() => { setModal(undefined); setReload((value) => value + 1); }}/>} {error && <div className="workspace-toast-error">{error}</div>}</>;
   }
-  const CustomList = getModelListView(schema.model) || ListView;
+  const CustomList = getListView(schema) || ListView;
   return <><CustomList schema={schema} basePath={basePath} data={data} query={query} page={page} loading={loading} selected={selected} filters={filters} onQuery={(value) => { setQuery(value); setPage(1); }} onPage={setPage} onSelected={setSelected} onFilters={(value) => { setFilters(value); setPage(1); }} onRefresh={() => setReload((value) => value + 1)} onDelete={remove} onBulkAction={bulkAction}/>{error && <div className="workspace-toast-error">{error}</div>}</>;
 }

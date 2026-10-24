@@ -7,7 +7,7 @@ import type { CustomFormViewProps } from "@luma/views/view-registry";
 import type { FieldSchema } from "@luma/views/types";
 
 export default function SaleOrderForm({ schema, basePath, id, values, editing, saving, onEdit, onChange, onSave, onButton }: CustomFormViewProps) {
-  const fields = Object.fromEntries(schema.form.sections.flatMap((section) => section.fields).map((field) => [field.name, field]));
+  const fields = Object.fromEntries((schema.form.allFields || schema.form.sections.flatMap((section) => section.fields)).map((field) => [field.name, field]));
   const status = schema.form.statusField;
   const statusOptions = status?.selection?.filter(([key]) => !schema.form.statusVisible.length || schema.form.statusVisible.includes(key)) ?? [];
   const visibleButtons = schema.form.buttons.filter((button) => !modifierActive(button.modifiers, "invisible", values));
