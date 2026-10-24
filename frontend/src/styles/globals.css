@@ -391,6 +391,70 @@
   .luma-document-summary dd { @apply font-medium tabular-nums; }
   .luma-document-summary dl > .total { @apply mt-3 border-b-0 pt-2 text-base; }
   .luma-document-summary .total dt, .luma-document-summary .total dd { @apply font-semibold text-foreground; }
+
+  .luma-customer { @apply min-h-[calc(100vh-44px)] bg-background; }
+  .luma-customer-header { @apply sticky top-11 z-30 flex min-h-[82px] items-center justify-between gap-4 border-b bg-background/95 px-6 py-3 backdrop-blur; }
+  .luma-customer-title { @apply flex min-w-0 items-center gap-3; }
+  .luma-customer-title > div:last-child { @apply min-w-0; }
+  .luma-customer-title > div:last-child > span { @apply text-[9px] font-semibold uppercase tracking-[.08em] text-muted-foreground; }
+  .luma-customer-title h1 { @apply truncate text-lg font-semibold tracking-[-.025em]; }
+  .luma-customer-title p { @apply text-[10px] text-muted-foreground; }
+  .luma-customer-avatar { @apply grid h-10 w-10 shrink-0 place-items-center rounded-lg border bg-muted/30; }
+  .luma-customer-avatar svg { @apply h-4 w-4 text-muted-foreground; }
+  .luma-customer-actions { @apply flex gap-1; }
+  .luma-customer-tabs { @apply sticky top-[126px] z-20 flex min-h-10 gap-1 overflow-x-auto border-b bg-background px-6; }
+  .luma-customer-tabs button { @apply flex items-center gap-1.5 border-b-2 border-transparent px-3 py-2 text-[11px] text-muted-foreground; }
+  .luma-customer-tabs button.active { @apply border-primary font-medium text-foreground; }
+  .luma-customer-tabs i { @apply min-w-4 rounded-full bg-muted px-1 text-center text-[9px] not-italic; }
+  .luma-customer-body { @apply mx-auto w-full max-w-[1440px]; }
+  .luma-customer-section { @apply border-b px-8 py-6 last:border-b-0; }
+  .luma-customer-section > header { @apply mb-5; }
+  .luma-customer-section h2 { @apply text-sm font-semibold tracking-[-.015em]; }
+  .luma-customer-section header p { @apply mt-1 text-[10px] text-muted-foreground; }
+  .luma-customer-overview { @apply grid gap-8 lg:grid-cols-[180px_minmax(0,1fr)]; }
+  .luma-customer-logo .luma-customer-field { @apply block; }
+  .luma-customer-logo .luma-customer-field > span { @apply sr-only; }
+  .luma-customer-grid { @apply grid grid-cols-1 gap-x-10 gap-y-3 md:grid-cols-2; }
+  .luma-customer-field { @apply grid min-w-0 grid-cols-[128px_minmax(0,1fr)] items-center gap-3; }
+  .luma-customer-field > span { @apply text-[10px] text-muted-foreground; }
+  .luma-customer-field > span b { @apply ml-0.5 text-primary; }
+  .luma-customer-field > div { @apply min-w-0 text-xs; }
+  .luma-customer-field.wide { @apply md:col-span-2; }
+  .luma-customer-relation > .luma-customer-field { @apply block; }
+  .luma-customer-relation > .luma-customer-field > span { @apply sr-only; }
+  .luma-customer-fallback { @apply mx-8 mt-6 flex gap-3 rounded-md border bg-muted/20 p-4; }
+  .luma-customer-fallback > svg { @apply mt-0.5 h-4 w-4 shrink-0 text-muted-foreground; }
+  .luma-customer-fallback > div { @apply flex min-w-0 flex-col; }
+  .luma-customer-fallback strong { @apply text-xs font-medium; }
+  .luma-customer-fallback span { @apply mt-1 text-[11px]; }
+  .luma-customer-fallback small { @apply mt-1 text-[9px] text-muted-foreground; }
+  .managed-relation-list { @apply grid gap-2 lg:grid-cols-2; }
+  .managed-relation-card { @apply flex min-h-24 gap-3 rounded-md border bg-background p-3 shadow-[var(--shadow-control)]; }
+  .managed-relation-card-icon { @apply grid h-8 w-8 shrink-0 place-items-center rounded-md bg-muted; }
+  .managed-relation-card-icon svg { @apply h-3.5 w-3.5 text-muted-foreground; }
+  .managed-relation-card-copy { @apply flex min-w-0 flex-1 flex-col; }
+  .managed-relation-card-copy strong { @apply truncate text-xs font-medium; }
+  .managed-relation-card-copy > span { @apply mt-1 text-[10px] leading-relaxed text-muted-foreground; }
+  .managed-address-badges { @apply mt-2 flex flex-wrap gap-1; }
+  .managed-address-badges i { @apply rounded border px-1.5 py-0.5 text-[8px] not-italic text-muted-foreground; }
+  .managed-address-badges i.primary { @apply border-primary/30 bg-primary/5 text-primary; }
+  .managed-relation-card-actions { @apply flex shrink-0 gap-0.5; }
+  .managed-relation-card-actions button { @apply grid h-7 w-7 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-foreground; }
+  .managed-relation-card-actions svg { @apply h-3 w-3; }
+  .managed-relation-card-empty { @apply col-span-full rounded-md border border-dashed px-4 py-8 text-center text-[10px] text-muted-foreground; }
+  .managed-relation-cards > .workspace-relation-add { @apply mt-3; }
+  .managed-relation-editor-backdrop { @apply fixed inset-0 z-[90] flex justify-end bg-foreground/15 backdrop-blur-[1px]; }
+  .managed-relation-editor { @apply flex h-full w-full max-w-2xl flex-col border-l bg-background shadow-[var(--shadow-floating)]; }
+  .managed-relation-editor > header { @apply flex items-start justify-between border-b px-6 py-5; }
+  .managed-relation-editor h3 { @apply text-sm font-semibold; }
+  .managed-relation-editor header p { @apply mt-1 text-[10px] text-muted-foreground; }
+  .managed-relation-editor header button { @apply grid h-8 w-8 place-items-center rounded hover:bg-muted; }
+  .managed-relation-editor header svg { @apply h-4 w-4; }
+  .managed-relation-editor > main { @apply grid flex-1 content-start grid-cols-1 gap-x-6 gap-y-3 overflow-y-auto p-6 md:grid-cols-2; }
+  .managed-relation-editor > main label { @apply flex flex-col gap-1; }
+  .managed-relation-editor > main label.wide { @apply md:col-span-2; }
+  .managed-relation-editor > main label > span { @apply text-[10px] text-muted-foreground; }
+  .managed-relation-editor > footer { @apply flex justify-end border-t px-6 py-4; }
   .workspace-loading, .workspace-error { @apply grid min-h-[calc(100vh-44px)] place-items-center content-center gap-2 text-xs text-muted-foreground; }
   .workspace-error strong { @apply text-sm text-foreground; }
   .luma-boot { @apply grid min-h-screen place-items-center content-center gap-3 bg-background text-muted-foreground; }

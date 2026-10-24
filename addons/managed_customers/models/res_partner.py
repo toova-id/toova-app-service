@@ -19,9 +19,38 @@ class ResPartner(models.Model):
             'l10n_id_tku', 'l10n_id_buyer_document_type', 'l10n_id_buyer_document_number', 'l10n_id_tax_name',
             'l10n_id_tax_address', 'l10n_id_kode_transaksi', 'user_id', 'property_product_pricelist',
             'property_payment_term_id', 'property_supplier_payment_term_id', 'property_purchase_currency_id',
-            'category_id', 'lang', 'comment', 'managed_address_ids', 'is_company', 'active',
+            'category_id', 'lang', 'comment', 'managed_address_ids', 'child_ids', 'is_company', 'active',
         ) if name in fields_by_name]
+        fields = []
+        for name in names:
+            config = {'name': name}
+            if name == 'image_1920':
+                config['widget'] = 'image'
+            elif name == 'managed_address_ids':
+                config.update({
+                    'widget': 'managed_addresses',
+                    'relation': {
+                        'editable': True,
+                        'inverse_field': 'account_id',
+                        'columns': [
+                            'label', 'recipient_name', 'recipient_phone', 'recipient_email',
+                            'street', 'street2', 'city', 'state_id', 'zip', 'country_id',
+                            'use_for_billing', 'use_for_shipping',
+                            'is_default_billing', 'is_default_shipping', 'active',
+                        ],
+                    },
+                })
+            elif name == 'child_ids':
+                config.update({
+                    'widget': 'managed_contacts',
+                    'relation': {
+                        'editable': True,
+                        'inverse_field': 'parent_id',
+                        'columns': ['name', 'function', 'email', 'phone', 'mobile', 'active'],
+                    },
+                })
+            fields.append(config)
         return {
             'list': {'title': role.title() + 's', 'fields': [name for name in ('name', 'phone', 'email', 'city', 'country_id', 'vat') if name in fields_by_name], 'default_order': 'display_name asc'},
-            'form': {'title': role.title(), 'fields': [{'name': n, **({'widget': 'image'} if n == 'image_1920' else {})} for n in names], 'write_fields': [n for n in names if n not in {'is_company'}], 'buttons': []},
+            'form': {'title': role.title(), 'fields': fields, 'write_fields': [n for n in names if n not in {'is_company'}], 'buttons': []},
         }

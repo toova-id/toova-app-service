@@ -493,7 +493,10 @@ def _serialize_form_values(model, values, schema):
         relation = model._fields[name].comodel_name
         if relation_view:
             child_fields = [column['name'] for column in relation_view['columns']]
-            serialized[name] = request.env[relation].browse(ids).read(child_fields) + pending
+            records = request.env[relation].browse(ids)
+            if field.get('widget') == 'managed_contacts':
+                records = records.filtered(lambda record: record.type == 'contact' and not record.employee)
+            serialized[name] = records.read(child_fields) + pending
         else:
             serialized[name] = request.env[relation].browse(ids).name_get()
     return serialized
@@ -556,9 +559,14 @@ def _normalize_form_values(values, schema):
             continue
         allowed = {column['name'] for column in relation_view['columns']}
         existing_ids = [row['id'] for row in rows if isinstance(row.get('id'), int)]
-        commands = [(6, 0, existing_ids)]
+        if field.get('widget') == 'managed_contacts':
+            commands = []
+        else:
+            commands = [(6, 0, existing_ids)]
         for row in rows:
             data = {key: value[0] if isinstance(value := row.get(key), (list, tuple)) and value else value for key in allowed if key in row}
+            if field.get('widget') == 'managed_contacts':
+                data.setdefault('type', 'contact')
             if isinstance(row.get('id'), int):
                 commands.append((1, row['id'], data))
             else:

@@ -1,6 +1,7 @@
-import { Check, Clipboard, Download, ExternalLink, FileText, Plus, Trash2, Upload } from "lucide-react";
+import { Check, Clipboard, Download, ExternalLink, FileText, MapPin, Pencil, Plus, Trash2, Upload, UserRound, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api, apiMutation } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Combobox } from "@/components/ui/combobox";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -63,6 +64,33 @@ registerFieldRenderer("url", ({ value }) => value ? <a className="workspace-fiel
 registerFieldRenderer("email", ({ value }) => value ? <a className="workspace-field-link" href={`mailto:${String(value)}`}>{String(value)}</a> : <>—</>);
 registerFieldRenderer("phone", ({ value }) => value ? <a className="workspace-field-link" href={`tel:${String(value)}`}>{String(value)}</a> : <>—</>);
 registerFieldRenderer("CopyClipboardChar", ({ value }) => value ? <span className="workspace-copy-value">{String(value)}<button type="button" aria-label="Salin" onClick={() => navigator.clipboard.writeText(String(value))}><Clipboard/></button></span> : <>—</>);
+function ManagedRelationCards({ actionId, field, value, onChange, editing }: EditorProps & { editing: boolean }) {
+  const rows = Array.isArray(value) ? value as Record<string, unknown>[] : [];
+  const columns = field.relationView?.columns || [];
+  const [open, setOpen] = useState<number>();
+  const isAddress = field.widget === "managed_addresses";
+  const activeRows = rows.filter((row) => row.active !== false);
+  const update = (index: number, name: string, nextValue: unknown) => {
+    let nextRows = rows.map((row, rowIndex) => rowIndex === index ? { ...row, [name]: nextValue } : row);
+    if (isAddress && (name === "is_default_billing" || name === "is_default_shipping") && nextValue === true) {
+      const usage = name === "is_default_billing" ? "use_for_billing" : "use_for_shipping";
+      nextRows = nextRows.map((row, rowIndex) => ({ ...row, ...(rowIndex === index ? { [usage]: true } : { [name]: false }) }));
+    }
+    onChange(nextRows);
+  };
+  const add = () => { onChange([...rows, { active: true }]); setOpen(rows.length); };
+  const archive = (index: number) => onChange(rows.map((row, rowIndex) => rowIndex === index ? { ...row, active: false, is_default_billing: false, is_default_shipping: false } : row));
+  const label = (row: Record<string, unknown>) => String(row.label || row.name || (isAddress ? "Alamat baru" : "Kontak baru"));
+  const summary = (row: Record<string, unknown>) => isAddress
+    ? [row.street, row.street2, row.city, Array.isArray(row.state_id) ? row.state_id[1] : false, row.zip, Array.isArray(row.country_id) ? row.country_id[1] : false].filter(Boolean).join(", ")
+    : [row.function, row.email, row.mobile || row.phone].filter(Boolean).join(" · ");
+  return <div className="managed-relation-cards">
+    <div className="managed-relation-list">{activeRows.map((row) => { const index = rows.indexOf(row); return <article key={String(row.id || `new-${index}`)} className="managed-relation-card"><div className="managed-relation-card-icon">{isAddress ? <MapPin/> : <UserRound/>}</div><div className="managed-relation-card-copy"><strong>{label(row)}</strong><span>{summary(row) || (isAddress ? "Alamat belum lengkap" : "Kontak belum lengkap")}</span>{isAddress && <div className="managed-address-badges">{Boolean(row.use_for_billing) && <i>Billing</i>}{Boolean(row.use_for_shipping) && <i>Shipping</i>}{Boolean(row.is_default_billing) && <i className="primary">Default billing</i>}{Boolean(row.is_default_shipping) && <i className="primary">Default shipping</i>}</div>}</div>{editing && <div className="managed-relation-card-actions"><button type="button" onClick={() => setOpen(index)} aria-label={`Edit ${label(row)}`}><Pencil/></button><button type="button" onClick={() => archive(index)} aria-label={`Arsipkan ${label(row)}`}><Trash2/></button></div>}</article>; })}{!activeRows.length && <div className="managed-relation-card-empty">{isAddress ? "Belum ada alamat khusus. Alamat utama masih menjadi fallback." : "Belum ada PIC untuk pelanggan ini."}</div>}</div>
+    {editing && <button type="button" className="workspace-relation-add" onClick={add}><Plus/>{isAddress ? "Tambah alamat" : "Tambah PIC"}</button>}
+    {open !== undefined && rows[open] && <div className="managed-relation-editor-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(undefined); }}><section className="managed-relation-editor" role="dialog" aria-modal="true"><header><div><h3>{isAddress ? "Alamat pelanggan" : "Kontak/PIC"}</h3><p>{isAddress ? "Atur lokasi, penerima, penggunaan, dan default transaksi." : "Simpan orang yang dapat dihubungi pada customer ini."}</p></div><button type="button" onClick={() => setOpen(undefined)} aria-label="Tutup"><X/></button></header><main>{columns.filter((column) => column.name !== "active").map((column) => <label key={column.name} className={["street", "street2"].includes(column.name) ? "wide" : undefined}><span>{column.label}{column.required && <b>*</b>}</span><FieldEditor actionId={actionId} field={column} value={rows[open][column.name]} onChange={(next) => update(open, column.name, next)}/></label>)}</main><footer><Button type="button" onClick={() => setOpen(undefined)}>Selesai</Button></footer></section></div>}
+  </div>;
+}
+
 function RelationTable({ actionId, field, value, onChange, editing, parentValues = {} }: EditorProps & { editing: boolean }) {
   const rows = Array.isArray(value) ? value as Record<string, unknown>[] : [];
   const columns = field.relationView?.columns || [];
@@ -82,6 +110,8 @@ function RelationTable({ actionId, field, value, onChange, editing, parentValues
 }
 registerFieldRenderer("many2many", (props) => <RelationTable actionId={0} {...props} onChange={() => undefined} editing={false}/>);
 registerFieldRenderer("one2many", display.many2many);
+registerFieldRenderer("managed_addresses", (props) => <ManagedRelationCards actionId={0} {...props} onChange={() => undefined} editing={false}/>);
+registerFieldRenderer("managed_contacts", display.managed_addresses);
 registerFieldRenderer("boolean", ({ value }) => <span className={value ? "workspace-boolean-on" : "workspace-boolean-off"}>{value ? "Ya" : "Tidak"}</span>);
 registerFieldRenderer("boolean_toggle", display.boolean);
 registerFieldRenderer("boolean_favorite", display.boolean);
@@ -145,6 +175,8 @@ editors.datetime = ({ field, value, onChange }) => { const current = localDateTi
 editors.binary = ({ field, value, onChange }) => <label className="workspace-file-input"><input type="file" accept={field.accept || (field.widget === "pdf_viewer" ? "application/pdf" : undefined)} onChange={(event) => { const file = event.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => onChange(String(reader.result).split(",", 2)[1] || false); reader.readAsDataURL(file); }}/><Upload/><span>{value ? "Ganti berkas" : "Pilih berkas"}</span>{Boolean(value) && <Check/>}</label>;
 editors.image = ({ value, onChange }) => <ImageUpload value={value} onChange={onChange}/>;
 editors.one2many = (props) => <RelationTable {...props} editing/>;
+editors.managed_addresses = (props) => <ManagedRelationCards {...props} editing/>;
+editors.managed_contacts = editors.managed_addresses;
 editors.many2many = (props) => props.field.relationView ? <RelationTable {...props} editing/> : <TagsEditor {...props}/>;
 editors.many2many_tags = (props) => <TagsEditor {...props}/>;
 editors.autosave_many2many_tags = editors.many2many_tags;
