@@ -215,7 +215,6 @@ editors.state_selection = editors.selection;
 editors.label_selection = editors.selection;
 editors.selection_badge = editors.selection;
 editors.account_type_selection = editors.selection;
-editors.image = editors.binary;
 editors.attachment_image = editors.image;
 editors.background_image = editors.image;
 editors.pdf_viewer = editors.binary;
