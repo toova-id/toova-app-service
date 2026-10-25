@@ -464,6 +464,28 @@
   .luma-contact-notes { @apply grid grid-cols-[24px_minmax(0,1fr)] items-start gap-2; }
   .luma-contact-notes > svg { @apply mt-2 h-3.5 w-3.5 text-muted-foreground; }
   .luma-contact-notes .luma-customer-field { @apply grid-cols-[128px_minmax(0,1fr)]; }
+  .luma-product-inventory-summary { @apply grid gap-3; }
+  .luma-product-stock-status { @apply flex items-center gap-3 rounded-md border bg-muted/20 px-4 py-3; }
+  .luma-product-stock-status > i { @apply h-2 w-2 shrink-0 rounded-full bg-muted-foreground/50; }
+  .luma-product-stock-status.tracked > i { @apply bg-primary; box-shadow: 0 0 0 4px rgb(0 206 124 / .10); }
+  .luma-product-stock-status > div { @apply flex min-w-0 flex-col gap-0.5; }
+  .luma-product-stock-status strong { @apply text-[11px] font-medium; }
+  .luma-product-stock-status span { @apply text-[9px] text-muted-foreground; }
+  .luma-product-metrics { @apply grid grid-cols-1 overflow-hidden rounded-md border bg-background sm:grid-cols-2; }
+  .luma-product-metrics article { @apply flex min-h-32 gap-4 border-b p-5 sm:border-b-0 sm:border-r; }
+  .luma-product-metrics article:last-child { @apply border-b-0 sm:border-r-0; }
+  .luma-product-metric-icon { @apply grid h-9 w-9 shrink-0 place-items-center rounded-md bg-accent text-accent-foreground; }
+  .luma-product-metric-icon svg { @apply h-4 w-4; }
+  .luma-product-metrics article.forecast .luma-product-metric-icon { @apply bg-muted text-muted-foreground; }
+  .luma-product-metric-copy { @apply flex min-w-0 flex-1 flex-col; }
+  .luma-product-metric-copy > span { @apply text-[9px] font-semibold uppercase tracking-[.06em] text-muted-foreground; }
+  .luma-product-metric-copy > strong { @apply mt-1 flex items-baseline gap-1.5 text-2xl font-semibold tracking-[-.035em] tabular-nums; }
+  .luma-product-metric-copy > strong small { @apply max-w-32 truncate text-[10px] font-normal tracking-normal text-muted-foreground; }
+  .luma-product-metric-copy > p { @apply mt-auto pt-2 text-[9px] text-muted-foreground; }
+  .luma-product-empty { @apply mx-8 my-8 grid min-h-48 place-items-center content-center gap-2 rounded-md border border-dashed bg-muted/10 px-5 text-center; }
+  .luma-product-empty > svg { @apply h-6 w-6 text-muted-foreground; }
+  .luma-product-empty strong { @apply text-xs font-medium; }
+  .luma-product-empty span { @apply max-w-md text-[10px] text-muted-foreground; }
   .workspace-loading, .workspace-error { @apply grid min-h-[calc(100vh-44px)] place-items-center content-center gap-2 text-xs text-muted-foreground; }
   .workspace-error strong { @apply text-sm text-foreground; }
   .luma-boot { @apply grid min-h-screen place-items-center content-center gap-3 bg-background text-muted-foreground; }
