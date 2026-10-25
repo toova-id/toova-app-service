@@ -502,11 +502,16 @@
   .luma-attribute-line-fields > label { @apply min-w-0; }
   .luma-attribute-line-fields .luma-combobox-trigger, .luma-attribute-line-fields .luma-multi-select { @apply w-full; }
   .luma-attribute-lines label { @apply grid min-w-0 gap-1; }
-  .luma-attribute-lines label > span, .luma-attribute-prices > span { @apply text-[9px] font-medium text-muted-foreground; }
-  .luma-attribute-prices { @apply grid gap-2 rounded-md bg-muted/30 p-3 md:grid-cols-2 xl:grid-cols-3; }
-  .luma-attribute-prices > span { @apply col-span-full; }
-  .luma-attribute-prices label { @apply grid grid-cols-[minmax(80px,1fr)_110px] items-center gap-2; }
-  .luma-attribute-prices input { @apply h-7 rounded-md border border-input bg-background px-2 text-right text-[11px] outline-none focus:border-[var(--focus-border)]; }
+  .luma-attribute-lines label > span { @apply text-[9px] font-medium text-muted-foreground; }
+  .luma-attribute-prices { @apply min-w-0 overflow-hidden rounded-md border; }
+  .luma-attribute-prices > header, .luma-attribute-prices > label { @apply grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(130px,180px)] items-center gap-4 px-3; }
+  .luma-attribute-prices > header { @apply min-h-8 bg-muted/40 text-[9px] font-medium uppercase tracking-[.02em] text-muted-foreground; }
+  .luma-attribute-prices > header span:last-child { @apply text-right; }
+  .luma-attribute-prices > label { @apply min-h-10 border-t; }
+  .luma-attribute-prices > label > span { @apply min-w-0 truncate text-[10px] font-medium; }
+  .luma-attribute-prices > label > div { @apply grid grid-cols-[14px_minmax(0,1fr)] items-center gap-1; }
+  .luma-attribute-prices > label > div > span { @apply text-center text-[10px] text-muted-foreground; }
+  .luma-attribute-prices input { @apply h-7 min-w-0 w-full rounded-md border border-input bg-background px-2 text-right text-[11px] outline-none focus:border-[var(--focus-border)]; }
   .luma-variant-empty { @apply grid gap-1 px-4 py-8 text-center text-[10px] text-muted-foreground; }
   .luma-variant-empty strong { @apply text-xs font-medium text-foreground; }
   .luma-variant-empty > a { @apply mx-auto mt-2; }
