@@ -120,6 +120,8 @@ def _relation_domain(field, parent_values):
     if field['name'] == 'state_id' and field.get('relation') == 'res.country.state':
         country_id = _domain_value(parent_values.get('country_id'))
         return [('country_id', '=', country_id)] if country_id else []
+    if field.get('relation') == 'res.partner' and field.get('parent') == 'seller_ids':
+        return [('supplier_rank', '>', 0), ('is_company', '=', True), ('active', '=', True)]
     if field.get('relation') != 'managed.indonesia.region':
         return domain
     mapping = {
@@ -585,12 +587,16 @@ def _normalize_form_values(values, schema):
             normalized[name] = [(6, 0, [item[0] if isinstance(item, (list, tuple)) else item for item in rows])]
             continue
         allowed = {column['name'] for column in relation_view['columns']}
-        existing_ids = [row['id'] for row in rows if isinstance(row.get('id'), int)]
-        if field.get('widget') in ('managed_contacts', 'managed_bank_accounts'):
+        existing_ids = [row['id'] for row in rows if isinstance(row.get('id'), int) and row.get('active', True) is not False]
+        if field.get('widget') in ('managed_contacts', 'managed_bank_accounts', 'managed_supplier_prices'):
             commands = []
         else:
             commands = [(6, 0, existing_ids)]
         for row in rows:
+            if field.get('widget') == 'managed_supplier_prices' and row.get('active', True) is False:
+                if isinstance(row.get('id'), int):
+                    commands.append((2, row['id'], 0))
+                continue
             data = {key: value[0] if isinstance(value := row.get(key), (list, tuple)) and value else value for key in allowed if key in row}
             if field.get('widget') == 'managed_contacts':
                 data.setdefault('type', 'contact')

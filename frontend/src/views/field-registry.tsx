@@ -1,4 +1,4 @@
-import { Check, Clipboard, Download, ExternalLink, FileText, Landmark, MapPin, Pencil, Plus, Trash2, Upload, UserRound, X } from "lucide-react";
+import { Check, Clipboard, Download, ExternalLink, FileText, Landmark, MapPin, Pencil, Plus, Trash2, Truck, Upload, UserRound, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api, apiMutation } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -72,6 +72,7 @@ function ManagedRelationCards({ actionId, field, value, onChange, editing }: Edi
   const draftSequence = useRef(0);
   const isAddress = field.widget === "managed_addresses";
   const isBank = field.widget === "managed_bank_accounts";
+  const isSupplier = field.widget === "managed_supplier_prices";
   const activeRows = rows.filter((row) => row.active !== false);
   const countryLabel = (row: Record<string, unknown>) => Array.isArray(row.country_id) ? String(row.country_id[1]) : "";
   const visibleColumn = (column: FieldSchema) => {
@@ -124,15 +125,16 @@ function ManagedRelationCards({ actionId, field, value, onChange, editing }: Edi
     close();
   };
   const archive = (index: number) => onChange(rows.map((row, rowIndex) => rowIndex === index ? { ...row, active: false, is_default_billing: false, is_default_shipping: false } : row));
-  const label = (row: Record<string, unknown>) => String(row.label || row.name || row.bank_name || (isAddress ? "Alamat baru" : isBank ? "Rekening baru" : "Kontak baru"));
+  const label = (row: Record<string, unknown>) => String(Array.isArray(row.partner_id) ? row.partner_id[1] : row.label || row.name || row.bank_name || (isAddress ? "Alamat baru" : isBank ? "Rekening baru" : isSupplier ? "Harga vendor baru" : "Kontak baru"));
   const summary = (row: Record<string, unknown>) => isAddress
     ? [row.managed_address_text, Array.isArray(row.indonesia_village_id) ? row.indonesia_village_id[1] : false, Array.isArray(row.indonesia_district_id) ? row.indonesia_district_id[1] : false, Array.isArray(row.indonesia_regency_id) ? row.indonesia_regency_id[1] : row.city, Array.isArray(row.state_id) ? row.state_id[1] : false, row.zip, Array.isArray(row.country_id) ? row.country_id[1] : false].filter(Boolean).join(", ")
     : isBank ? [row.acc_number, row.acc_holder_name, Array.isArray(row.currency_id) ? row.currency_id[1] : false].filter(Boolean).join(" · ")
+    : isSupplier ? [row.product_code, `${Number(row.min_qty || 0).toLocaleString("id-ID")}+`, `${Array.isArray(row.currency_id) ? row.currency_id[1] : ""} ${Number(row.price || 0).toLocaleString("id-ID")}`, `${Number(row.delay || 0)} hari`].filter(Boolean).join(" · ")
     : [row.function, row.email, row.mobile || row.phone].filter(Boolean).join(" · ");
   return <div className="managed-relation-cards">
-    <div className="managed-relation-list">{activeRows.map((row) => { const index = rows.indexOf(row); return <article key={String(row.id || `new-${index}`)} className="managed-relation-card"><div className="managed-relation-card-icon">{isAddress ? <MapPin/> : isBank ? <Landmark/> : <UserRound/>}</div><div className="managed-relation-card-copy"><strong>{label(row)}</strong><span>{summary(row) || (isAddress ? "Alamat belum lengkap" : "Kontak belum lengkap")}</span>{isAddress && <div className="managed-address-badges">{Boolean(row.use_for_billing) && <i>Billing</i>}{Boolean(row.use_for_shipping) && <i>Shipping</i>}{Boolean(row.is_default_billing) && <i className="primary">Default billing</i>}{Boolean(row.is_default_shipping) && <i className="primary">Default shipping</i>}</div>}</div>{editing && <div className="managed-relation-card-actions"><button type="button" onClick={() => edit(index)} aria-label={`Edit ${label(row)}`}><Pencil/></button><button type="button" onClick={() => archive(index)} aria-label={`Arsipkan ${label(row)}`}><Trash2/></button></div>}</article>; })}{!activeRows.length && <div className="managed-relation-card-empty">{isAddress ? "Belum ada alamat khusus. Alamat utama masih menjadi fallback." : isBank ? "Belum ada rekening pembayaran." : "Belum ada PIC."}</div>}</div>
-    {editing && <button type="button" className="workspace-relation-add" onClick={add}><Plus/>{isAddress ? "Tambah alamat" : isBank ? "Tambah rekening" : "Tambah PIC"}</button>}
-    {open !== undefined && draft && <div className="managed-relation-editor-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}><section className="managed-relation-editor" role="dialog" aria-modal="true"><header><div><h3>{isAddress ? "Alamat bisnis" : isBank ? "Rekening pembayaran" : "Kontak/PIC"}</h3><p>{isAddress ? "Atur lokasi, penerima, penggunaan, dan default transaksi." : isBank ? "Simpan rekening resmi untuk pembayaran vendor." : "Simpan orang yang dapat dihubungi pada organisasi ini."}</p></div><button type="button" onClick={close} aria-label="Tutup"><X/></button></header><main>{columns.filter(visibleColumn).map((column) => <label key={column.name} className={column.name === "managed_address_text" ? "wide" : undefined}><span>{column.label}{column.required && <b>*</b>}</span><FieldEditor actionId={actionId} field={column} value={draft[column.name]} parentValues={draft} onChange={(next) => updateDraft(column.name, next)}/></label>)}</main><footer><Button type="button" variant="ghost" onClick={close}>Batal</Button><Button type="button" onClick={saveDraft}>Simpan</Button></footer></section></div>}
+    <div className="managed-relation-list">{activeRows.map((row) => { const index = rows.indexOf(row); return <article key={String(row.id || `new-${index}`)} className="managed-relation-card"><div className="managed-relation-card-icon">{isAddress ? <MapPin/> : isBank ? <Landmark/> : isSupplier ? <Truck/> : <UserRound/>}</div><div className="managed-relation-card-copy"><strong>{label(row)}</strong><span>{summary(row) || (isAddress ? "Alamat belum lengkap" : "Kontak belum lengkap")}</span>{isAddress && <div className="managed-address-badges">{Boolean(row.use_for_billing) && <i>Billing</i>}{Boolean(row.use_for_shipping) && <i>Shipping</i>}{Boolean(row.is_default_billing) && <i className="primary">Default billing</i>}{Boolean(row.is_default_shipping) && <i className="primary">Default shipping</i>}</div>}</div>{editing && <div className="managed-relation-card-actions"><button type="button" onClick={() => edit(index)} aria-label={`Edit ${label(row)}`}><Pencil/></button><button type="button" onClick={() => archive(index)} aria-label={`Arsipkan ${label(row)}`}><Trash2/></button></div>}</article>; })}{!activeRows.length && <div className="managed-relation-card-empty">{isAddress ? "Belum ada alamat khusus. Alamat utama masih menjadi fallback." : isBank ? "Belum ada rekening pembayaran." : isSupplier ? "Belum ada harga vendor. Cost default tetap dipakai." : "Belum ada PIC."}</div>}</div>
+    {editing && <button type="button" className="workspace-relation-add" onClick={add}><Plus/>{isAddress ? "Tambah alamat" : isBank ? "Tambah rekening" : isSupplier ? "Tambah harga vendor" : "Tambah PIC"}</button>}
+    {open !== undefined && draft && <div className="managed-relation-editor-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}><section className="managed-relation-editor" role="dialog" aria-modal="true"><header><div><h3>{isAddress ? "Alamat bisnis" : isBank ? "Rekening pembayaran" : isSupplier ? "Harga vendor" : "Kontak/PIC"}</h3><p>{isAddress ? "Atur lokasi, penerima, penggunaan, dan default transaksi." : isBank ? "Simpan rekening resmi untuk pembayaran vendor." : isSupplier ? "Atur kode vendor, minimum pembelian, harga, dan lead time." : "Simpan orang yang dapat dihubungi pada organisasi ini."}</p></div><button type="button" onClick={close} aria-label="Tutup"><X/></button></header><main>{columns.filter(visibleColumn).map((column) => <label key={column.name} className={column.name === "managed_address_text" ? "wide" : undefined}><span>{column.label}{column.required && <b>*</b>}</span><FieldEditor actionId={actionId} field={column} value={draft[column.name]} parentValues={draft} onChange={(next) => updateDraft(column.name, next)}/></label>)}</main><footer><Button type="button" variant="ghost" onClick={close}>Batal</Button><Button type="button" onClick={saveDraft}>Simpan</Button></footer></section></div>}
   </div>;
 }
 
@@ -158,6 +160,7 @@ registerFieldRenderer("one2many", display.many2many);
 registerFieldRenderer("managed_addresses", (props) => <ManagedRelationCards actionId={0} {...props} onChange={() => undefined} editing={false}/>);
 registerFieldRenderer("managed_contacts", display.managed_addresses);
 registerFieldRenderer("managed_bank_accounts", display.managed_addresses);
+registerFieldRenderer("managed_supplier_prices", display.managed_addresses);
 registerFieldRenderer("boolean", ({ value }) => <span className={value ? "workspace-boolean-on" : "workspace-boolean-off"}>{value ? "Ya" : "Tidak"}</span>);
 registerFieldRenderer("boolean_toggle", display.boolean);
 registerFieldRenderer("boolean_favorite", display.boolean);
@@ -224,6 +227,7 @@ editors.one2many = (props) => <RelationTable {...props} editing/>;
 editors.managed_addresses = (props) => <ManagedRelationCards {...props} editing/>;
 editors.managed_contacts = editors.managed_addresses;
 editors.managed_bank_accounts = editors.managed_addresses;
+editors.managed_supplier_prices = editors.managed_addresses;
 editors.many2many = (props) => props.field.relationView ? <RelationTable {...props} editing/> : <TagsEditor {...props}/>;
 editors.many2many_tags = (props) => <TagsEditor {...props}/>;
 editors.autosave_many2many_tags = editors.many2many_tags;
