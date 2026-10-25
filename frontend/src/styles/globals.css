@@ -515,8 +515,7 @@
   .luma-attribute-summary strong { @apply font-medium; }
   .luma-attribute-summary i { @apply text-[10px] not-italic text-muted-foreground; }
   .luma-attribute-color { @apply h-2.5 w-2.5 rounded-full border; }
-  .luma-attribute-page .luma-customer-body { @apply max-w-4xl; }
-  .luma-attribute-name { @apply max-w-xl; }
+  .luma-attribute-name { @apply grid gap-4 md:grid-cols-2; }
   .luma-attribute-values { @apply overflow-hidden rounded-md border; }
   .luma-attribute-values-head, .luma-attribute-value-row { @apply grid grid-cols-[minmax(180px,1fr)_32px] items-start gap-3 px-3; }
   .luma-attribute-values.color-mode .luma-attribute-values-head, .luma-attribute-values.color-mode .luma-attribute-value-row { @apply sm:grid-cols-[minmax(180px,1fr)_150px_32px]; }
@@ -546,7 +545,7 @@
   .luma-attribute-advanced > button svg.open { @apply rotate-180; }
   .luma-attribute-advanced > .luma-customer-grid { @apply border-t p-4; }
   .luma-attribute-mode-lock { @apply col-span-full text-[9px] text-amber-700; }
-  .luma-attribute-usage { @apply max-w-xs; }
+  .luma-attribute-usage { @apply grid gap-4 md:grid-cols-2; }
   .luma-variants-table { @apply overflow-x-auto rounded-md border; }
   .luma-variants-table table { @apply w-full min-w-[880px] border-collapse text-[11px]; }
   .luma-variants-table th { @apply h-9 border-b bg-muted/40 px-3 text-left text-[9px] font-medium uppercase tracking-[.02em] text-muted-foreground; }
