@@ -137,7 +137,7 @@ def _relation_domain(field, parent_values):
         return [('attribute_id', '=', attribute_id)] if attribute_id else [('id', '=', 0)]
     if field.get('relation') == 'product.product' and field.get('parent') == 'item_ids':
         template_id = _domain_value(parent_values.get('product_tmpl_id'))
-        return [('product_tmpl_id', '=', template_id)] if template_id else []
+        return [('product_tmpl_id', '=', template_id)] if template_id else [('id', '=', 0)]
     if field.get('relation') == 'product.pricelist' and field.get('parent') == 'item_ids':
         parent_id = _domain_value(parent_values.get('__parent_id'))
         return [('id', '!=', parent_id)] if parent_id else []
