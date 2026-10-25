@@ -49,9 +49,61 @@ class TestManagedProducts(TransactionCase):
         self.assertIn('managed_product_kind', fields)
         self.assertIn('managed_track_inventory', fields)
         self.assertEqual(fields['default_code']['label'], 'SKU')
+        self.assertEqual(fields['attribute_line_ids']['widget'], 'managed_attribute_lines')
+        self.assertEqual(fields['product_variant_ids']['widget'], 'managed_variants')
         self.assertEqual(fields['seller_ids']['widget'], 'managed_supplier_prices')
         self.assertIn('property_account_income_id', fields)
         self.assertNotIn('qty_available', contract['form']['write_fields'])
+
+    def test_native_variant_generation_and_value_prices(self):
+        self.env.company.managed_product_variants = True
+        attribute = self.env['product.attribute'].create({'name': 'Managed Size', 'create_variant': 'always'})
+        small, large = self.env['product.attribute.value'].create([
+            {'name': 'S', 'attribute_id': attribute.id},
+            {'name': 'L', 'attribute_id': attribute.id},
+        ])
+        product = self.env['product.template'].with_context(managed_ui=True).create({
+            'name': 'Managed Shirt',
+            'attribute_line_ids': [(0, 0, {
+                'attribute_id': attribute.id,
+                'value_ids': [(6, 0, [small.id, large.id])],
+            })],
+        })
+        self.assertEqual(product.product_variant_count, 2)
+        line = product.attribute_line_ids
+        line.managed_value_prices = {str(small.id): 0, str(large.id): 15000}
+        line._inverse_managed_value_prices()
+        self.assertEqual(
+            line.product_template_value_ids.filtered(lambda value: value.product_attribute_value_id == large).price_extra,
+            15000,
+        )
+        variant = product.product_variant_ids.filtered(
+            lambda item: large in item.product_template_attribute_value_ids.product_attribute_value_id
+        )
+        variant.with_context(managed_ui=True).write({'default_code': 'SHIRT-L', 'barcode': '9876543210123'})
+        self.assertEqual(variant.managed_variant_name, 'L')
+
+    def test_vendor_price_can_target_variant(self):
+        self.env.company.managed_product_variants = True
+        attribute = self.env['product.attribute'].create({'name': 'Managed Color', 'create_variant': 'always'})
+        black, white = self.env['product.attribute.value'].create([
+            {'name': 'Black', 'attribute_id': attribute.id},
+            {'name': 'White', 'attribute_id': attribute.id},
+        ])
+        vendor = self.env['res.partner'].create({'name': 'Variant Vendor', 'supplier_rank': 1})
+        product = self.env['product.template'].with_context(managed_ui=True).create({
+            'name': 'Variant Product',
+            'attribute_line_ids': [(0, 0, {
+                'attribute_id': attribute.id,
+                'value_ids': [(6, 0, [black.id, white.id])],
+            })],
+        })
+        variant = product.product_variant_ids[:1]
+        supplier = self.env['product.supplierinfo'].create({
+            'partner_id': vendor.id, 'product_tmpl_id': product.id,
+            'product_id': variant.id, 'price': 10000,
+        })
+        self.assertEqual(supplier.product_id, variant)
 
     def test_vendor_price_uses_native_supplierinfo(self):
         vendor = self.env['res.partner'].create({'name': 'Managed Vendor', 'supplier_rank': 1})

@@ -28,13 +28,13 @@ const localDateTime = (value: Value) => value ? String(value).replace(" ", "T").
 const relationId = (item: unknown) => Array.isArray(item) ? Number(item[0]) : Number(item);
 const relationLabel = (item: unknown) => Array.isArray(item) ? String(item[1]) : String(item);
 
-function relationParams(field: FieldSchema, query = "", parentValues?: Record<string, unknown>) { return new URLSearchParams({ q: query, ...(field.parent ? { parent: field.parent } : {}), ...(parentValues ? { values: JSON.stringify(parentValues) } : {}) }); }
+function relationParams(field: FieldSchema, query = "", parentValues?: Record<string, unknown>) { return new URLSearchParams({ q: query, ...(field.parent ? { parent: field.parent } : {}), ...(parentValues ? { values: JSON.stringify(parentValues) } : {}), ...(parentValues?.id ? { recordId: String(parentValues.id) } : {}) }); }
 
-function TagsEditor({ actionId, field, value, onChange }: EditorProps) {
+function TagsEditor({ actionId, field, value, onChange, parentValues }: EditorProps) {
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<{ id: number; label: string }[]>([]);
   const selected = Array.isArray(value) ? value : [];
-  useEffect(() => { const params = new URLSearchParams({ q: query, ...(field.parent ? { parent: field.parent } : {}) }); const timeout = setTimeout(() => api<{ items: { id: number; label: string }[] }>(`/api/v1/ui/actions/${actionId}/relations/${field.name}?${params}`).then((response) => setItems(response.items)).catch(() => setItems([])), 120); return () => clearTimeout(timeout); }, [actionId, field.name, field.parent, query]);
+  useEffect(() => { const params = relationParams(field, query, parentValues); const timeout = setTimeout(() => api<{ items: { id: number; label: string }[] }>(`/api/v1/ui/actions/${actionId}/relations/${field.name}?${params}`).then((response) => setItems(response.items)).catch(() => setItems([])), 120); return () => clearTimeout(timeout); }, [actionId, field.name, field.parent, parentValues, query]);
   const selectedIds = new Set(selected.map((item) => Array.isArray(item) ? item[0] : item));
   const options = [...selected.map((item) => ({ value: relationId(item), label: relationLabel(item) })), ...items.filter((item) => !selectedIds.has(item.id)).map((item) => ({ value: item.id, label: item.label }))];
   return <MultiSelect options={options} value={selected.map((item) => ({ value: relationId(item), label: relationLabel(item) }))} onSearch={setQuery} onChange={(next) => onChange(next.map((item) => [Number(item.value), item.label]))} placeholder="Pilih..."/>;
@@ -64,7 +64,7 @@ registerFieldRenderer("url", ({ value }) => value ? <a className="workspace-fiel
 registerFieldRenderer("email", ({ value }) => value ? <a className="workspace-field-link" href={`mailto:${String(value)}`}>{String(value)}</a> : <>—</>);
 registerFieldRenderer("phone", ({ value }) => value ? <a className="workspace-field-link" href={`tel:${String(value)}`}>{String(value)}</a> : <>—</>);
 registerFieldRenderer("CopyClipboardChar", ({ value }) => value ? <span className="workspace-copy-value">{String(value)}<button type="button" aria-label="Salin" onClick={() => navigator.clipboard.writeText(String(value))}><Clipboard/></button></span> : <>—</>);
-function ManagedRelationCards({ actionId, field, value, onChange, editing }: EditorProps & { editing: boolean }) {
+function ManagedRelationCards({ actionId, field, value, onChange, editing, parentValues }: EditorProps & { editing: boolean }) {
   const rows = Array.isArray(value) ? value as Record<string, unknown>[] : [];
   const columns = field.relationView?.columns || [];
   const [open, setOpen] = useState<number>();
@@ -73,9 +73,11 @@ function ManagedRelationCards({ actionId, field, value, onChange, editing }: Edi
   const isAddress = field.widget === "managed_addresses";
   const isBank = field.widget === "managed_bank_accounts";
   const isSupplier = field.widget === "managed_supplier_prices";
+  const productIdColumn = columns.find((column) => column.name === "product_id");
   const activeRows = rows.filter((row) => row.active !== false);
   const countryLabel = (row: Record<string, unknown>) => Array.isArray(row.country_id) ? String(row.country_id[1]) : "";
   const visibleColumn = (column: FieldSchema) => {
+    if (isSupplier && column.name === "product_id" && !parentValues?.id) return false;
     if (!isAddress) return column.name !== "active";
     if (column.name === "active") return false;
     const indonesia = countryLabel(draft || {}) === "Indonesia";
@@ -106,12 +108,12 @@ function ManagedRelationCards({ actionId, field, value, onChange, editing }: Edi
     if (field.relationView?.onchange?.[name] !== "1") return;
     const request = ++draftSequence.current;
     try {
-      const result = await apiMutation<{ values: Record<string, unknown> }>(`/api/v1/ui/actions/${actionId}/relations/${field.name}/onchange`, "POST", { values: next, parentValues: {}, field: name });
+      const result = await apiMutation<{ values: Record<string, unknown> }>(`/api/v1/ui/actions/${actionId}/relations/${field.name}/onchange`, "POST", { values: next, parentValues: parentValues || {}, field: name });
       if (request === draftSequence.current) setDraft((current) => ({ ...(current || {}), ...result.values }));
     } catch { /* Main form save remains server-validated. */ }
   };
   const edit = (index: number) => { setOpen(index); setDraft({ ...rows[index] }); };
-  const add = () => { setOpen(rows.length); setDraft({ active: true, country_id: false }); };
+  const add = () => { setOpen(rows.length); setDraft({ active: true, country_id: false, product_id: false }); };
   const close = () => { setOpen(undefined); setDraft(undefined); };
   const saveDraft = () => {
     if (open === undefined || !draft) return;
@@ -134,7 +136,7 @@ function ManagedRelationCards({ actionId, field, value, onChange, editing }: Edi
   return <div className="managed-relation-cards">
     <div className="managed-relation-list">{activeRows.map((row) => { const index = rows.indexOf(row); return <article key={String(row.id || `new-${index}`)} className="managed-relation-card"><div className="managed-relation-card-icon">{isAddress ? <MapPin/> : isBank ? <Landmark/> : isSupplier ? <Truck/> : <UserRound/>}</div><div className="managed-relation-card-copy"><strong>{label(row)}</strong><span>{summary(row) || (isAddress ? "Alamat belum lengkap" : "Kontak belum lengkap")}</span>{isAddress && <div className="managed-address-badges">{Boolean(row.use_for_billing) && <i>Billing</i>}{Boolean(row.use_for_shipping) && <i>Shipping</i>}{Boolean(row.is_default_billing) && <i className="primary">Default billing</i>}{Boolean(row.is_default_shipping) && <i className="primary">Default shipping</i>}</div>}</div>{editing && <div className="managed-relation-card-actions"><button type="button" onClick={() => edit(index)} aria-label={`Edit ${label(row)}`}><Pencil/></button><button type="button" onClick={() => archive(index)} aria-label={`Arsipkan ${label(row)}`}><Trash2/></button></div>}</article>; })}{!activeRows.length && <div className="managed-relation-card-empty">{isAddress ? "Belum ada alamat khusus. Alamat utama masih menjadi fallback." : isBank ? "Belum ada rekening pembayaran." : isSupplier ? "Belum ada harga vendor. Cost default tetap dipakai." : "Belum ada PIC."}</div>}</div>
     {editing && <button type="button" className="workspace-relation-add" onClick={add}><Plus/>{isAddress ? "Tambah alamat" : isBank ? "Tambah rekening" : isSupplier ? "Tambah harga vendor" : "Tambah PIC"}</button>}
-    {open !== undefined && draft && <div className="managed-relation-editor-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}><section className="managed-relation-editor" role="dialog" aria-modal="true"><header><div><h3>{isAddress ? "Alamat bisnis" : isBank ? "Rekening pembayaran" : isSupplier ? "Harga vendor" : "Kontak/PIC"}</h3><p>{isAddress ? "Atur lokasi, penerima, penggunaan, dan default transaksi." : isBank ? "Simpan rekening resmi untuk pembayaran vendor." : isSupplier ? "Atur kode vendor, minimum pembelian, harga, dan lead time." : "Simpan orang yang dapat dihubungi pada organisasi ini."}</p></div><button type="button" onClick={close} aria-label="Tutup"><X/></button></header><main>{columns.filter(visibleColumn).map((column) => <label key={column.name} className={column.name === "managed_address_text" ? "wide" : undefined}><span>{column.label}{column.required && <b>*</b>}</span><FieldEditor actionId={actionId} field={column} value={draft[column.name]} parentValues={draft} onChange={(next) => updateDraft(column.name, next)}/></label>)}</main><footer><Button type="button" variant="ghost" onClick={close}>Batal</Button><Button type="button" onClick={saveDraft}>Simpan</Button></footer></section></div>}
+    {open !== undefined && draft && <div className="managed-relation-editor-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}><section className="managed-relation-editor" role="dialog" aria-modal="true"><header><div><h3>{isAddress ? "Alamat bisnis" : isBank ? "Rekening pembayaran" : isSupplier ? "Harga vendor" : "Kontak/PIC"}</h3><p>{isAddress ? "Atur lokasi, penerima, penggunaan, dan default transaksi." : isBank ? "Simpan rekening resmi untuk pembayaran vendor." : isSupplier ? `Atur ${productIdColumn && parentValues?.id ? "scope variant, " : ""}kode vendor, minimum pembelian, harga, dan lead time.` : "Simpan orang yang dapat dihubungi pada organisasi ini."}</p></div><button type="button" onClick={close} aria-label="Tutup"><X/></button></header><main>{columns.filter(visibleColumn).map((column) => <label key={column.name} className={column.name === "managed_address_text" ? "wide" : undefined}><span>{column.label}{column.required && <b>*</b>}</span><FieldEditor actionId={actionId} field={column} value={draft[column.name]} parentValues={draft} onChange={(next) => updateDraft(column.name, next)}/></label>)}</main><footer><Button type="button" variant="ghost" onClick={close}>Batal</Button><Button type="button" onClick={saveDraft}>Simpan</Button></footer></section></div>}
   </div>;
 }
 

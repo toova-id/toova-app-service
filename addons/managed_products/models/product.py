@@ -8,6 +8,12 @@ class ProductProduct(models.Model):
     _inherit = 'product.product'
 
     managed_sku_normalized = fields.Char(compute='_compute_managed_sku', store=True, index=True)
+    managed_variant_name = fields.Char(compute='_compute_managed_variant_name', string='Variant')
+
+    @api.depends('product_template_attribute_value_ids.name')
+    def _compute_managed_variant_name(self):
+        for product in self:
+            product.managed_variant_name = product.product_template_attribute_value_ids._get_combination_name() or _('Default')
 
     @api.depends('default_code')
     def _compute_managed_sku(self):
@@ -40,6 +46,29 @@ class ProductProduct(models.Model):
         return result
 
 
+class ProductTemplateAttributeLine(models.Model):
+    _inherit = 'product.template.attribute.line'
+
+    managed_creation_mode = fields.Selection(related='attribute_id.create_variant', string='Creation Mode')
+    managed_value_prices = fields.Json(compute='_compute_managed_value_prices', inverse='_inverse_managed_value_prices')
+
+    @api.depends('product_template_value_ids.price_extra', 'product_template_value_ids.product_attribute_value_id')
+    def _compute_managed_value_prices(self):
+        for line in self:
+            line.managed_value_prices = {
+                str(value.product_attribute_value_id.id): value.price_extra
+                for value in line.product_template_value_ids
+            }
+
+    def _inverse_managed_value_prices(self):
+        for line in self:
+            prices = line.managed_value_prices or {}
+            for value in line.product_template_value_ids:
+                key = str(value.product_attribute_value_id.id)
+                if key in prices:
+                    value.price_extra = prices[key] or 0.0
+
+
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
@@ -52,6 +81,18 @@ class ProductTemplate(models.Model):
         compute='_compute_managed_product_controls', inverse='_inverse_managed_product_controls',
         store=True, readonly=False, precompute=True, string='Track Inventory',
     )
+    managed_variant_preview_count = fields.Integer(compute='_compute_managed_variant_preview_count', string='Variant Combinations')
+
+    @api.depends('attribute_line_ids.active', 'attribute_line_ids.value_ids', 'attribute_line_ids.attribute_id.create_variant')
+    def _compute_managed_variant_preview_count(self):
+        for product in self:
+            lines = product.attribute_line_ids.filtered(
+                lambda line: line.active and line.attribute_id.create_variant != 'no_variant'
+            )
+            count = 1
+            for line in lines:
+                count *= len(line.value_ids)
+            product.managed_variant_preview_count = count if lines else 1
 
     @api.model
     def default_get(self, fields_list):
@@ -77,18 +118,47 @@ class ProductTemplate(models.Model):
     def _onchange_managed_product_controls(self):
         self._inverse_managed_product_controls()
 
+    @api.model
+    def _managed_attribute_prices(self, commands):
+        prices = []
+        for command in commands or []:
+            if not isinstance(command, (list, tuple)) or len(command) < 3 or not isinstance(command[2], dict):
+                continue
+            data = command[2]
+            if 'managed_value_prices' in data:
+                prices.append((command[1] if command[0] == 1 else False, data.get('attribute_id'), data['managed_value_prices'] or {}))
+        return prices
+
+    def _apply_managed_attribute_prices(self, prices):
+        for product in self:
+            for line_id, attribute_id, values in prices:
+                line = product.attribute_line_ids.filtered(
+                    lambda item: item.id == line_id if line_id else item.attribute_id.id == attribute_id
+                )[:1]
+                for value in line.product_template_value_ids:
+                    key = str(value.product_attribute_value_id.id)
+                    if key in values:
+                        value.price_extra = values[key] or 0.0
+
     @api.model_create_multi
     def create(self, vals_list):
         if self.env.context.get('managed_ui') and not self.env.company.managed_product_variants:
             for vals in vals_list:
                 if vals.get('attribute_line_ids'):
                     raise ValidationError(_('Enable Product Variants before adding attributes.'))
-        return super().create(vals_list)
+        prices = [self._managed_attribute_prices(vals.get('attribute_line_ids')) for vals in vals_list]
+        products = super().create(vals_list)
+        for product, product_prices in zip(products, prices):
+            product._apply_managed_attribute_prices(product_prices)
+        return products
 
     def write(self, vals):
         if self.env.context.get('managed_ui') and vals.get('attribute_line_ids') and not self.env.company.managed_product_variants:
             raise ValidationError(_('Enable Product Variants before adding attributes.'))
-        return super().write(vals)
+        prices = self._managed_attribute_prices(vals.get('attribute_line_ids'))
+        result = super().write(vals)
+        self._apply_managed_attribute_prices(prices)
+        return result
 
     @api.model
     def _managed_ui_contract(self, action_xmlid):
@@ -104,10 +174,16 @@ class ProductTemplate(models.Model):
 
         fields_by_name = self._fields
         supplier_fields = self.env['product.supplierinfo']._fields
+        attribute_line_fields = self.env['product.template.attribute.line']._fields
+        variant_fields = self.env['product.product']._fields
         def available(*names):
             return [name for name in names if name in fields_by_name]
         def available_supplier_fields(*names):
             return [name for name in names if name in supplier_fields]
+        def available_attribute_line_fields(*names):
+            return [name for name in names if name in attribute_line_fields]
+        def available_variant_fields(*names):
+            return [name for name in names if name in variant_fields]
 
         list_fields = available(
             'image_128', 'default_code', 'name', 'managed_product_kind',
@@ -124,10 +200,10 @@ class ProductTemplate(models.Model):
             'l10n_id_product_code', 'tracking', 'responsible_id', 'route_ids',
             *(('property_account_income_id', 'property_account_expense_id') if self.env.user.has_group('account.group_account_user') else ()),
             'weight', 'volume', 'description_sale', 'description_purchase', 'description',
-            'attribute_line_ids',
+            'attribute_line_ids', 'product_variant_ids', 'product_variant_count', 'managed_variant_preview_count',
             'company_id', 'currency_id', 'qty_available', 'virtual_available',
         )
-        readonly = {'currency_id', 'qty_available', 'virtual_available', 'detailed_type'}
+        readonly = {'currency_id', 'qty_available', 'virtual_available', 'detailed_type', 'product_variant_count', 'managed_variant_preview_count'}
         write_fields = [name for name in form_fields if name not in readonly]
         filters = [
             {'name': 'sellable', 'label': 'Can be Sold', 'domain': [('sale_ok', '=', True)]},
@@ -156,10 +232,29 @@ class ProductTemplate(models.Model):
                          'editable': True,
                          'inverse_field': 'product_tmpl_id',
                          'columns': available_supplier_fields(
-                             'partner_id', 'product_code', 'product_name', 'min_qty', 'price',
+                             'partner_id', 'product_id', 'product_code', 'product_name', 'min_qty', 'price',
                              'currency_id', 'delay', 'date_start', 'date_end',
                          ),
                      }} if name == 'seller_ids' else
+                     {'name': name, 'widget': 'managed_attribute_lines', 'relation': {
+                         'editable': True,
+                         'inverse_field': 'product_tmpl_id',
+                         'columns': available_attribute_line_fields(
+                             'attribute_id', 'value_ids', 'managed_creation_mode', 'managed_value_prices', 'active',
+                         ),
+                     }} if name == 'attribute_line_ids' else
+                     {'name': name, 'widget': 'managed_variants', 'relation': {
+                         'editable': True,
+                         'inverse_field': 'product_tmpl_id',
+                         'columns': [
+                             {'name': column, **({'widget': 'image'} if column == 'image_variant_1920' else {})}
+                             for column in available_variant_fields(
+                                 'managed_variant_name', 'image_variant_1920', 'default_code', 'barcode',
+                                 'lst_price', 'standard_price', 'weight', 'volume', 'qty_available',
+                                 'virtual_available', 'active',
+                             )
+                         ],
+                     }} if name == 'product_variant_ids' else
                      {'name': name})
                     for name in form_fields
                 ],

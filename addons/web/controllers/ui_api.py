@@ -122,6 +122,12 @@ def _relation_domain(field, parent_values):
         return [('country_id', '=', country_id)] if country_id else []
     if field.get('relation') == 'res.partner' and field.get('parent') == 'seller_ids':
         return [('supplier_rank', '>', 0), ('is_company', '=', True), ('active', '=', True)]
+    if field.get('relation') == 'product.product' and field.get('parent') == 'seller_ids':
+        template_id = _domain_value(parent_values.get('__parent_id'))
+        return [('product_tmpl_id', '=', template_id)] if template_id else [('id', '=', 0)]
+    if field.get('relation') == 'product.attribute.value' and field.get('parent') == 'attribute_line_ids':
+        attribute_id = _domain_value(parent_values.get('attribute_id'))
+        return [('attribute_id', '=', attribute_id)] if attribute_id else [('id', '=', 0)]
     if field.get('relation') != 'managed.indonesia.region':
         return domain
     mapping = {
@@ -525,7 +531,13 @@ def _serialize_form_values(model, values, schema):
             records = request.env[relation].browse(ids)
             if field.get('widget') == 'managed_contacts':
                 records = records.filtered(lambda record: record.type == 'contact' and not record.employee)
-            serialized[name] = records.read(child_fields) + pending
+            rows = records.read(child_fields)
+            columns = {column['name']: column for column in relation_view['columns']}
+            for row in rows:
+                for child_name, child_field in columns.items():
+                    if child_field.get('type') == 'many2many' and isinstance(row.get(child_name), list):
+                        row[child_name] = request.env[child_field['relation']].browse(row[child_name]).name_get()
+            serialized[name] = rows + pending
         else:
             serialized[name] = request.env[relation].browse(ids).name_get()
     return serialized
@@ -586,9 +598,10 @@ def _normalize_form_values(values, schema):
         if not relation_view or not rows or not isinstance(rows[0], dict):
             normalized[name] = [(6, 0, [item[0] if isinstance(item, (list, tuple)) else item for item in rows])]
             continue
-        allowed = {column['name'] for column in relation_view['columns']}
+        columns = {column['name']: column for column in relation_view['columns']}
+        allowed = {name for name, column in columns.items() if not column.get('readonly')}
         existing_ids = [row['id'] for row in rows if isinstance(row.get('id'), int) and row.get('active', True) is not False]
-        if field.get('widget') in ('managed_contacts', 'managed_bank_accounts', 'managed_supplier_prices'):
+        if field.get('widget') in ('managed_contacts', 'managed_bank_accounts', 'managed_supplier_prices', 'managed_attribute_lines', 'managed_variants'):
             commands = []
         else:
             commands = [(6, 0, existing_ids)]
@@ -597,7 +610,15 @@ def _normalize_form_values(values, schema):
                 if isinstance(row.get('id'), int):
                     commands.append((2, row['id'], 0))
                 continue
-            data = {key: value[0] if isinstance(value := row.get(key), (list, tuple)) and value else value for key in allowed if key in row}
+            data = {}
+            for key in allowed & row.keys():
+                value = row[key]
+                column_type = columns[key].get('type')
+                if column_type == 'many2one' and isinstance(value, (list, tuple)):
+                    value = value[0] if value else False
+                elif column_type == 'many2many' and isinstance(value, list):
+                    value = [(6, 0, [item[0] if isinstance(item, (list, tuple)) else item for item in value])]
+                data[key] = value
             if field.get('widget') == 'managed_contacts':
                 data.setdefault('type', 'contact')
             if isinstance(row.get('id'), int):
@@ -991,6 +1012,9 @@ class ManagedUiApi(http.Controller):
             relation_model.check_access_rights('read')
             try:
                 parent_values = json.loads(values or '{}')
+                record_id = kw.get('recordId')
+                if record_id and str(record_id).isdigit():
+                    parent_values['__parent_id'] = int(record_id)
             except (TypeError, ValueError) as error:
                 raise ValidationError('Invalid relation values.') from error
             if not isinstance(parent_values, dict):

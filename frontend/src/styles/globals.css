@@ -486,6 +486,43 @@
   .luma-product-empty > svg { @apply h-6 w-6 text-muted-foreground; }
   .luma-product-empty strong { @apply text-xs font-medium; }
   .luma-product-empty span { @apply max-w-md text-[10px] text-muted-foreground; }
+  .luma-variant-config { @apply overflow-hidden rounded-md border; }
+  .luma-variant-preview { @apply flex flex-col justify-between gap-3 border-b bg-muted/20 px-4 py-3 sm:flex-row sm:items-center; }
+  .luma-variant-preview > div { @apply flex items-baseline gap-2; }
+  .luma-variant-preview strong { @apply text-lg font-semibold tabular-nums; }
+  .luma-variant-preview span { @apply text-[10px] text-muted-foreground; }
+  .luma-variant-preview p { @apply text-[9px] text-muted-foreground; }
+  .luma-attribute-lines { @apply divide-y; }
+  .luma-attribute-lines > article { @apply grid gap-3 p-4; }
+  .luma-attribute-lines article > header { @apply flex items-start justify-between gap-3; }
+  .luma-attribute-lines article > header > div { @apply flex min-w-0 flex-1 items-end gap-3; }
+  .luma-attribute-lines article > header label { @apply min-w-48 flex-1; }
+  .luma-attribute-lines article > header small { @apply mb-2 hidden whitespace-nowrap text-[9px] text-muted-foreground md:block; }
+  .luma-attribute-lines article > header button { @apply grid h-8 w-8 shrink-0 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-destructive; }
+  .luma-attribute-lines article > header svg { @apply h-3.5 w-3.5; }
+  .luma-attribute-lines label { @apply grid gap-1; }
+  .luma-attribute-lines label > span, .luma-attribute-prices > span { @apply text-[9px] font-medium text-muted-foreground; }
+  .luma-attribute-prices { @apply grid gap-2 rounded-md bg-muted/30 p-3 md:grid-cols-2 xl:grid-cols-3; }
+  .luma-attribute-prices > span { @apply col-span-full; }
+  .luma-attribute-prices label { @apply grid grid-cols-[minmax(80px,1fr)_110px] items-center gap-2; }
+  .luma-attribute-prices input { @apply h-7 rounded-md border border-input bg-background px-2 text-right text-[11px] outline-none focus:border-[var(--focus-border)]; }
+  .luma-variant-empty { @apply px-4 py-8 text-center text-[10px] text-muted-foreground; }
+  .luma-attribute-summary { @apply flex flex-wrap gap-1.5; }
+  .luma-attribute-summary > span { @apply inline-flex gap-1 rounded bg-muted px-2 py-1 text-[10px]; }
+  .luma-attribute-summary strong { @apply font-medium; }
+  .luma-attribute-summary i { @apply text-[10px] not-italic text-muted-foreground; }
+  .luma-variants-table { @apply overflow-x-auto rounded-md border; }
+  .luma-variants-table table { @apply w-full min-w-[880px] border-collapse text-[11px]; }
+  .luma-variants-table th { @apply h-9 border-b bg-muted/40 px-3 text-left text-[9px] font-medium uppercase tracking-[.02em] text-muted-foreground; }
+  .luma-variants-table td { @apply h-12 border-b px-3 tabular-nums; }
+  .luma-variants-table tr:last-child td { @apply border-b-0; }
+  .luma-variant-name { @apply flex items-center gap-2; }
+  .luma-variant-name > span, .luma-variant-name > svg { @apply h-7 w-7 shrink-0 rounded bg-muted p-1.5 text-muted-foreground; }
+  .luma-variant-name strong { @apply max-w-60 truncate font-medium; }
+  .luma-variants-read { @apply grid gap-1; }
+  .luma-variants-read > span { @apply grid grid-cols-[minmax(100px,1fr)_minmax(90px,.5fr)_90px] gap-3 border-b py-1.5 text-[10px] last:border-b-0; }
+  .luma-variants-read i { @apply not-italic text-muted-foreground; }
+  .luma-variants-read b { @apply text-right font-medium tabular-nums; }
   .workspace-loading, .workspace-error { @apply grid min-h-[calc(100vh-44px)] place-items-center content-center gap-2 text-xs text-muted-foreground; }
   .workspace-error strong { @apply text-sm text-foreground; }
   .luma-boot { @apply grid min-h-screen place-items-center content-center gap-3 bg-background text-muted-foreground; }

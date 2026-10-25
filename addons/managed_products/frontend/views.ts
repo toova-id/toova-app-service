@@ -5,7 +5,7 @@ registerModelView("product.template", {
   form: {
     titleField: "name",
     sections: [
-      { id: "identity", label: "Produk", description: "Identitas utama barang atau jasa.", columns: 2, fields: ["image_1920", "name", "default_code", "barcode", "managed_product_kind", "managed_track_inventory", "categ_id", "sale_ok", "purchase_ok", "active", "attribute_line_ids"] },
+      { id: "identity", label: "Produk", description: "Identitas utama barang atau jasa.", columns: 2, fields: ["image_1920", "name", "default_code", "barcode", "managed_product_kind", "managed_track_inventory", "categ_id", "sale_ok", "purchase_ok", "active", "attribute_line_ids", "product_variant_ids"] },
       { id: "units", label: "Satuan", columns: 2, fields: ["uom_id", "uom_po_id", "weight", "volume"] },
       { id: "sales", label: "Penjualan", columns: 2, fields: ["list_price", "invoice_policy", "sale_delay", "taxes_id", "description_sale"] },
       { id: "purchase", label: "Pembelian", columns: 2, fields: ["standard_price", "purchase_method", "supplier_taxes_id", "seller_ids", "description_purchase"] },

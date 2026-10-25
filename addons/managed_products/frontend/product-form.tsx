@@ -3,12 +3,18 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@luma/components/ui/button";
 import { useSession } from "@luma/app/session";
-import { FieldEditor, FieldValue } from "@luma/views/field-registry";
+import { FieldEditor, FieldValue, registerFieldEditor, registerFieldRenderer } from "@luma/views/field-registry";
+import { AttributeLinesEditor, AttributeLinesValue, VariantsEditor, VariantsValue } from "./variant-manager";
 import { modifierActive } from "@luma/views/modifiers";
 import type { CustomFormViewProps } from "@luma/views/view-registry";
 import type { FieldSchema } from "@luma/views/types";
 
-type Tab = "summary" | "sales" | "purchase" | "inventory" | "accounting";
+type Tab = "summary" | "variants" | "sales" | "purchase" | "inventory" | "accounting";
+
+registerFieldEditor("managed_attribute_lines", (props) => <AttributeLinesEditor {...props}/>);
+registerFieldRenderer("managed_attribute_lines", ({ value }) => <AttributeLinesValue value={value}/>);
+registerFieldEditor("managed_variants", (props) => <VariantsEditor {...props}/>);
+registerFieldRenderer("managed_variants", ({ value, record }) => <VariantsValue value={value} parentValues={record}/>);
 
 function InventoryMetric({ icon, label, value, unit, detail, tone }: { icon: JSX.Element; label: string; value: unknown; unit: string; detail: string; tone?: "forecast" }) {
   const quantity = typeof value === "number" ? value : Number(value || 0);
@@ -38,7 +44,9 @@ export default function ProductForm(props: CustomFormViewProps) {
   };
   const section = (title: string, description: string, content: JSX.Element) => <section className="luma-customer-section"><header><h2>{title}</h2><p>{description}</p></header>{content}</section>;
   const image = fields.image_1920 ? <div className="luma-customer-field"><span className="sr-only">Gambar produk</span><div>{editing ? <FieldEditor actionId={schema.id} field={fields.image_1920} value={values.image_1920} onChange={(value) => onChange("image_1920", value)}/> : <FieldValue field={fields.image_1920} value={values.image_1920} record={values}/>}</div></div> : null;
-  const tabs: [Tab, string, number?][] = [["summary", "Ringkasan"], ["sales", "Penjualan"], ["purchase", "Pembelian", supplierCount], ["inventory", "Persediaan"], ["accounting", "Pajak & Accounting"]];
+  const variantRows = Array.isArray(values.product_variant_ids) ? values.product_variant_ids as Record<string, unknown>[] : [];
+  const variantCount = variantRows.filter((row) => row.active !== false).length;
+  const tabs: [Tab, string, number?][] = [["summary", "Ringkasan"], ...(variantsEnabled ? [["variants", "Variants", variantCount] as [Tab, string, number]] : []), ["sales", "Penjualan"], ["purchase", "Pembelian", supplierCount], ["inventory", "Persediaan"], ["accounting", "Pajak & Accounting"]];
   const typeLabel = service ? "Jasa" : stocked ? "Barang dengan stok" : "Barang tanpa stok";
   const unitLabel = Array.isArray(values.uom_id) ? String(values.uom_id[1]) : "unit";
   const inventoryStatus = <div className={`luma-product-stock-status ${stocked ? "tracked" : "untracked"}`}><i/><div><strong>{stocked ? "Pelacakan stok aktif" : "Pelacakan stok nonaktif"}</strong><span>{stocked ? "Kuantitas berubah dari penerimaan, pengiriman, dan penyesuaian stok." : "Produk tetap dapat dibeli dan dijual, tetapi kuantitas gudang tidak dicatat."}</span></div></div>;
@@ -49,6 +57,7 @@ export default function ProductForm(props: CustomFormViewProps) {
     <nav className="luma-customer-tabs" aria-label="Bagian produk">{tabs.map(([key, label, count]) => <button key={key} type="button" className={tab === key ? "active" : undefined} onClick={() => setTab(key)}>{label}{count !== undefined && <i>{count}</i>}</button>)}</nav>
     <main className="luma-customer-body">
       {tab === "summary" && <>{section("Identitas produk", "Data utama untuk pencarian, transaksi, dan dokumen.", <div className="luma-customer-overview"><div className="luma-customer-logo">{image}</div><div className="luma-customer-grid">{field("name")}{field("default_code")}{field("barcode")}{field("managed_product_kind")}{!service && field("managed_track_inventory")}{field("categ_id")}{field("active")}{variantsEnabled && field("attribute_line_ids", "wide")}</div></div>)}{section("Satuan & ukuran", "Satuan transaksi dan ukuran fisik produk.", <div className="luma-customer-grid">{field("uom_id")}{field("uom_po_id")}{!service && field("weight")}{!service && field("volume")}</div>)}{section("Catatan internal", "Informasi internal yang tidak dikirim ke customer atau vendor.", <div className="luma-customer-grid">{field("description", "wide")}</div>)}</>}
+      {tab === "variants" && <>{section("Atribut & kombinasi", "Pilih atribut dan nilai. Odoo membuat kombinasi product.product native.", <div className="luma-customer-relation">{field("attribute_line_ids")}</div>)}{id && section("Variants", "Kelola identity, harga, ukuran, dan stok per kombinasi.", <div className="luma-customer-relation">{field("product_variant_ids")}</div>)}</>}
       {tab === "sales" && <>{section("Kebijakan penjualan", "Default harga dan penagihan tetap dihitung engine Odoo.", <div className="luma-customer-grid">{field("sale_ok")}{field("list_price")}{field("invoice_policy")}{!service && field("sale_delay")}{field("taxes_id")}</div>)}{section("Deskripsi penjualan", "Teks ini masuk ke quotation dan sales order.", <div className="luma-customer-grid">{field("description_sale", "wide")}</div>)}</>}
       {tab === "purchase" && <>{section("Kebijakan pembelian", "Cost default dipakai saat harga vendor tidak ditemukan.", <div className="luma-customer-grid">{field("purchase_ok")}{field("standard_price")}{field("purchase_method")}{field("supplier_taxes_id")}</div>)}{section("Vendor & harga beli", "Harga, minimum pembelian, kode vendor, dan lead time canonical Odoo.", <div className="luma-customer-relation">{field("seller_ids")}</div>)}{section("Deskripsi pembelian", "Teks ini masuk ke RFQ dan purchase order.", <div className="luma-customer-grid">{field("description_purchase", "wide")}</div>)}</>}
       {tab === "inventory" && (service ? <div className="luma-product-empty"><Wrench/><strong>Jasa tidak memiliki persediaan</strong><span>Ubah tipe produk jika barang perlu penerimaan, pengiriman, atau stok.</span></div> : <>{section("Status persediaan", "Ringkasan kuantitas produk pada seluruh lokasi internal perusahaan.", inventoryMetrics)}{section("Operasional gudang", "Aktifkan barang dengan stok untuk route dan tracking inventory.", <div className="luma-customer-grid">{field("route_ids", "wide")}{field("responsible_id")}{trackingEnabled && field("tracking")}</div>)}</>)}
