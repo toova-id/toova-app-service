@@ -49,33 +49,114 @@ class ProductProduct(models.Model):
 class ProductAttribute(models.Model):
     _inherit = 'product.attribute'
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        if self.env.context.get('managed_ui'):
+            for vals in vals_list:
+                vals['name'] = (vals.get('name') or '').strip()
+                if not vals['name']:
+                    raise ValidationError(_('Nama atribut wajib diisi.'))
+        attributes = super().create(vals_list)
+        attributes._check_managed_duplicate_names()
+        return attributes
+
+    def write(self, vals):
+        if self.env.context.get('managed_ui') and 'name' in vals:
+            vals['name'] = (vals.get('name') or '').strip()
+            if not vals['name']:
+                raise ValidationError(_('Nama atribut wajib diisi.'))
+        result = super().write(vals)
+        self._check_managed_duplicate_names()
+        return result
+
+    def _check_managed_duplicate_names(self):
+        if not self.env.context.get('managed_ui'):
+            return
+        Attribute = self.with_context(active_test=False, managed_ui=False).sudo()
+        for attribute in self:
+            duplicate = Attribute.search([
+                ('id', '!=', attribute.id),
+                ('name', '=ilike', attribute.name.strip()),
+            ], limit=1)
+            if duplicate:
+                raise ValidationError(_('Atribut %(name)s sudah ada.', name=attribute.name))
+
     @api.model
     def _managed_ui_contract(self, action_xmlid):
         if action_xmlid != 'managed_products.action_product_attributes':
             return super()._managed_ui_contract(action_xmlid)
         value_fields = self.env['product.attribute.value']._fields
         value_columns = [name for name in ('name', 'html_color', 'is_custom', 'sequence') if name in value_fields]
+        display_selection = [('radio', 'Daftar pilihan'), ('pills', 'Tombol pilihan'), ('select', 'Dropdown'), ('color', 'Pilihan warna')]
+        creation_selection = [('always', 'Saat produk disimpan'), ('dynamic', 'Saat digunakan dalam transaksi'), ('no_variant', 'Tidak membuat varian')]
         return {
             'list': {
-                'title': 'Attributes',
-                'fields': ['name', 'display_type', 'create_variant', 'number_related_products'],
+                'title': 'Atribut produk',
+                'fields': [
+                    {'name': 'name', 'label': 'Nama atribut'},
+                    {'name': 'display_type', 'label': 'Tampilan', 'selection': display_selection},
+                    {'name': 'create_variant', 'label': 'Pembuatan varian', 'selection': creation_selection},
+                    {'name': 'number_related_products', 'label': 'Digunakan oleh produk'},
+                ],
                 'default_order': 'sequence, name',
             },
             'form': {
-                'title': 'Attribute',
+                'title': 'Atribut produk',
                 'fields': [
-                    'name', 'display_type', 'create_variant',
-                    {'name': 'value_ids', 'widget': 'managed_attribute_values', 'relation': {
+                    {'name': 'name', 'label': 'Nama atribut', 'placeholder': 'Contoh: Warna, Ukuran, Isi kemasan'},
+                    {'name': 'display_type', 'label': 'Cara pilihan ditampilkan', 'selection': display_selection},
+                    {'name': 'create_variant', 'label': 'Cara varian dibuat', 'selection': creation_selection},
+                    {'name': 'value_ids', 'label': 'Pilihan nilai', 'widget': 'managed_attribute_values', 'relation': {
                         'editable': True,
                         'inverse_field': 'attribute_id',
-                        'columns': value_columns,
+                        'columns': [
+                            {'name': name, **({'label': 'Nama nilai', 'placeholder': 'Contoh: 250 ml, Merah, XL'} if name == 'name' else {'label': 'Warna'} if name == 'html_color' else {'label': 'Izinkan nilai bebas'} if name == 'is_custom' else {'label': 'Urutan'})}
+                            for name in value_columns
+                        ],
                     }},
-                    'number_related_products',
+                    {'name': 'number_related_products', 'label': 'Digunakan oleh produk'},
                 ],
                 'write_fields': ['name', 'display_type', 'create_variant', 'value_ids'],
                 'buttons': [],
             },
         }
+
+
+class ProductAttributeValue(models.Model):
+    _inherit = 'product.attribute.value'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        if self.env.context.get('managed_ui'):
+            for vals in vals_list:
+                vals['name'] = (vals.get('name') or '').strip()
+                if not vals['name']:
+                    raise ValidationError(_('Nama nilai atribut wajib diisi.'))
+        values = super().create(vals_list)
+        values._check_managed_duplicate_names()
+        return values
+
+    def write(self, vals):
+        if self.env.context.get('managed_ui') and 'name' in vals:
+            vals['name'] = (vals.get('name') or '').strip()
+            if not vals['name']:
+                raise ValidationError(_('Nama nilai atribut wajib diisi.'))
+        result = super().write(vals)
+        self._check_managed_duplicate_names()
+        return result
+
+    def _check_managed_duplicate_names(self):
+        if not self.env.context.get('managed_ui'):
+            return
+        Value = self.with_context(active_test=False, managed_ui=False).sudo()
+        for value in self:
+            duplicate = Value.search([
+                ('id', '!=', value.id),
+                ('attribute_id', '=', value.attribute_id.id),
+                ('name', '=ilike', value.name.strip()),
+            ], limit=1)
+            if duplicate:
+                raise ValidationError(_('Nilai %(name)s sudah ada pada atribut %(attribute)s.', name=value.name, attribute=value.attribute_id.name))
 
 
 class ProductTemplateAttributeLine(models.Model):

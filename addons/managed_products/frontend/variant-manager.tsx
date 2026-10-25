@@ -1,5 +1,6 @@
 import { Image, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@luma/components/ui/button";
 import { FieldEditor } from "@luma/views/field-registry";
 import type { FieldSchema } from "@luma/views/types";
@@ -27,7 +28,7 @@ export function AttributeLinesEditor({ actionId, field, value, parentValues, onC
       <header><small>{row.managed_creation_mode === "dynamic" ? "Dibuat saat transaksi" : row.managed_creation_mode === "no_variant" ? "Opsi tanpa variant" : "Kombinasi dibuat saat simpan"}</small><button type="button" aria-label="Hapus atribut" onClick={() => archive(index)}><Trash2/></button></header>
       <div className="luma-attribute-line-fields"><label><span>Atribut</span><FieldEditor actionId={actionId} field={columns.attribute_id} value={row.attribute_id} parentValues={{ ...row, id: parentValues?.id }} onChange={(next) => update(index, "attribute_id", next)}/></label><label><span>Nilai</span><FieldEditor actionId={actionId} field={columns.value_ids} value={row.value_ids} parentValues={{ ...row, id: parentValues?.id }} onChange={(next) => update(index, "value_ids", next)}/></label></div>
       {Array.isArray(row.value_ids) && row.value_ids.length > 0 && <div className="luma-attribute-prices"><span>Tambahan harga per nilai</span>{row.value_ids.map((item) => { const id = String(Array.isArray(item) ? item[0] : item); return <label key={id}><span>{relationLabel(item)}</span><input type="number" min="0" value={String(prices[id] || "")} placeholder="0" onChange={(event) => update(index, "managed_value_prices", { ...prices, [id]: event.target.value === "" ? 0 : Number(event.target.value) })}/></label>; })}</div>}
-    </article>; })}{!active.length && <div className="luma-variant-empty"><strong>Master atribut masih kosong</strong><span>Buat Warna, Ukuran, atau atribut lain lewat menu Products → Attributes, lalu kembali dan pilih di sini.</span></div>}</div>
+    </article>; })}{!active.length && <div className="luma-variant-empty"><strong>Belum ada atribut pada produk</strong><span>Buat master Warna, Ukuran, atau Isi kemasan bila belum tersedia. Lalu kembali dan pilih di sini.</span><Button asChild variant="outline"><Link to="/app/products/atribut/new" target="_blank">Buat atribut</Link></Button></div>}</div>
     <button type="button" className="workspace-relation-add" onClick={add}><Plus/>Tambah atribut</button>
   </div>;
 }

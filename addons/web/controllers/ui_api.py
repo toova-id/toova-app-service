@@ -240,6 +240,8 @@ def _contract_field(metadata, item, parent=None):
     if not name or name not in metadata:
         raise ValidationError(f'Invalid managed UI field: {name}.')
     relation_config = config.pop('relation', None)
+    selection = config.pop('selection', None)
+    help_text = config.pop('help', None)
     field = {key: metadata[name].get(key) for key in _FIELD_ATTRIBUTES if key in metadata[name]}
     field.update({
         'name': name,
@@ -250,6 +252,12 @@ def _contract_field(metadata, item, parent=None):
         'modifiers': config.pop('modifiers', {}),
         'relationView': None,
     })
+    if selection is not None:
+        if field.get('type') != 'selection' or not isinstance(selection, (list, tuple)):
+            raise ValidationError(f'Invalid selection override for field {name}.')
+        field['selection'] = selection
+    if help_text is not None:
+        field['help'] = help_text
     if config:
         raise ValidationError(f'Unsupported managed UI field options: {", ".join(config)}.')
     if relation_config:

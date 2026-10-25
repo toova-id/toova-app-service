@@ -46,8 +46,40 @@ class TestManagedProducts(TransactionCase):
         contract = self.env['product.attribute']._managed_ui_contract('managed_products.action_product_attributes')
         fields = {field if isinstance(field, str) else field['name']: field for field in contract['form']['fields']}
         self.assertEqual(fields['value_ids']['widget'], 'managed_attribute_values')
-        self.assertEqual(fields['value_ids']['relation']['columns'], ['name', 'html_color', 'is_custom', 'sequence'])
+        self.assertEqual([column if isinstance(column, str) else column['name'] for column in fields['value_ids']['relation']['columns']], ['name', 'html_color', 'is_custom', 'sequence'])
+        self.assertEqual(fields['name']['label'], 'Nama atribut')
+        self.assertEqual(fields['display_type']['selection'][-1], ('color', 'Pilihan warna'))
         self.assertIn('value_ids', contract['form']['write_fields'])
+
+    def test_attribute_names_are_trimmed_and_duplicates_blocked(self):
+        attribute = self.env['product.attribute'].with_context(managed_ui=True).create({
+            'name': ' Isi kemasan ',
+            'value_ids': [(0, 0, {'name': ' 250 ml '})],
+        })
+        self.assertEqual(attribute.name, 'Isi kemasan')
+        self.assertEqual(attribute.value_ids.name, '250 ml')
+        with self.assertRaises(ValidationError):
+            self.env['product.attribute'].with_context(managed_ui=True).create({'name': 'isi KEMASAN'})
+        with self.assertRaises(ValidationError):
+            self.env['product.attribute.value'].with_context(managed_ui=True).create({
+                'attribute_id': attribute.id, 'name': '250 ML',
+            })
+
+    def test_packaging_volume_values_generate_native_variants(self):
+        self.env.company.managed_product_variants = True
+        attribute = self.env['product.attribute'].with_context(managed_ui=True).create({
+            'name': 'Isi kemasan',
+            'value_ids': [(0, 0, {'name': '250 ml'}), (0, 0, {'name': '500 ml'}), (0, 0, {'name': '1 L'})],
+        })
+        product = self.env['product.template'].with_context(managed_ui=True).create({
+            'name': 'Sabun cair',
+            'attribute_line_ids': [(0, 0, {
+                'attribute_id': attribute.id,
+                'value_ids': [(6, 0, attribute.value_ids.ids)],
+            })],
+        })
+        self.assertEqual(product.product_variant_count, 3)
+        self.assertEqual(set(product.product_variant_ids.mapped('managed_variant_name')), {'250 ml', '500 ml', '1 L'})
 
     def test_product_contract(self):
         contract = self.env['product.template']._managed_ui_contract('managed_products.action_products')
