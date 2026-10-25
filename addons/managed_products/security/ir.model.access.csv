@@ -4,3 +4,7 @@ access_managed_product_attribute_value_manager,managed.product.attribute.value.m
 access_managed_product_category_manager,managed.product.category.manager,product.model_product_category,product.group_product_variant,1,1,1,0
 access_managed_product_pricelist_manager,managed.product.pricelist.manager,product.model_product_pricelist,product.group_product_pricelist,1,1,1,0
 access_managed_product_pricelist_item_manager,managed.product.pricelist.item.manager,product.model_product_pricelist_item,product.group_product_pricelist,1,1,1,1
+access_managed_uom_category_manager,managed.uom.category.manager,uom.model_uom_category,uom.group_uom,1,1,1,0
+access_managed_uom_manager,managed.uom.manager,uom.model_uom_uom,uom.group_uom,1,1,1,0
+access_managed_uom_category_admin,managed.uom.category.admin,uom.model_uom_category,base.group_system,1,1,1,0
+access_managed_uom_admin,managed.uom.admin,uom.model_uom_uom,base.group_system,1,1,1,0

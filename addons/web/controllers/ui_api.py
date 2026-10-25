@@ -123,6 +123,10 @@ def _relation_domain(field, parent_values):
     if field['name'] == 'parent_id' and field.get('relation') == 'product.category':
         category_id = _domain_value(parent_values.get('__parent_id'))
         return [('id', 'not child_of', category_id)] if category_id else []
+    if field['name'] == 'uom_po_id' and field.get('relation') == 'uom.uom':
+        uom_id = _domain_value(parent_values.get('uom_id'))
+        category = request.env['uom.uom'].browse(uom_id).category_id if uom_id else False
+        return [('category_id', '=', category.id)] if category else []
     if field.get('relation') == 'res.partner' and field.get('parent') == 'seller_ids':
         return [('supplier_rank', '>', 0), ('is_company', '=', True), ('active', '=', True)]
     if field.get('relation') == 'product.product' and field.get('parent') == 'seller_ids':
@@ -618,7 +622,7 @@ def _normalize_form_values(values, schema):
         columns = {column['name']: column for column in relation_view['columns']}
         allowed = {name for name, column in columns.items() if not column.get('readonly')}
         existing_ids = [row['id'] for row in rows if isinstance(row.get('id'), int) and row.get('active', True) is not False]
-        if field.get('widget') in ('managed_contacts', 'managed_bank_accounts', 'managed_supplier_prices', 'managed_attribute_lines', 'managed_variants', 'managed_attribute_values', 'managed_pricelist_rules'):
+        if field.get('widget') in ('managed_contacts', 'managed_bank_accounts', 'managed_supplier_prices', 'managed_attribute_lines', 'managed_variants', 'managed_attribute_values', 'managed_pricelist_rules', 'managed_uom_units'):
             commands = []
         else:
             commands = [(6, 0, existing_ids)]
@@ -638,6 +642,8 @@ def _normalize_form_values(values, schema):
                 data[key] = value
             if field.get('widget') == 'managed_contacts':
                 data.setdefault('type', 'contact')
+            if field.get('widget') == 'managed_uom_units' and row.get('active', True) is False:
+                data['active'] = False
             if isinstance(row.get('id'), int):
                 commands.append((1, row['id'], data))
             else:
@@ -898,7 +904,8 @@ class ManagedUiApi(http.Controller):
             values = {name: value for name, value in values.items() if name in allowed}
             values = {name: value[0] if isinstance(value, (list, tuple)) and _form_fields(schema).get(name, {}).get('type') == 'many2one' and value else value for name, value in values.items()}
             values = _normalize_form_values(values, schema)
-            record = request.env[action.res_model].with_context(**context).create(values)
+            with request.env.cr.savepoint():
+                record = request.env[action.res_model].with_context(**context).create(values)
             return request.make_json_response({'id': record.id}, status=201)
         except (AccessError, MissingError) as error:
             return _error(error, 'forbidden', 403)
@@ -920,7 +927,8 @@ class ManagedUiApi(http.Controller):
                 raise MissingError('Record not found.')
             values = {name: value for name, value in values.items() if name in allowed}
             values = {name: value[0] if isinstance(value, (list, tuple)) and _form_fields(schema).get(name, {}).get('type') == 'many2one' and value else value for name, value in values.items()}
-            record.write(_normalize_form_values(values, schema))
+            with request.env.cr.savepoint():
+                record.write(_normalize_form_values(values, schema))
             return request.make_json_response({'id': record.id})
         except (AccessError, MissingError) as error:
             return _error(error, 'forbidden', 403)
@@ -942,7 +950,8 @@ class ManagedUiApi(http.Controller):
             records = model.browse(ids).exists()
             if set(records.ids) != set(ids) or model.search_count(expression.AND([domain, [('id', 'in', ids)]])) != len(ids):
                 raise AccessError('One or more records are unavailable.')
-            records.unlink()
+            with request.env.cr.savepoint():
+                records.unlink()
             return request.make_json_response({'deleted': len(ids)})
         except (AccessError, MissingError) as error:
             return _error(error, 'forbidden', 403)

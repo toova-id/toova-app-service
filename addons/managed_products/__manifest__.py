@@ -6,7 +6,7 @@
     'category': 'Hidden',
     'summary': 'Managed product catalog, identity rules, and UI contract',
     'depends': ['managed_directory', 'stock', 'l10n_id_efaktur_coretax'],
-    'data': ['security/ir.model.access.csv', 'views/actions.xml'],
+    'data': ['security/ir.model.access.csv', 'data/uom_data.xml', 'views/actions.xml'],
     'installable': True,
     'auto_install': False,
     'license': 'LGPL-3',

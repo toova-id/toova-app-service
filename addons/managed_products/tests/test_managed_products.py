@@ -128,6 +128,29 @@ class TestManagedProducts(TransactionCase):
                 'name': 'retail idr', 'currency_id': self.env.company.currency_id.id,
             })
 
+    def test_uom_contract_and_native_conversion(self):
+        contract = self.env['uom.category']._managed_ui_contract('managed_products.action_uom_categories')
+        fields = {field if isinstance(field, str) else field['name']: field for field in contract['form']['fields']}
+        self.assertEqual(fields['uom_ids']['widget'], 'managed_uom_units')
+        self.assertFalse(contract['list']['delete'])
+        category = self.env['uom.category'].with_context(managed_ui=True).create({
+            'name': ' Test Volume ',
+            'uom_ids': [
+                (0, 0, {'name': ' L ', 'managed_base_quantity': 1, 'rounding': 0.001}),
+                (0, 0, {'name': ' ml ', 'managed_base_quantity': 0.001, 'rounding': 1}),
+            ],
+        })
+        liter = category.uom_ids.filtered(lambda unit: unit.name == 'L')
+        milliliter = category.uom_ids.filtered(lambda unit: unit.name == 'ml')
+        self.assertEqual(category.name, 'Test Volume')
+        self.assertEqual(liter.uom_type, 'reference')
+        self.assertEqual(milliliter.uom_type, 'smaller')
+        self.assertEqual(milliliter._compute_quantity(1000, liter), 1)
+        with self.assertRaises(ValidationError):
+            self.env['uom.uom'].with_context(managed_ui=True).create({
+                'name': 'ML', 'category_id': category.id, 'managed_base_quantity': 0.001, 'rounding': 1,
+            })
+
     def test_native_variant_generation_and_value_prices(self):
         self.env.company.managed_product_variants = True
         attribute = self.env['product.attribute'].create({'name': 'Managed Size', 'create_variant': 'always'})

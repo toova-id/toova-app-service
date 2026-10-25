@@ -7,6 +7,6 @@ registerManagedNavigation("managed_products", {
     { xmlid: "managed_products.menu_product_attributes", label: "Atribut" },
     { xmlid: "managed_products.menu_product_categories", label: "Kategori" },
     { xmlid: "managed_products.menu_product_pricelists", label: "Daftar Harga" },
-    { xmlid: "managed_products.menu_product_uom", label: "Units of Measure" },
+    { xmlid: "managed_products.menu_product_uom", label: "Satuan" },
   ],
 });

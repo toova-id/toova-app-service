@@ -514,6 +514,8 @@ class ProductTemplate(models.Model):
                     ({'name': name, 'widget': 'image'} if name == 'image_1920' else
                      {'name': name, 'label': 'SKU'} if name == 'default_code' else
                      {'name': name, 'label': 'Product Type'} if name in ('managed_product_kind', 'detailed_type') else
+                     {'name': name, 'label': 'Satuan stok & penjualan', 'help': 'Satuan dasar untuk stok, penjualan, harga, dan laporan produk.'} if name == 'uom_id' else
+                     {'name': name, 'label': 'Satuan pembelian', 'help': 'Harus berada dalam kelompok satuan yang sama agar dapat dikonversi.'} if name == 'uom_po_id' else
                      {'name': name, 'widget': 'managed_supplier_prices', 'relation': {
                          'editable': True,
                          'inverse_field': 'product_tmpl_id',
