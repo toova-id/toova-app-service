@@ -494,23 +494,34 @@
   .luma-variant-preview p { @apply text-[9px] text-muted-foreground; }
   .luma-attribute-lines { @apply divide-y; }
   .luma-attribute-lines > article { @apply grid gap-3 p-4; }
-  .luma-attribute-lines article > header { @apply flex items-start justify-between gap-3; }
-  .luma-attribute-lines article > header > div { @apply flex min-w-0 flex-1 items-end gap-3; }
-  .luma-attribute-lines article > header label { @apply min-w-48 flex-1; }
-  .luma-attribute-lines article > header small { @apply mb-2 hidden whitespace-nowrap text-[9px] text-muted-foreground md:block; }
+  .luma-attribute-lines article > header { @apply flex items-center justify-between gap-3; }
+  .luma-attribute-lines article > header small { @apply text-[9px] text-muted-foreground; }
   .luma-attribute-lines article > header button { @apply grid h-8 w-8 shrink-0 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-destructive; }
   .luma-attribute-lines article > header svg { @apply h-3.5 w-3.5; }
-  .luma-attribute-lines label { @apply grid gap-1; }
+  .luma-attribute-line-fields { @apply grid min-w-0 gap-3 lg:grid-cols-[minmax(260px,.7fr)_minmax(360px,1.3fr)]; }
+  .luma-attribute-line-fields > label { @apply min-w-0; }
+  .luma-attribute-line-fields .luma-combobox-trigger, .luma-attribute-line-fields .luma-multi-select { @apply w-full; }
+  .luma-attribute-lines label { @apply grid min-w-0 gap-1; }
   .luma-attribute-lines label > span, .luma-attribute-prices > span { @apply text-[9px] font-medium text-muted-foreground; }
   .luma-attribute-prices { @apply grid gap-2 rounded-md bg-muted/30 p-3 md:grid-cols-2 xl:grid-cols-3; }
   .luma-attribute-prices > span { @apply col-span-full; }
   .luma-attribute-prices label { @apply grid grid-cols-[minmax(80px,1fr)_110px] items-center gap-2; }
   .luma-attribute-prices input { @apply h-7 rounded-md border border-input bg-background px-2 text-right text-[11px] outline-none focus:border-[var(--focus-border)]; }
-  .luma-variant-empty { @apply px-4 py-8 text-center text-[10px] text-muted-foreground; }
+  .luma-variant-empty { @apply grid gap-1 px-4 py-8 text-center text-[10px] text-muted-foreground; }
+  .luma-variant-empty strong { @apply text-xs font-medium text-foreground; }
   .luma-attribute-summary { @apply flex flex-wrap gap-1.5; }
   .luma-attribute-summary > span { @apply inline-flex gap-1 rounded bg-muted px-2 py-1 text-[10px]; }
   .luma-attribute-summary strong { @apply font-medium; }
   .luma-attribute-summary i { @apply text-[10px] not-italic text-muted-foreground; }
+  .luma-attribute-color { @apply h-2.5 w-2.5 rounded-full border; }
+  .luma-attribute-values { @apply overflow-hidden rounded-md border; }
+  .luma-attribute-values-head, .luma-attribute-value-row { @apply grid grid-cols-[18px_minmax(180px,1fr)_minmax(130px,.55fr)_70px_32px] items-center gap-2 px-3; }
+  .luma-attribute-values-head { @apply h-8 bg-muted/40 text-[9px] font-medium uppercase tracking-[.02em] text-muted-foreground; }
+  .luma-attribute-values-head > :first-child { @apply col-start-2; }
+  .luma-attribute-value-row { @apply min-h-11 border-t py-1.5; }
+  .luma-attribute-value-row > svg { @apply h-3.5 w-3.5 text-muted-foreground/60; }
+  .luma-attribute-value-row > button { @apply grid h-7 w-7 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-destructive; }
+  .luma-attribute-value-row > button svg { @apply h-3 w-3; }
   .luma-variants-table { @apply overflow-x-auto rounded-md border; }
   .luma-variants-table table { @apply w-full min-w-[880px] border-collapse text-[11px]; }
   .luma-variants-table th { @apply h-9 border-b bg-muted/40 px-3 text-left text-[9px] font-medium uppercase tracking-[.02em] text-muted-foreground; }

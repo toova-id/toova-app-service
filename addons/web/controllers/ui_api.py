@@ -601,12 +601,12 @@ def _normalize_form_values(values, schema):
         columns = {column['name']: column for column in relation_view['columns']}
         allowed = {name for name, column in columns.items() if not column.get('readonly')}
         existing_ids = [row['id'] for row in rows if isinstance(row.get('id'), int) and row.get('active', True) is not False]
-        if field.get('widget') in ('managed_contacts', 'managed_bank_accounts', 'managed_supplier_prices', 'managed_attribute_lines', 'managed_variants'):
+        if field.get('widget') in ('managed_contacts', 'managed_bank_accounts', 'managed_supplier_prices', 'managed_attribute_lines', 'managed_variants', 'managed_attribute_values'):
             commands = []
         else:
             commands = [(6, 0, existing_ids)]
         for row in rows:
-            if field.get('widget') == 'managed_supplier_prices' and row.get('active', True) is False:
+            if field.get('widget') in ('managed_supplier_prices', 'managed_attribute_values') and row.get('active', True) is False:
                 if isinstance(row.get('id'), int):
                     commands.append((2, row['id'], 0))
                 continue

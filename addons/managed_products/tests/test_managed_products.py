@@ -42,6 +42,13 @@ class TestManagedProducts(TransactionCase):
         product.write({'managed_product_kind': 'service'})
         self.assertEqual(product.detailed_type, 'service')
 
+    def test_attribute_contract(self):
+        contract = self.env['product.attribute']._managed_ui_contract('managed_products.action_product_attributes')
+        fields = {field if isinstance(field, str) else field['name']: field for field in contract['form']['fields']}
+        self.assertEqual(fields['value_ids']['widget'], 'managed_attribute_values')
+        self.assertEqual(fields['value_ids']['relation']['columns'], ['name', 'html_color', 'is_custom', 'sequence'])
+        self.assertIn('value_ids', contract['form']['write_fields'])
+
     def test_product_contract(self):
         contract = self.env['product.template']._managed_ui_contract('managed_products.action_products')
         fields = {field if isinstance(field, str) else field['name']: field for field in contract['form']['fields']}

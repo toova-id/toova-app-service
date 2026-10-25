@@ -46,6 +46,38 @@ class ProductProduct(models.Model):
         return result
 
 
+class ProductAttribute(models.Model):
+    _inherit = 'product.attribute'
+
+    @api.model
+    def _managed_ui_contract(self, action_xmlid):
+        if action_xmlid != 'managed_products.action_product_attributes':
+            return super()._managed_ui_contract(action_xmlid)
+        value_fields = self.env['product.attribute.value']._fields
+        value_columns = [name for name in ('name', 'html_color', 'is_custom', 'sequence') if name in value_fields]
+        return {
+            'list': {
+                'title': 'Attributes',
+                'fields': ['name', 'display_type', 'create_variant', 'number_related_products'],
+                'default_order': 'sequence, name',
+            },
+            'form': {
+                'title': 'Attribute',
+                'fields': [
+                    'name', 'display_type', 'create_variant',
+                    {'name': 'value_ids', 'widget': 'managed_attribute_values', 'relation': {
+                        'editable': True,
+                        'inverse_field': 'attribute_id',
+                        'columns': value_columns,
+                    }},
+                    'number_related_products',
+                ],
+                'write_fields': ['name', 'display_type', 'create_variant', 'value_ids'],
+                'buttons': [],
+            },
+        }
+
+
 class ProductTemplateAttributeLine(models.Model):
     _inherit = 'product.template.attribute.line'
 
