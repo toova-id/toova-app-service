@@ -16,10 +16,26 @@
     <field name="context">{'search_default_filter_to_sell': 0}</field>
   </record>
 
+  <record id="action_product_categories" model="ir.actions.act_window">
+    <field name="name">Kategori Produk</field>
+    <field name="res_model">product.category</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[]</field>
+    <field name="context">{}</field>
+  </record>
+
+  <record id="action_product_pricelists" model="ir.actions.act_window">
+    <field name="name">Daftar Harga</field>
+    <field name="res_model">product.pricelist</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[]</field>
+    <field name="context">{'default_base': 'list_price'}</field>
+  </record>
+
   <menuitem id="menu_products_root" name="Products" sequence="25" groups="base.group_user"/>
   <menuitem id="menu_products" name="Products" parent="menu_products_root" action="action_products" sequence="10"/>
   <menuitem id="menu_product_attributes" name="Atribut" parent="menu_products_root" action="action_product_attributes" sequence="15" groups="product.group_product_variant"/>
-  <menuitem id="menu_product_categories" name="Categories" parent="menu_products_root" action="product.product_category_action_form" sequence="20" groups="product.group_product_variant"/>
-  <menuitem id="menu_product_pricelists" name="Pricelists" parent="menu_products_root" action="product.product_pricelist_action2" sequence="30" groups="product.group_product_pricelist"/>
+  <menuitem id="menu_product_categories" name="Kategori" parent="menu_products_root" action="action_product_categories" sequence="20" groups="product.group_product_variant"/>
+  <menuitem id="menu_product_pricelists" name="Daftar Harga" parent="menu_products_root" action="action_product_pricelists" sequence="30" groups="product.group_product_pricelist"/>
   <menuitem id="menu_product_uom" name="Units of Measure" parent="menu_products_root" action="uom.product_uom_form_action" sequence="40" groups="uom.group_uom"/>
 </odoo>

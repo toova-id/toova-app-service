@@ -159,6 +159,179 @@ class ProductAttributeValue(models.Model):
                 raise ValidationError(_('Nilai %(name)s sudah ada pada atribut %(attribute)s.', name=value.name, attribute=value.attribute_id.name))
 
 
+class ProductCategory(models.Model):
+    _inherit = 'product.category'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        if self.env.context.get('managed_ui'):
+            for vals in vals_list:
+                vals['name'] = (vals.get('name') or '').strip()
+                if not vals['name']:
+                    raise ValidationError(_('Nama kategori wajib diisi.'))
+        categories = super().create(vals_list)
+        categories._check_managed_duplicate_names()
+        return categories
+
+    def write(self, vals):
+        if self.env.context.get('managed_ui') and 'name' in vals:
+            vals['name'] = (vals.get('name') or '').strip()
+            if not vals['name']:
+                raise ValidationError(_('Nama kategori wajib diisi.'))
+        result = super().write(vals)
+        self._check_managed_duplicate_names()
+        return result
+
+    def _check_managed_duplicate_names(self):
+        if not self.env.context.get('managed_ui'):
+            return
+        Category = self.with_context(managed_ui=False).sudo()
+        for category in self:
+            if Category.search_count([
+                ('id', '!=', category.id),
+                ('parent_id', '=', category.parent_id.id or False),
+                ('name', '=ilike', category.name),
+            ]):
+                raise ValidationError(_('Kategori %(name)s sudah ada pada induk yang sama.', name=category.name))
+
+    @api.model
+    def _managed_ui_contract(self, action_xmlid):
+        if action_xmlid != 'managed_products.action_product_categories':
+            return super()._managed_ui_contract(action_xmlid)
+        account_fields = []
+        if self.env.user.has_group('account.group_account_user'):
+            account_fields = [
+                {'name': 'property_account_income_categ_id', 'label': 'Akun pendapatan'},
+                {'name': 'property_account_expense_categ_id', 'label': 'Akun beban'},
+            ]
+        return {
+            'list': {
+                'title': 'Kategori produk',
+                'fields': [
+                    {'name': 'complete_name', 'label': 'Kategori'},
+                    {'name': 'parent_id', 'label': 'Kategori induk'},
+                    {'name': 'product_count', 'label': 'Jumlah produk'},
+                ],
+                'default_order': 'complete_name',
+                'delete': False,
+            },
+            'form': {
+                'title': 'Kategori produk',
+                'fields': [
+                    {'name': 'name', 'label': 'Nama kategori', 'placeholder': 'Contoh: Minuman, Elektronik, Jasa'},
+                    {'name': 'parent_id', 'label': 'Kategori induk', 'help': 'Kosongkan untuk membuat kategori utama.'},
+                    {'name': 'complete_name', 'label': 'Struktur kategori'},
+                    {'name': 'product_count', 'label': 'Jumlah produk'},
+                    *account_fields,
+                ],
+                'write_fields': ['name', 'parent_id', *[field['name'] for field in account_fields]],
+                'buttons': [],
+            },
+        }
+
+
+class ProductPricelist(models.Model):
+    _inherit = 'product.pricelist'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        if self.env.context.get('managed_ui'):
+            for vals in vals_list:
+                vals['name'] = (vals.get('name') or '').strip()
+                if not vals['name']:
+                    raise ValidationError(_('Nama daftar harga wajib diisi.'))
+        pricelists = super().create(vals_list)
+        pricelists._check_managed_duplicate_names()
+        return pricelists
+
+    def write(self, vals):
+        if self.env.context.get('managed_ui') and 'name' in vals:
+            vals['name'] = (vals.get('name') or '').strip()
+            if not vals['name']:
+                raise ValidationError(_('Nama daftar harga wajib diisi.'))
+        result = super().write(vals)
+        self._check_managed_duplicate_names()
+        return result
+
+    def _check_managed_duplicate_names(self):
+        if not self.env.context.get('managed_ui'):
+            return
+        Pricelist = self.with_context(active_test=False, managed_ui=False).sudo()
+        for pricelist in self:
+            if Pricelist.search_count([
+                ('id', '!=', pricelist.id),
+                ('company_id', '=', pricelist.company_id.id or False),
+                ('currency_id', '=', pricelist.currency_id.id),
+                ('name', '=ilike', pricelist.name),
+            ]):
+                raise ValidationError(_('Daftar harga %(name)s sudah ada untuk perusahaan dan mata uang ini.', name=pricelist.name))
+
+    @api.model
+    def _managed_ui_contract(self, action_xmlid):
+        if action_xmlid != 'managed_products.action_product_pricelists':
+            return super()._managed_ui_contract(action_xmlid)
+        item_fields = self.env['product.pricelist.item']._fields
+        columns = [name for name in (
+            'applied_on', 'categ_id', 'product_tmpl_id', 'product_id',
+            'compute_price', 'fixed_price', 'percent_price', 'base', 'base_pricelist_id',
+            'price_discount', 'price_surcharge', 'price_round', 'price_min_margin', 'price_max_margin',
+            'min_quantity', 'date_start', 'date_end', 'name', 'price',
+        ) if name in item_fields]
+        labels = {
+            'applied_on': 'Berlaku untuk', 'categ_id': 'Kategori produk', 'product_tmpl_id': 'Produk',
+            'product_id': 'Variant', 'compute_price': 'Cara menentukan harga', 'fixed_price': 'Harga tetap',
+            'percent_price': 'Diskon (%)', 'base': 'Harga acuan', 'base_pricelist_id': 'Daftar harga acuan',
+            'price_discount': 'Diskon formula (%)', 'price_surcharge': 'Tambahan tetap',
+            'price_round': 'Pembulatan', 'price_min_margin': 'Margin minimum',
+            'price_max_margin': 'Margin maksimum', 'min_quantity': 'Minimum kuantitas',
+            'date_start': 'Mulai berlaku', 'date_end': 'Berakhir', 'name': 'Cakupan', 'price': 'Hasil aturan',
+        }
+        selections = {
+            'applied_on': [('3_global', 'Semua produk'), ('2_product_category', 'Kategori produk'), ('1_product', 'Produk tertentu'), ('0_product_variant', 'Variant tertentu')],
+            'compute_price': [('fixed', 'Harga tetap'), ('percentage', 'Diskon persentase'), ('formula', 'Formula lanjutan')],
+            'base': [('list_price', 'Harga jual produk'), ('standard_price', 'Cost'), ('pricelist', 'Daftar harga lain')],
+        }
+        relation_columns = [
+            {'name': name, 'label': labels[name], **({'selection': selections[name]} if name in selections else {})}
+            for name in columns
+        ]
+        return {
+            'list': {
+                'title': 'Daftar harga',
+                'fields': [
+                    {'name': 'name', 'label': 'Nama daftar harga'},
+                    {'name': 'currency_id', 'label': 'Mata uang'},
+                    {'name': 'company_id', 'label': 'Perusahaan'},
+                    {'name': 'active', 'label': 'Aktif'},
+                ],
+                'default_order': 'sequence asc, name asc',
+                'filters': [{'name': 'archived', 'label': 'Diarsipkan', 'domain': [('active', '=', False)]}],
+                'delete': False,
+            },
+            'form': {
+                'title': 'Daftar harga',
+                'fields': [
+                    {'name': 'name', 'label': 'Nama daftar harga', 'placeholder': 'Contoh: Retail IDR, Grosir, Export USD'},
+                    {'name': 'currency_id', 'label': 'Mata uang'},
+                    {'name': 'company_id', 'label': 'Perusahaan', 'help': 'Kosongkan agar dapat digunakan semua perusahaan yang diizinkan.'},
+                    {'name': 'active', 'label': 'Aktif'},
+                    {'name': 'discount_policy', 'label': 'Tampilan diskon', 'selection': [
+                        ('with_discount', 'Tampilkan harga akhir'),
+                        ('without_discount', 'Tampilkan harga publik dan diskon'),
+                    ]},
+                    {'name': 'country_group_ids', 'label': 'Kelompok negara'},
+                    {'name': 'item_ids', 'label': 'Aturan harga', 'widget': 'managed_pricelist_rules', 'relation': {
+                        'editable': True,
+                        'inverse_field': 'pricelist_id',
+                        'columns': relation_columns,
+                    }},
+                ],
+                'write_fields': ['name', 'currency_id', 'company_id', 'active', 'discount_policy', 'country_group_ids', 'item_ids'],
+                'buttons': [],
+            },
+        }
+
+
 class ProductTemplateAttributeLine(models.Model):
     _inherit = 'product.template.attribute.line'
 

@@ -1,3 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_managed_product_attribute_manager,managed.product.attribute.manager,product.model_product_attribute,product.group_product_variant,1,1,1,1
 access_managed_product_attribute_value_manager,managed.product.attribute.value.manager,product.model_product_attribute_value,product.group_product_variant,1,1,1,1
+access_managed_product_category_manager,managed.product.category.manager,product.model_product_category,product.group_product_variant,1,1,1,0
+access_managed_product_pricelist_manager,managed.product.pricelist.manager,product.model_product_pricelist,product.group_product_pricelist,1,1,1,0
+access_managed_product_pricelist_item_manager,managed.product.pricelist.item.manager,product.model_product_pricelist_item,product.group_product_pricelist,1,1,1,1

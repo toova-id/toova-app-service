@@ -578,6 +578,21 @@
   .luma-variants-read > span { @apply grid grid-cols-[minmax(100px,1fr)_minmax(90px,.5fr)_90px] gap-3 border-b py-1.5 text-[10px] last:border-b-0; }
   .luma-variants-read i { @apply not-italic text-muted-foreground; }
   .luma-variants-read b { @apply text-right font-medium tabular-nums; }
+  .luma-category-summary { @apply grid gap-4 md:grid-cols-2; }
+  .luma-pricelist-rule-list { @apply overflow-hidden rounded-md border; }
+  .luma-pricelist-rule-list > article { @apply grid min-h-12 grid-cols-[32px_minmax(0,1fr)_max-content] items-center gap-3 border-b px-3 last:border-b-0; }
+  .luma-pricelist-rule-icon { @apply grid h-7 w-7 place-items-center rounded-md bg-muted text-muted-foreground; }
+  .luma-pricelist-rule-icon svg { @apply h-3.5 w-3.5; }
+  .luma-pricelist-rule-list > article > div:nth-child(2) { @apply grid min-w-0 gap-0.5; }
+  .luma-pricelist-rule-list strong { @apply truncate text-[10px] font-medium; }
+  .luma-pricelist-rule-list span { @apply truncate text-[9px] text-muted-foreground; }
+  .luma-pricelist-rules > .workspace-relation-add { @apply mt-2; }
+  .luma-pricelist-rule-drawer main { @apply grid grid-cols-2 gap-3; }
+  .luma-pricelist-rule-drawer main > label { @apply grid min-w-0 gap-1; }
+  .luma-pricelist-rule-drawer main > label.wide, .luma-pricelist-rule-drawer main > .wide { @apply col-span-full; }
+  .luma-pricelist-rule-drawer main > label > span { @apply text-[9px] font-medium text-muted-foreground; }
+  .luma-pricelist-rule-drawer main input:not([type=checkbox]), .luma-pricelist-rule-drawer main button[role=combobox] { @apply h-8 w-full; }
+  .luma-pricelist-advanced-toggle { @apply h-8 rounded-md border border-dashed text-[10px] text-muted-foreground hover:bg-muted/30; }
   .workspace-loading, .workspace-error { @apply grid min-h-[calc(100vh-44px)] place-items-center content-center gap-2 text-xs text-muted-foreground; }
   .workspace-error strong { @apply text-sm text-foreground; }
   .luma-boot { @apply grid min-h-screen place-items-center content-center gap-3 bg-background text-muted-foreground; }

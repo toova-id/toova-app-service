@@ -120,6 +120,9 @@ def _relation_domain(field, parent_values):
     if field['name'] == 'state_id' and field.get('relation') == 'res.country.state':
         country_id = _domain_value(parent_values.get('country_id'))
         return [('country_id', '=', country_id)] if country_id else []
+    if field['name'] == 'parent_id' and field.get('relation') == 'product.category':
+        category_id = _domain_value(parent_values.get('__parent_id'))
+        return [('id', 'not child_of', category_id)] if category_id else []
     if field.get('relation') == 'res.partner' and field.get('parent') == 'seller_ids':
         return [('supplier_rank', '>', 0), ('is_company', '=', True), ('active', '=', True)]
     if field.get('relation') == 'product.product' and field.get('parent') == 'seller_ids':
@@ -128,6 +131,12 @@ def _relation_domain(field, parent_values):
     if field.get('relation') == 'product.attribute.value' and field.get('parent') == 'attribute_line_ids':
         attribute_id = _domain_value(parent_values.get('attribute_id'))
         return [('attribute_id', '=', attribute_id)] if attribute_id else [('id', '=', 0)]
+    if field.get('relation') == 'product.product' and field.get('parent') == 'item_ids':
+        template_id = _domain_value(parent_values.get('product_tmpl_id'))
+        return [('product_tmpl_id', '=', template_id)] if template_id else []
+    if field.get('relation') == 'product.pricelist' and field.get('parent') == 'item_ids':
+        parent_id = _domain_value(parent_values.get('__parent_id'))
+        return [('id', '!=', parent_id)] if parent_id else []
     if field.get('relation') != 'managed.indonesia.region':
         return domain
     mapping = {
@@ -331,8 +340,8 @@ def _managed_view_schema(action):
             'columns': columns,
             'readFields': read_fields,
             'defaultOrder': list_contract.get('default_order') or model._order,
-            'create': model.check_access_rights('create', raise_exception=False) and context.get('create', True) is not False,
-            'delete': model.check_access_rights('unlink', raise_exception=False),
+            'create': list_contract.get('create', model.check_access_rights('create', raise_exception=False)) and context.get('create', True) is not False,
+            'delete': list_contract.get('delete', model.check_access_rights('unlink', raise_exception=False)),
             'export': request.env.user.has_group('base.group_allow_export'),
             'filters': list_contract.get('filters', []),
             'actions': [],
@@ -343,8 +352,8 @@ def _managed_view_schema(action):
             'sections': [{'label': 'Informasi utama', 'fields': form_fields}],
             'allFields': form_fields,
             'writeFields': write_fields,
-            'create': model.check_access_rights('create', raise_exception=False) and context.get('create', True) is not False,
-            'write': model.check_access_rights('write', raise_exception=False),
+            'create': form_contract.get('create', model.check_access_rights('create', raise_exception=False)) and context.get('create', True) is not False,
+            'write': form_contract.get('write', model.check_access_rights('write', raise_exception=False)),
             'onchange': onchange,
             'statusField': status_field,
             'statusVisible': form_contract.get('status_visible', []),
@@ -609,12 +618,12 @@ def _normalize_form_values(values, schema):
         columns = {column['name']: column for column in relation_view['columns']}
         allowed = {name for name, column in columns.items() if not column.get('readonly')}
         existing_ids = [row['id'] for row in rows if isinstance(row.get('id'), int) and row.get('active', True) is not False]
-        if field.get('widget') in ('managed_contacts', 'managed_bank_accounts', 'managed_supplier_prices', 'managed_attribute_lines', 'managed_variants', 'managed_attribute_values'):
+        if field.get('widget') in ('managed_contacts', 'managed_bank_accounts', 'managed_supplier_prices', 'managed_attribute_lines', 'managed_variants', 'managed_attribute_values', 'managed_pricelist_rules'):
             commands = []
         else:
             commands = [(6, 0, existing_ids)]
         for row in rows:
-            if field.get('widget') in ('managed_supplier_prices', 'managed_attribute_values') and row.get('active', True) is False:
+            if field.get('widget') in ('managed_supplier_prices', 'managed_attribute_values', 'managed_pricelist_rules') and row.get('active', True) is False:
                 if isinstance(row.get('id'), int):
                     commands.append((2, row['id'], 0))
                 continue
@@ -922,6 +931,9 @@ class ManagedUiApi(http.Controller):
     def delete_records(self, action_id):
         try:
             action = _visible_action(action_id)
+            schema = _view_schema(action)
+            if not schema['list']['delete']:
+                raise AccessError('Delete is not available for this action.')
             ids = _json_body().get('ids', [])
             if not isinstance(ids, list) or not ids or not all(isinstance(item, int) for item in ids):
                 raise ValidationError('Select records to delete.')

@@ -5,10 +5,16 @@ const views = fs.readFileSync(new URL("../../addons/managed_products/frontend/vi
 const form = fs.readFileSync(new URL("../../addons/managed_products/frontend/product-form.tsx", import.meta.url), "utf8");
 const variants = fs.readFileSync(new URL("../../addons/managed_products/frontend/variant-manager.tsx", import.meta.url), "utf8");
 const attributeForm = fs.readFileSync(new URL("../../addons/managed_products/frontend/attribute-form.tsx", import.meta.url), "utf8");
+const categoryForm = fs.readFileSync(new URL("../../addons/managed_products/frontend/category-form.tsx", import.meta.url), "utf8");
+const pricelistForm = fs.readFileSync(new URL("../../addons/managed_products/frontend/pricelist-form.tsx", import.meta.url), "utf8");
+const pricelistRules = fs.readFileSync(new URL("../../addons/managed_products/frontend/pricelist-rules.tsx", import.meta.url), "utf8");
 const actions = fs.readFileSync(new URL("../../addons/managed_products/views/actions.xml", import.meta.url), "utf8");
 for (const token of ["managed_sku_normalized", "managed_product_variants", "managed_product_kind", "managed_track_inventory", "managed_supplier_prices", "managed_attribute_lines", "managed_attribute_values", "managed_variants", "managed_value_prices", "seller_ids", "property_account_income_id", "managed_products.action_products", "managed_products.action_product_attributes"]) if (!contract.includes(token)) throw new Error(`managed products missing ${token}`);
 for (const token of ["Penjualan", "Pembelian", "Persediaan", "Pajak & Accounting", "seller_ids", "l10n_id_product_code", "InventoryMetric", "Pelacakan stok aktif", "toLocaleString(\"id-ID\""]) if (!form.includes(token) && !views.includes(token)) throw new Error(`managed product view missing ${token}`);
 for (const token of ["AttributeLinesEditor", "VariantsEditor", "kombinasi diperkirakan", "Harga ekstra", "qty_available", "virtual_available", "Buat atribut"]) if (!variants.includes(token)) throw new Error(`managed variants missing ${token}`);
 for (const token of ["Nama atribut", "Pilihan nilai", "Pengaturan lanjutan", "250 ml", "UoM ml/L", "create_variant", "value_ids"]) if (!attributeForm.includes(token)) throw new Error(`managed attribute form missing ${token}`);
-for (const token of ["menu_products_root", "menu_product_attributes", "menu_product_categories", "menu_product_pricelists", "menu_product_uom"]) if (!actions.includes(token)) throw new Error(`managed product navigation missing ${token}`);
+for (const token of ["menu_products_root", "menu_product_attributes", "menu_product_categories", "menu_product_pricelists", "menu_product_uom", "action_product_categories", "action_product_pricelists"]) if (!actions.includes(token)) throw new Error(`managed product navigation missing ${token}`);
+for (const token of ["Identitas kategori", "Default accounting"]) if (!categoryForm.includes(token)) throw new Error(`managed category form missing ${token}`);
+for (const token of ["Identitas daftar harga", "Aturan harga", "Pengaturan lanjutan"]) if (!pricelistForm.includes(token)) throw new Error(`managed pricelist form missing ${token}`);
+for (const token of ["Tambah aturan harga", "Semua produk", "Formula lanjutan", "min_quantity"]) if (!pricelistRules.includes(token)) throw new Error(`managed pricelist rules missing ${token}`);
 console.log("managed products self-check passed");

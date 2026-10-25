@@ -94,6 +94,40 @@ class TestManagedProducts(TransactionCase):
         self.assertIn('property_account_income_id', fields)
         self.assertNotIn('qty_available', contract['form']['write_fields'])
 
+    def test_category_contract_and_duplicate_sibling_block(self):
+        contract = self.env['product.category']._managed_ui_contract('managed_products.action_product_categories')
+        fields = {field if isinstance(field, str) else field['name']: field for field in contract['form']['fields']}
+        self.assertEqual(fields['name']['label'], 'Nama kategori')
+        self.assertFalse(contract['list']['delete'])
+        parent = self.env['product.category'].with_context(managed_ui=True).create({'name': ' Minuman '})
+        self.assertEqual(parent.name, 'Minuman')
+        self.env['product.category'].with_context(managed_ui=True).create({'name': 'Teh', 'parent_id': parent.id})
+        with self.assertRaises(ValidationError):
+            self.env['product.category'].with_context(managed_ui=True).create({'name': ' teh ', 'parent_id': parent.id})
+
+    def test_pricelist_contract_and_native_rule(self):
+        contract = self.env['product.pricelist']._managed_ui_contract('managed_products.action_product_pricelists')
+        fields = {field if isinstance(field, str) else field['name']: field for field in contract['form']['fields']}
+        self.assertEqual(fields['item_ids']['widget'], 'managed_pricelist_rules')
+        self.assertIn('item_ids', contract['form']['write_fields'])
+        self.assertFalse(contract['list']['delete'])
+        product = self.env['product.product'].create({'name': 'Managed Price Product', 'list_price': 100000})
+        pricelist = self.env['product.pricelist'].with_context(managed_ui=True).create({
+            'name': ' Retail IDR ',
+            'currency_id': self.env.company.currency_id.id,
+            'item_ids': [(0, 0, {
+                'applied_on': '1_product', 'product_tmpl_id': product.product_tmpl_id.id,
+                'compute_price': 'fixed', 'fixed_price': 75000, 'min_quantity': 2,
+            })],
+        })
+        self.assertEqual(pricelist.name, 'Retail IDR')
+        self.assertEqual(pricelist.item_ids.product_tmpl_id, product.product_tmpl_id)
+        self.assertEqual(pricelist._get_product_price(product, 2), 75000)
+        with self.assertRaises(ValidationError):
+            self.env['product.pricelist'].with_context(managed_ui=True).create({
+                'name': 'retail idr', 'currency_id': self.env.company.currency_id.id,
+            })
+
     def test_native_variant_generation_and_value_prices(self):
         self.env.company.managed_product_variants = True
         attribute = self.env['product.attribute'].create({'name': 'Managed Size', 'create_variant': 'always'})
