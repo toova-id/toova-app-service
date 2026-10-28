@@ -27,7 +27,7 @@ export default defineConfig({
     preserveSymlinks: true,
     alias: {
       "@": path.resolve(__dirname, "src"),
-      "@luma": path.resolve(__dirname, "src"),
+      "@toova": path.resolve(__dirname, "src"),
       "react": path.resolve(__dirname, "node_modules/react"),
       "react/jsx-runtime": path.resolve(__dirname, "node_modules/react/jsx-runtime.js"),
       "lucide-react": path.resolve(__dirname, "node_modules/lucide-react"),

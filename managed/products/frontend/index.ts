@@ -1,8 +1,8 @@
 import "./views";
 import "./navigation";
-import { registerFieldEditor, registerFieldRenderer } from "@luma/views/field-registry";
-import { registerActionFormView } from "@luma/views/view-registry";
-import { registerSettingsSection } from "@luma/features/settings/settings-registry";
+import { registerFieldEditor, registerFieldRenderer } from "@toova/views/field-registry";
+import { registerActionFormView } from "@toova/views/view-registry";
+import { registerSettingsSection } from "@toova/features/settings/settings-registry";
 import AttributeForm from "./attribute-form";
 import { AttributeValuesEditor, AttributeValuesValue } from "./attribute-values";
 import CategoryForm from "./category-form";

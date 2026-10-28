@@ -1,5 +1,5 @@
 import "./views";
-import { registerActionFormView } from "@luma/views/view-registry";
+import { registerActionFormView } from "@toova/views/view-registry";
 import VendorForm from "./vendor-form";
 
 registerActionFormView("vendors.action_vendors", VendorForm);

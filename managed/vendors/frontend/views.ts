@@ -1,4 +1,4 @@
-import { registerActionView } from "@luma/views/view-metadata";
+import { registerActionView } from "@toova/views/view-metadata";
 
 registerActionView("vendors.action_vendors", {
   list: { columns: ["name", "phone", "email", "city", "country_id", "vat"] },

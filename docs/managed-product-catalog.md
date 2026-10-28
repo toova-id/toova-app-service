@@ -56,13 +56,13 @@ Jika tidak ada Attribute pembentuk variant, Product tetap memiliki satu `product
 Contoh:
 
 ```text
-Template: Kaos Luma
+Template: Kaos Toova
 Attribute: Ukuran
 Values: L, XL
 
 Variants:
-- Kaos Luma (L)
-- Kaos Luma (XL)
+- Kaos Toova (L)
+- Kaos Toova (XL)
 ```
 
 Sales, Stock, barcode scan, dan channel order harus memilih `product.product`, bukan hanya template.
@@ -253,9 +253,9 @@ Pricelist bukan duplikasi Product. Channel berbeda tetap memakai Variant canonic
 Satu Product tidak boleh dibuat menjadi:
 
 ```text
-Kaos Luma Shopee
-Kaos Luma Tokopedia
-Kaos Luma Website
+Kaos Toova Shopee
+Kaos Toova Tokopedia
+Kaos Toova Website
 ```
 
 Itu akan memecah SKU, barcode, procurement, dan stock.
@@ -307,15 +307,15 @@ Contoh:
 ```text
 Pricelist: Shopee IDR
 
-Luma Test Product (L)  = Rp120.000
-Luma Test Product (XL) = Rp135.000
+Toova Test Product (L)  = Rp120.000
+Toova Test Product (XL) = Rp135.000
 ```
 
 Data:
 
 ```text
 applied_on = 0_product_variant
-product_tmpl_id = Luma Test Product
+product_tmpl_id = Toova Test Product
 product_id = Variant L atau XL
 compute_price = fixed
 ```
@@ -694,7 +694,7 @@ Equation bisnis selalu tampil agar user dapat memeriksa makna ratio sebelum save
 ### 13.1 Variant price per channel
 
 ```text
-Product: Kaos Luma
+Product: Kaos Toova
 Variants:
 - L
 - XL

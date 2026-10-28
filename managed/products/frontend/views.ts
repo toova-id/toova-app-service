@@ -1,4 +1,4 @@
-import { registerModelView } from "@luma/views/view-metadata";
+import { registerModelView } from "@toova/views/view-metadata";
 
 registerModelView("product.template", {
   list: { columns: ["image_128", "default_code", "name", "managed_product_kind", "categ_id", "list_price", "qty_available"] },

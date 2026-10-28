@@ -64,7 +64,7 @@ def _document_path(model, record_id):
     mapping = {
         'res.partner': {'customers.action_customers': '/app/contacts/customers', 'vendors.action_vendors': '/app/contacts/vendors'},
         'product.template': {'products.action_products': '/app/products/products'},
-        'sale.order': {'sale.action_quotations': '/app/sales/penawaran', 'sale.action_orders': '/app/sales/pesanan-penjualan'},
+        'sale.order': {'sales.action_quotations': '/app/sales/penawaran', 'sales.action_orders': '/app/sales/pesanan'},
     }
     candidates = mapping.get(model, {})
     for xmlid, base in candidates.items():
@@ -92,7 +92,7 @@ class ManagedInboxApi(http.Controller):
             'messages': messages,
             'mentions': mentions,
             'activities': activities,
-            'attention': mentions + activities,
+            'attention': messages + mentions + activities,
         }
 
     @http.route('/api/v1/inbox/counts', type='http', auth='user', methods=['GET'])

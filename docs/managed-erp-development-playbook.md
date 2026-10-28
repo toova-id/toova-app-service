@@ -25,11 +25,24 @@ python3 scripts/test_managed_addon_scope.py
 Runtime development saat checkpoint ini:
 
 ```text
-App container: erp-local-app
+HTTP container: erp-local-app
+Realtime container: erp-local-realtime
+Redis container: erp-local-redis
 DB container: erp-local-db
 Database: erp_local
 URL: http://127.0.0.1:8069
+WebSocket: ws://127.0.0.1:8072/websocket
 ```
+
+Seed showcase development:
+
+```bash
+docker exec -i erp-local-app python /opt/odoo/odoo-bin shell \
+  --db_host=erp-local-db --db_port=5432 --db_user=odoo --db_password=odoo \
+  -d erp_local --no-http < scripts/seed_managed_demo.py
+```
+
+Seeder idempotent dan hanya menerima database `erp_local` atau prefix `test_`. Seeder membuat Customer, Vendor, PIC, Employee, Product/Variant, Category, Pricelist, stock awal, Penawaran, Pesanan, Invoice draft, aktivitas, channel, dan role demo melalui model native. Jangan jalankan pada production.
 
 Ambil development login dari konfigurasi local environment. Jangan simpan password, database secret, token, atau production credential dalam dokumentasi.
 
@@ -345,7 +358,7 @@ Implemented catalog baseline:
 Known runtime facts:
 
 ```text
-Luma Test Product template ID: 1
+Toova Test Product template ID: 1
 Active variants during latest validation:
 - product.product 19: XL
 - product.product 20: L
@@ -403,6 +416,18 @@ Responsive form has no horizontal overflow
 
 ### Phase B — Sales end-to-end
 
+Navigation ownership:
+
+```text
+Sales       → Penawaran, Pesanan
+Contacts    → Customer/PIC master
+Products    → Product, Variant, Daftar Harga, UoM
+Persediaan  → Pengiriman operasional
+Keuangan    → Invoice dan Payment
+Pengaturan  → Pengaturan penjualan
+Analitik    → workspace lintas domain terpisah, bukan submenu Sales
+```
+
 Goal:
 
 ```text
@@ -422,19 +447,19 @@ Required design rules:
 - invoice uses native invoice creation;
 - payment status remains computed Accounting state.
 
-First implementation slice:
+First implementation slice baseline:
 
 ```text
-Create quotation
-→ select Customer
-→ select Pricelist
-→ add Variant line
-→ run nested onchange
-→ save draft
-→ reopen and verify snapshot
+Managed Penawaran action
+→ select managed Customer
+→ choose product.product Variant
+→ run nested native onchange
+→ save line price snapshot
+→ confirm through native action_confirm()
+→ view confirmed document under Pesanan
 ```
 
-Do not start Delivery/Invoice UI before quotation line behavior and permission tests pass.
+Pengiriman, invoice, dan payment tidak menjadi duplicate CRUD di Sales. Pesanan menampilkan computed status dan nanti deep-link ke managed Persediaan/Keuangan. Do not start those pages before quotation line behavior and permission tests pass.
 
 Acceptance for first slice:
 

@@ -19,9 +19,9 @@ class ManagedSettingsRegistry(models.AbstractModel):
         return [
             *super()._managed_permission_catalog(),
             {'key': 'sales', 'label': 'Sales', 'sequence': 40, 'permissions': [
-                {'key': 'sales.quotations', 'label': 'Quotations', 'groups': {'read': 'settings.group_sales_quotations_read', 'write': 'settings.group_sales_quotations_write'}},
-                {'key': 'sales.orders', 'label': 'Sales Orders', 'groups': {'read': 'settings.group_sales_orders_read', 'write': 'settings.group_sales_orders_write'}},
-                {'key': 'settings.sales', 'label': 'Sales Settings', 'groups': {'read': 'settings.group_settings_sales_read', 'write': 'settings.group_settings_sales_write'}},
+                {'key': 'sales.quotations', 'label': 'Penawaran', 'groups': {'read': 'settings.group_sales_quotations_read', 'write': 'settings.group_sales_quotations_write'}},
+                {'key': 'sales.orders', 'label': 'Pesanan', 'groups': {'read': 'settings.group_sales_orders_read', 'write': 'settings.group_sales_orders_write'}},
+                {'key': 'settings.sales', 'label': 'Pengaturan Penjualan', 'groups': {'read': 'settings.group_settings_sales_read', 'write': 'settings.group_settings_sales_write'}},
             ]},
         ]
 
@@ -29,11 +29,16 @@ class ManagedSettingsRegistry(models.AbstractModel):
     def _managed_action_permissions(self):
         return {
             **super()._managed_action_permissions(),
-            'sale.action_quotations': 'sales.quotations',
-            'sale.action_quotations_with_onboarding': 'sales.quotations',
-            'sale.action_orders': 'sales.orders',
-            'sale.action_orders_to_invoice': 'sales.orders',
-            'sale.action_orders_upselling': 'sales.orders',
+            'sales.action_quotations': 'sales.quotations',
+            'sales.action_orders': 'sales.orders',
+        }
+
+    @api.model
+    def _managed_menu_permissions(self):
+        return {
+            **super()._managed_menu_permissions(),
+            'sales.menu_quotations': 'sales.quotations',
+            'sales.menu_orders': 'sales.orders',
         }
 
 

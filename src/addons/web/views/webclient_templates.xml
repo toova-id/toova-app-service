@@ -108,27 +108,33 @@
 
             <main class="o_workspace_login_shell">
                 <section class="o_workspace_login_intro">
-                    <span class="o_workspace_login_brand"><i/> Luma</span>
-                    <div>
-                        <span class="o_workspace_login_eyebrow">Business workspace</span>
-                        <h1>One clean space for daily work.</h1>
-                        <p>Manage operations, people, sales, and reporting without visual noise.</p>
+                    <header>
+                        <span class="o_workspace_login_brand"><i/> Toova</span>
+                        <span class="o_workspace_login_badge">ERP OPERASIONAL</span>
+                    </header>
+                    <div class="o_workspace_login_story">
+                        <span class="o_workspace_login_eyebrow">Satu ruang kerja</span>
+                        <h1>Operasional bisnis,<br/><em>lebih tertata.</em></h1>
+                        <p>Kelola penjualan, produk, pelanggan, persediaan, dan keuangan tanpa berpindah konteks.</p>
+                        <ul>
+                            <li><i/>Data bisnis saling terhubung</li>
+                            <li><i/>Alur kerja jelas untuk setiap tim</li>
+                            <li><i/>Odoo tetap menjadi business engine</li>
+                        </ul>
                     </div>
-                    <small>Secure private workspace</small>
+                    <footer>Toova untuk operasional bisnis Indonesia</footer>
                 </section>
                 <section class="o_workspace_login_panel">
                     <div t-attf-class="o_workspace_login_card {{login_card_classes}} o_database_list">
                         <div class="o_workspace_login_identity">
-                            <img t-attf-src="/web/binary/company_logo{{ '?dbname='+db if db else '' }}" alt="Company logo"/>
+                            <img t-attf-src="/web/binary/company_logo{{ '?dbname='+db if db else '' }}" alt="Logo perusahaan"/>
                             <div>
-                                <span>Welcome back</span>
-                                <strong>Sign in to continue</strong>
+                                <span>Selamat datang</span>
+                                <strong>Masuk ke Toova</strong>
                             </div>
                         </div>
                         <t t-out="0"/>
-                        <div class="o_workspace_login_footer" t-if="not disable_footer and not disable_database_manager">
-                            <a href="/web/database/manager">Manage databases</a>
-                        </div>
+                        <p class="o_workspace_login_help">Gunakan akun internal perusahaan.</p>
                     </div>
                 </section>
             </main>

@@ -80,7 +80,7 @@ export default function ActionPage({ actionId, basePath }: { actionId: number; b
   async function runButton(name: string, type: "object" | "action") {
     if (!recordId || recordId === "new") return;
     setLoading(true);
-    try { const response = await apiMutation<{ result?: unknown }>(`/api/v1/ui/actions/${actionId}/records/${recordId}/button`, "POST", { name, type }); const result = response.result as WindowAction | undefined; if (result?.type === "ir.actions.act_window" && (result.target === "new" || result.views?.some((view) => view[1] === "form"))) setModal(result); else setReload((value) => value + 1); }
+    try { const response = await apiMutation<{ result?: unknown; recordAvailable?: boolean }>(`/api/v1/ui/actions/${actionId}/records/${recordId}/button`, "POST", { name, type }); const result = response.result as WindowAction | undefined; if (result?.type === "ir.actions.act_window" && (result.target === "new" || result.views?.some((view) => view[1] === "form"))) setModal(result); else if (response.recordAvailable === false) navigate(basePath); else setReload((value) => value + 1); }
     catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); }
     finally { setLoading(false); }
   }

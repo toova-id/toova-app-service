@@ -10,5 +10,5 @@ export default function ClientActionPage({ actionId }: { actionId: number }) {
   if (!action) return <div className="workspace-loading">Memuat fitur...</div>;
   const Component = getClientAction(action.tag);
   if (Component) return <Component action={action}/>;
-  return <div className="workspace-error"><strong>{action.name}</strong><span>Fitur <code>{action.tag}</code> belum memiliki renderer Luma.</span></div>;
+  return <div className="workspace-error"><strong>{action.name}</strong><span>Fitur <code>{action.tag}</code> belum memiliki renderer Toova.</span></div>;
 }

@@ -45,6 +45,17 @@ class TestManagedUiApi(HttpCase):
         response = self.url_open('/api/v1/ui/actions/999999')
         self.assertEqual(response.status_code, 403)
 
+    def test_action_domain_scopes_direct_record_access(self):
+        quotations = self.env.ref('sales.action_quotations', raise_if_not_found=False)
+        if not quotations:
+            self.skipTest('Managed Sales is not installed.')
+        customer = self.env['res.partner'].with_context(managed_party_role='customer').create({'name': 'Scoped Customer'})
+        order = self.env['sale.order'].create({'partner_id': customer.id})
+        order.write({'state': 'sale'})
+        self.authenticate(self.user.login, 'managed_ui_user')
+        response = self.url_open(f'/api/v1/ui/actions/{quotations.id}/records/{order.id}')
+        self.assertEqual(response.status_code, 403)
+
     def test_unmanaged_native_action_rejected(self):
         self.authenticate(self.user.login, 'managed_ui_user')
         action = self.env.ref('account.action_move_out_invoice_type', raise_if_not_found=False)

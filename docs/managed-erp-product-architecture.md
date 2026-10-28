@@ -332,6 +332,16 @@ Products
 
 Tidak ada menu factor UoM, raw attribute line, Product Variant CRUD terpisah, atau Pricelist Item CRUD terpisah.
 
+Sales memakai ownership berbasis task:
+
+```text
+Penjualan
+├── Penawaran
+└── Pesanan
+```
+
+Customer tetap dikelola di Contacts, Product/Variant serta Daftar Harga tetap di Products, pengiriman operasional dimiliki Persediaan/Warehouse, invoice dan pembayaran dimiliki Keuangan, pengaturan penjualan berada di Pengaturan, dan analitik akan menjadi workspace lintas domain terpisah. Sales hanya menampilkan status pengiriman dan tagihan dalam konteks Pesanan; tidak membuat CRUD Stock atau Accounting kedua.
+
 ## 12. Status implementasi
 
 | Domain | Status | Catatan |
@@ -348,7 +358,8 @@ Tidak ada menu factor UoM, raw attribute line, Product Variant CRUD terpisah, at
 | Category | Selesai baseline | Native hierarchy, duplicate sibling guard, no managed delete |
 | Pricelist | Selesai baseline | Global/category/product/variant rules, fixed/discount/formula |
 | UoM | Selesai baseline | Category-centered editor, `ml`, conversion facade, transaction lock |
-| Sales end-to-end | Berikutnya | Quotation → Delivery → Invoice → Payment status |
+| Sales quotation | Baseline aktif | Managed Penawaran/Pesanan, Customer selector, Variant line editor, native onchange/pricing, confirmation |
+| Sales fulfillment | Berikutnya | Status/deep-link Delivery → Invoice → Payment tanpa duplicate Stock/Finance CRUD |
 | Marketplace connector | Belum ada | Store mapping, price sync, order import, settlement perlu domain terpisah |
 | Contact duplicate candidate flow | Belum lengkap | Exact legal identity block sudah ada |
 | Full browser visual QA | Belum lengkap | Perlu desktop/mobile dan role matrix |

@@ -1,10 +1,10 @@
 import "./views";
-import { registerClientAction } from "@luma/features/feature-registry";
-import SettingsShell from "@luma/features/settings/settings-shell";
-import { registerActionFormView, registerActionListView } from "@luma/views/view-registry";
+import { registerClientAction } from "@toova/features/feature-registry";
+import SettingsShell from "@toova/features/settings/settings-shell";
+import { registerActionFormView, registerActionListView } from "@toova/views/view-registry";
 import { UserSettingsForm } from "./settings-forms";
 import RoleSettingsForm from "./role-form";
-import { registerSettingsSection } from "@luma/features/settings/settings-registry";
+import { registerSettingsSection } from "@toova/features/settings/settings-registry";
 import GeneralSettings from "./general-settings";
 import { RolesSettingsList, UsersSettingsList } from "./settings-list";
 

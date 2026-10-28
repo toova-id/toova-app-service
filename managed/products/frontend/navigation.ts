@@ -1,4 +1,4 @@
-import { registerManagedNavigation } from "@luma/app/managed-navigation";
+import { registerManagedNavigation } from "@toova/app/managed-navigation";
 
 registerManagedNavigation("products", {
   label: "Products",

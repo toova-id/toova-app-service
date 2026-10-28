@@ -7,5 +7,5 @@ const sale = fs.readFileSync(new URL("../../managed/sales/frontend/navigation.ts
 for (const token of ["registerManagedNavigation", "applyManagedNavigation", "findByXmlid"]) if (!source.includes(token)) throw new Error(`managed navigation missing ${token}`);
 for (const module of ["mail", "contacts", "sale", "products", "customers", "vendors", "contact_persons", "people", "settings"]) if (!icons.includes(`registerModuleIcon("${module}"`)) throw new Error(`navigation icon missing ${module}`);
 for (const token of ["def _managed_action_ids", "_managed_action_ids(action_model)", "managed_actions.get(action_model, set())"]) if (!api.includes(token)) throw new Error(`navigation API must restrict menus to managed action anchors: ${token}`);
-for (const xmlid of ["sale.menu_sale_quotations", "sale.menu_sale_order", "sale.menu_sale_order_invoice"]) if (!sale.includes(xmlid)) throw new Error(`sale navigation missing ${xmlid}`);
+for (const xmlid of ["sales.menu_quotations", "sales.menu_orders"]) if (!sale.includes(xmlid)) throw new Error(`sale navigation missing ${xmlid}`);
 console.log("managed navigation self-check passed");

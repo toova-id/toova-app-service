@@ -24,14 +24,14 @@ export default function SettingsShell() {
   if (!active) return <div className="workspace-loading">Memuat pengaturan...</div>;
   const Component = getSettingsSection(active.key);
   const id = active.actionId || undefined;
-  return <div className="luma-settings-workspace">
-    <aside className="luma-settings-sidebar">
+  return <div className="toova-settings-workspace">
+    <aside className="toova-settings-sidebar">
       <header><h1>Pengaturan</h1></header>
       <nav>{[...mainSections, ...moduleSections].map((section, index) => { const Icon = icons[section.key as keyof typeof icons] || Settings2; return <button key={section.key} type="button" className={`${active.key === section.key ? "active" : ""}${index === mainSections.length ? " module-start" : ""}`} onClick={() => open(section)}><Icon/><span><strong>{section.label}</strong></span><ChevronRight/></button>; })}</nav>
     </aside>
-    <main className="luma-settings-content">
-      <header className="luma-settings-content-header"><div><h2>{active.label}</h2></div>{active.readiness.status !== "ready" && active.readiness.message && <b className={active.readiness.status}>{active.readiness.message}</b>}</header>
-      <div className="luma-settings-content-body">{Component ? <Component section={active} onBack={() => navigate(rootPath)}/> : id ? <ActionPage actionId={id} basePath={active.placement === "advanced" ? `${rootPath}/advanced/${active.key}` : `${rootPath}/${active.key}`}/> : <div className="workspace-error"><strong>{active.label}</strong><span>Renderer belum tersedia.</span></div>}</div>
+    <main className="toova-settings-content">
+      <header className="toova-settings-content-header"><div><h2>{active.label}</h2></div>{active.readiness.status !== "ready" && active.readiness.message && <b className={active.readiness.status}>{active.readiness.message}</b>}</header>
+      <div className="toova-settings-content-body">{Component ? <Component section={active} onBack={() => navigate(rootPath)}/> : id ? <ActionPage actionId={id} basePath={active.placement === "advanced" ? `${rootPath}/advanced/${active.key}` : `${rootPath}/${active.key}`}/> : <div className="workspace-error"><strong>{active.label}</strong><span>Renderer belum tersedia.</span></div>}</div>
     </main>
   </div>;
 }

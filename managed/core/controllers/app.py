@@ -78,4 +78,5 @@ class ManagedApp(http.Controller):
             ],
             'modules': modules,
             'csrfToken': request.csrf_token(),
+            'realtimeUrl': request.env['ir.config_parameter'].sudo().get_param('managed.realtime_url') or False,
         }, headers=[('Cache-Control', 'no-store')])

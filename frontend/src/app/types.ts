@@ -8,6 +8,7 @@ export interface Session {
   companies: Company[];
   modules: string[];
   csrfToken: string;
+  realtimeUrl?: string;
 }
 export interface ServerNavigationItem {
   id: number;

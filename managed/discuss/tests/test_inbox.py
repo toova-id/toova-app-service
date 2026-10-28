@@ -18,9 +18,13 @@ class TestManagedInbox(HttpCase):
         overview = self.url_open('/api/v1/inbox')
         self.assertEqual(overview.status_code, 200)
         self.assertIn(self.channel.id, [item['id'] for item in overview.json()['conversations']])
+        self.assertGreater(overview.json()['counts']['messages'], 0)
         thread = self.url_open(f'/api/v1/inbox/channels/{self.channel.id}')
         self.assertEqual(thread.status_code, 200)
         self.assertEqual(thread.json()['messages'][-1]['body'], '<p>Halo Inbox</p>')
+        counts = self.url_open('/api/v1/inbox/counts').json()
+        self.assertEqual(counts['messages'], 0)
+        self.assertEqual(counts['attention'], counts['mentions'] + counts['activities'])
 
     def test_non_member_cannot_read_channel(self):
         hidden = self.env['mail.channel'].create({'name': 'Hidden Inbox', 'channel_type': 'group'})

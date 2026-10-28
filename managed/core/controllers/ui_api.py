@@ -131,6 +131,15 @@ def _visible_action(action_id):
 def _action_xmlid(action):
     return action.get_external_id().get(action.id) or ''
 
+def _scoped_record(action, record_id):
+    context, domain = _eval_action(action)
+    record = request.env[action.res_model].with_context(**context).search(
+        expression.AND([domain, [('id', '=', record_id)]]), limit=1,
+    )
+    if not record:
+        raise MissingError('Record not found.')
+    return record
+
 def _domain_value(value):
     if isinstance(value, (list, tuple)):
         return value[0] if value else False
@@ -162,6 +171,36 @@ def _relation_domain(field, parent_values):
     if field.get('relation') == 'product.pricelist' and field.get('parent') == 'item_ids':
         parent_id = _domain_value(parent_values.get('__parent_id'))
         return [('id', '!=', parent_id)] if parent_id else []
+    if field.get('widget') == 'managed_customer_many2one' and field.get('relation') == 'res.partner':
+        return [
+            ('parent_id', '=', False),
+            ('managed_role_ids.role', '=', 'customer'),
+            ('managed_role_ids.company_id', '=', request.env.company.id),
+            ('managed_role_ids.active', '=', True),
+            ('active', '=', True),
+        ]
+    if field.get('widget') == 'managed_order_address_many2one' and field.get('relation') == 'res.partner':
+        partner_id = _domain_value(parent_values.get('partner_id'))
+        return [('id', 'child_of', partner_id), ('active', '=', True)] if partner_id else [('id', '=', 0)]
+    if field.get('widget') == 'managed_order_pricelist_many2one' and field.get('relation') == 'product.pricelist':
+        company_id = _domain_value(parent_values.get('company_id')) or request.env.company.id
+        return [('active', '=', True), ('company_id', 'in', [False, company_id])]
+    if field.get('widget') == 'managed_order_payment_term_many2one' and field.get('relation') == 'account.payment.term':
+        company_id = _domain_value(parent_values.get('company_id')) or request.env.company.id
+        return [('company_id', 'in', [False, company_id])]
+    if field.get('widget') == 'managed_order_fiscal_position_many2one' and field.get('relation') == 'account.fiscal.position':
+        company_id = _domain_value(parent_values.get('company_id')) or request.env.company.id
+        return [('company_id', '=', company_id)]
+    if field.get('widget') == 'managed_order_warehouse_many2one' and field.get('relation') == 'stock.warehouse':
+        company_id = _domain_value(parent_values.get('company_id')) or request.env.company.id
+        return [('company_id', '=', company_id), ('active', '=', True)]
+    if field.get('widget') == 'managed_sale_product_many2one' and field.get('relation') == 'product.product':
+        company_id = _domain_value(parent_values.get('company_id')) or request.env.company.id
+        return [('sale_ok', '=', True), ('active', '=', True), ('product_tmpl_id.company_id', 'in', [False, company_id])]
+    if field.get('widget') == 'managed_sale_uom_many2one' and field.get('relation') == 'uom.uom':
+        product_id = _domain_value(parent_values.get('product_id'))
+        product = request.env['product.product'].browse(product_id).exists() if product_id else request.env['product.product']
+        return [('category_id', '=', product.uom_id.category_id.id)] if product else [('id', '=', 0)]
     if field.get('relation') != 'managed.indonesia.region':
         return domain
     mapping = {
@@ -885,10 +924,7 @@ class ManagedUiApi(http.Controller):
             if record_id == 'new':
                 values = _serialize_form_values(model, model.default_get(fields_to_read), schema)
                 return request.make_json_response({'id': None, 'values': values}, headers=[('Cache-Control', 'no-store')])
-            record = model.browse(int(record_id)).exists()
-            if not record:
-                raise MissingError('Record not found.')
-            record.check_access_rule('read')
+            record = _scoped_record(action, int(record_id))
             values = _serialize_form_values(model, record.read(fields_to_read)[0], schema)
             return request.make_json_response({'id': record.id, 'values': values}, headers=[('Cache-Control', 'no-store')])
         except (AccessError, MissingError) as error:
@@ -979,10 +1015,7 @@ class ManagedUiApi(http.Controller):
             allowed = {(item['name'], item['type']) for item in schema['form']['buttons']}
             if (button_name, button_type) not in allowed:
                 raise AccessError('Button is not available.')
-            record = request.env[action.res_model].browse(record_id).exists()
-            if not record:
-                raise MissingError('Record not found.')
-            record.check_access_rule('read')
+            record = _scoped_record(action, record_id)
             if button_type == 'object':
                 result = getattr(record, button_name)()
             else:
@@ -991,7 +1024,11 @@ class ManagedUiApi(http.Controller):
                     raise MissingError('Action not found.')
                 action_type = target.type
                 result = request.env[action_type].browse(target.id).read()[0]
-            return request.make_json_response({'result': _action_payload(result)})
+            _context, domain = _eval_action(action)
+            record_available = bool(record.exists() and request.env[action.res_model].search_count(
+                expression.AND([domain, [('id', '=', record_id)]]),
+            ))
+            return request.make_json_response({'result': _action_payload(result), 'recordAvailable': record_available})
         except (AccessError, MissingError) as error:
             return _error(error, 'forbidden', 403)
         except (AttributeError, UserError, ValidationError, ValueError) as error:
@@ -1032,9 +1069,7 @@ class ManagedUiApi(http.Controller):
             allowed = _writable_form_fields(schema)
             if not isinstance(values, dict):
                 raise ValidationError('Payload must contain field values.')
-            record = request.env[action.res_model].with_context(**context).browse(record_id).exists()
-            if not record:
-                raise MissingError('Record not found.')
+            record = _scoped_record(action, record_id)
             values = {name: value for name, value in values.items() if name in allowed}
             values = {name: value[0] if isinstance(value, (list, tuple)) and _form_fields(schema).get(name, {}).get('type') == 'many2one' and value else value for name, value in values.items()}
             with request.env.cr.savepoint():

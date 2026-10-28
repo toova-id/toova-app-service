@@ -1,4 +1,4 @@
-import { registerActionView } from "@luma/views/view-metadata";
+import { registerActionView } from "@toova/views/view-metadata";
 
 registerActionView("settings.action_company_profile", {
   form: { titleField: "name", sections: [

@@ -6,7 +6,7 @@
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <meta name="theme-color" content="#020617"/>
-        <title>Luma</title>
+        <title>Toova</title>
         <link t-foreach="styles" t-as="stylesheet" rel="stylesheet" t-att-href="stylesheet"/>
     </head>
     <body>

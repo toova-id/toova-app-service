@@ -27,6 +27,10 @@ DBNAME_PATTERN = '^[a-zA-Z0-9][a-zA-Z0-9_.-]+$'
 
 class Database(http.Controller):
 
+    @staticmethod
+    def _managed_database_access():
+        return request.not_found() if not odoo.tools.config['list_db'] else None
+
     def _render_template(self, **d):
         d.setdefault('manage', True)
         d['insecure'] = odoo.tools.config.verify_admin_password('admin')
@@ -58,18 +62,27 @@ class Database(http.Controller):
 
     @http.route('/web/database/selector', type='http', auth="none")
     def selector(self, **kw):
+        blocked = self._managed_database_access()
+        if blocked:
+            return blocked
         if request.db:
             request.env.cr.close()
         return self._render_template(manage=False)
 
     @http.route('/web/database/manager', type='http', auth="none")
     def manager(self, **kw):
+        blocked = self._managed_database_access()
+        if blocked:
+            return blocked
         if request.db:
             request.env.cr.close()
         return self._render_template()
 
     @http.route('/web/database/create', type='http', auth="none", methods=['POST'], csrf=False)
     def create(self, master_pwd, name, lang, password, **post):
+        blocked = self._managed_database_access()
+        if blocked:
+            return blocked
         insecure = odoo.tools.config.verify_admin_password('admin')
         if insecure and master_pwd:
             dispatch_rpc('db', 'change_admin_password', ["admin", master_pwd])
@@ -89,6 +102,9 @@ class Database(http.Controller):
 
     @http.route('/web/database/duplicate', type='http', auth="none", methods=['POST'], csrf=False)
     def duplicate(self, master_pwd, name, new_name, neutralize_database=False):
+        blocked = self._managed_database_access()
+        if blocked:
+            return blocked
         insecure = odoo.tools.config.verify_admin_password('admin')
         if insecure and master_pwd:
             dispatch_rpc('db', 'change_admin_password', ["admin", master_pwd])
@@ -106,6 +122,9 @@ class Database(http.Controller):
 
     @http.route('/web/database/drop', type='http', auth="none", methods=['POST'], csrf=False)
     def drop(self, master_pwd, name):
+        blocked = self._managed_database_access()
+        if blocked:
+            return blocked
         insecure = odoo.tools.config.verify_admin_password('admin')
         if insecure and master_pwd:
             dispatch_rpc('db', 'change_admin_password', ["admin", master_pwd])
@@ -121,6 +140,9 @@ class Database(http.Controller):
 
     @http.route('/web/database/backup', type='http', auth="none", methods=['POST'], csrf=False)
     def backup(self, master_pwd, name, backup_format='zip'):
+        blocked = self._managed_database_access()
+        if blocked:
+            return blocked
         insecure = odoo.tools.config.verify_admin_password('admin')
         if insecure and master_pwd:
             dispatch_rpc('db', 'change_admin_password', ["admin", master_pwd])
@@ -144,6 +166,9 @@ class Database(http.Controller):
 
     @http.route('/web/database/restore', type='http', auth="none", methods=['POST'], csrf=False)
     def restore(self, master_pwd, backup_file, name, copy=False, neutralize_database=False):
+        blocked = self._managed_database_access()
+        if blocked:
+            return blocked
         insecure = odoo.tools.config.verify_admin_password('admin')
         if insecure and master_pwd:
             dispatch_rpc('db', 'change_admin_password', ["admin", master_pwd])
@@ -163,6 +188,9 @@ class Database(http.Controller):
 
     @http.route('/web/database/change_password', type='http', auth="none", methods=['POST'], csrf=False)
     def change_password(self, master_pwd, master_pwd_new):
+        blocked = self._managed_database_access()
+        if blocked:
+            return blocked
         try:
             dispatch_rpc('db', 'change_admin_password', [master_pwd, master_pwd_new])
             return request.redirect('/web/database/manager')

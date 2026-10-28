@@ -37,6 +37,31 @@ for addon_root in (ROOT / 'src/odoo/addons', ROOT / 'src/addons', ROOT / 'manage
 missing_roots = PRODUCT_ROOTS - modules.keys()
 assert not missing_roots, f'missing product roots: {sorted(missing_roots)}'
 assert not EXCLUDED & modules.keys(), f'excluded addons retained: {sorted(EXCLUDED & modules.keys())}'
+assert not any('odoo.addons.website' in path.read_text(errors='ignore') for path in (ROOT / 'src/addons/web').rglob('*.py')), \
+    'web addon must not retain website-only test imports'
+brand_sources = [ROOT / 'frontend', ROOT / 'managed', ROOT / 'docs', ROOT / 'src/addons/web/views', ROOT / 'src/addons/web/static/src/scss']
+legacy_brand = 'lu' + 'ma'
+assert not any(
+    __import__('re').search(rf'(?<![A-Za-z]){legacy_brand}(?![A-Za-z])', path.read_text(errors='ignore'), __import__('re').IGNORECASE)
+    for source in brand_sources for path in source.rglob('*')
+    if path.is_file() and 'node_modules' not in path.parts and 'core/static/app' not in path.as_posix()
+), 'legacy brand must not remain'
+database_controller = (ROOT / 'src/addons/web/controllers/database.py').read_text()
+assert "if not odoo.tools.config['list_db']" in database_controller and 'request.not_found()' in database_controller, \
+    'database manager routes must be blocked for single-tenant runtime'
+assert 'Kelola database' not in (ROOT / 'src/addons/web/views/webclient_templates.xml').read_text(), \
+    'login page must not expose database management'
+restart_script = (ROOT / 'scripts/restart_local_app.sh').read_text()
+assert '--runtime-role=http' in restart_script and '--runtime-role=realtime' in restart_script, \
+    'local stack must run isolated HTTP and realtime roles'
+assert '--session-store=redis' in restart_script and 'managed.realtime_url' in restart_script, \
+    'local HTTP/realtime roles must share Redis sessions and publish direct websocket URL'
+assert 'nginx' not in restart_script.lower(), 'local realtime stack must not require nginx'
+for init_path in (ROOT / 'managed').glob('*/tests/__init__.py'):
+    for line in init_path.read_text().splitlines():
+        if line.startswith('from . import '):
+            module = line.rsplit(' ', 1)[-1]
+            assert (init_path.parent / f'{module}.py').exists(), f'missing managed test module: {module}'
 
 missing_dependencies = {
     (name, dependency)

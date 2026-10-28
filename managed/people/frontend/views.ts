@@ -1,4 +1,4 @@
-import { registerActionView } from "@luma/views/view-metadata";
+import { registerActionView } from "@toova/views/view-metadata";
 
 registerActionView("people.action_employees", {
   list: { columns: ["name", "job_id", "department_id", "work_email", "work_phone", "company_id"] },

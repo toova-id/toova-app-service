@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 import { Skeleton } from "./ui/skeleton";
 
 export function AppLoading() {
-  return <div className="luma-boot" role="status"><span className="luma-brand-mark"/><strong>Luma</strong><span>Menyiapkan ruang kerja...</span></div>;
+  return <div className="toova-boot" role="status"><span className="toova-brand-mark"/><strong>Toova</strong><span>Menyiapkan ruang kerja...</span></div>;
 }
 
 export function ViewLoading() {

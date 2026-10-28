@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { api, setCsrfToken } from "@/lib/api";
+import { connectRealtime } from "@/lib/realtime";
 import { AppShell } from "./app-shell";
 import { applyManagedNavigation } from "./managed-navigation";
 import { routes } from "./features";
@@ -23,6 +24,10 @@ export default function App() {
     ]).then(([currentSession, currentNavigation]) => { setCsrfToken(currentSession.csrfToken); setSession(currentSession); setNavigation(applyManagedNavigation(currentNavigation.items)); }).catch((reason) => { if (reason.name !== "AbortError") setError(reason.message); });
     return () => controller.abort();
   }, [attempt]);
+  useEffect(() => {
+    if (!session) return;
+    return connectRealtime(session.realtimeUrl, (notifications) => window.dispatchEvent(new CustomEvent("toova:realtime", { detail: notifications })));
+  }, [session?.user.id]);
   if (error) return <LoadError message={error} retry={() => setAttempt((value) => value + 1)}/>;
   if (!session) return <AppLoading/>;
   return <SessionProvider session={session}><NavigationProvider items={navigation}><BrowserRouter><Routes><Route element={<AppShell/>}>{routes.filter((route) => !route.module || session.modules.includes(route.module)).map(({ path, component: Component }) => <Route key={path} path={path} element={<Suspense fallback={<ViewLoading/>}><Component/></Suspense>}/>)}</Route></Routes></BrowserRouter></NavigationProvider></SessionProvider>;
