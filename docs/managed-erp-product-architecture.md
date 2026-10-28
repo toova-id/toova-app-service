@@ -2,7 +2,7 @@
 
 Status: baseline implementasi aktif pada branch `feat/react-client`.
 
-Dokumen ini menjelaskan tujuan produk, alasan perubahan dari UI Odoo generik, batas tanggung jawab managed layer, keputusan domain, dan arah pengembangan. Detail katalog Product, Variant, Pricelist, dan UoM ada di [Managed Product Catalog](managed-product-catalog.md).
+Dokumen ini menjelaskan tujuan produk, alasan perubahan dari UI Odoo generik, batas tanggung jawab managed layer, keputusan domain, dan arah pengembangan. Detail katalog Product, Variant, Pricelist, dan UoM ada di [Managed Product Catalog](managed-product-catalog.md). Urutan kerja, pola implementasi, checkpoint, dan acceptance criteria untuk agent berikutnya ada di [Managed ERP Development Playbook and Handoff](managed-erp-development-playbook.md).
 
 ## 1. Tujuan produk
 

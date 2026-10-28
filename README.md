@@ -183,6 +183,7 @@ Documentation
 -------------
 - [Managed ERP Product Architecture](docs/managed-erp-product-architecture.md)
 - [Managed Product Catalog](docs/managed-product-catalog.md)
+- [Managed ERP Development Playbook and Handoff](docs/managed-erp-development-playbook.md)
 - [Managed ERP Addon Scope](docs/managed-erp-addon-scope.md)
 - [Managed ERP Product Scope Review](docs/managed-erp-product-scope-review.md)
 - [Runtime Roles and Object Storage Operations](docs/runtime-roles-storage-operations.md)

@@ -2,7 +2,7 @@
 
 Status: implementasi baseline aktif.
 
-Dokumen ini menjadi contract domain dan UX untuk Product, Attribute, Variant, Category, Pricelist, UoM, dan Packaging. Tujuan utamanya mencegah model yang benar dipakai untuk konsep yang salah.
+Dokumen ini menjadi contract domain dan UX untuk Product, Attribute, Variant, Category, Pricelist, UoM, dan Packaging. Tujuan utamanya mencegah model yang benar dipakai untuk konsep yang salah. Cara melanjutkan implementasi dan acceptance criteria task berikutnya ada di [Managed ERP Development Playbook and Handoff](managed-erp-development-playbook.md).
 
 ## 1. Goal
 
