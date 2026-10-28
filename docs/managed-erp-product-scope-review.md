@@ -1,6 +1,8 @@
 # Managed ERP Product Scope Review — Indonesia First
 
-Status: architecture baseline, 2026-10-24. Scope source: `scripts/test_managed_addon_scope.py`, retained manifests, model fields, views, security groups, and Indonesian localization code.
+Status: initial scope audit, 2026-10-24. Scope source: `scripts/test_managed_addon_scope.py`, retained manifests, model fields, views, security groups, and Indonesian localization code.
+
+Current implementation decisions supersede recommendations in this audit where they differ. See [Managed ERP Product Architecture](managed-erp-product-architecture.md) for product boundaries and status, and [Managed Product Catalog](managed-product-catalog.md) for Product, Variant, Pricelist, and UoM contracts.
 
 ## 1. Executive decision
 
@@ -175,6 +177,8 @@ Validation:
 - duplicate detection by normalized tax ID, email, and phone.
 
 ### 5.2 Products
+
+Implementation status: managed Product, Attribute, Variant, Category, Pricelist, and UoM are now active. Canonical models and pricing/conversion engines remain native. See [Managed Product Catalog](managed-product-catalog.md).
 
 Default visible:
 

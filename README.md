@@ -181,6 +181,10 @@ log_performance_slow_ms = 500
 
 Documentation
 -------------
+- [Managed ERP Product Architecture](docs/managed-erp-product-architecture.md)
+- [Managed Product Catalog](docs/managed-product-catalog.md)
+- [Managed ERP Addon Scope](docs/managed-erp-addon-scope.md)
+- [Managed ERP Product Scope Review](docs/managed-erp-product-scope-review.md)
 - [Runtime Roles and Object Storage Operations](docs/runtime-roles-storage-operations.md)
 - [Base Image and Stateless Runtime Goal](docs/odoo16-base-runtime-goal.md)
 - [Optimization Plan](docs/odoo16-engine-optimization-plan.md)

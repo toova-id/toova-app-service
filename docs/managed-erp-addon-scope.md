@@ -27,7 +27,7 @@ Payments       payment payment_custom
 
 Payroll Indonesia, POS, Xendit/Midtrans providers, Indonesian delivery connectors, managed subscription, and product frontend remain custom work. `payment` and `account_payment` stay as framework modules.
 
-Product roots describe packaged backend capability, not default end-user scope. Default visibility, capability profiles, field policy, Indonesian compliance gaps, and managed UI migration order are defined in [Managed ERP Product Scope Review](managed-erp-product-scope-review.md).
+Product roots describe packaged backend capability, not default end-user scope. Product-layer boundaries and implementation status are defined in [Managed ERP Product Architecture](managed-erp-product-architecture.md). Product, Variant, Pricelist, and UoM contracts are defined in [Managed Product Catalog](managed-product-catalog.md). Initial capability audit and Indonesian compliance gaps remain in [Managed ERP Product Scope Review](managed-erp-product-scope-review.md).
 
 Excluded source includes foreign localizations, foreign payment providers, website/e-commerce, marketing, events, e-learning, surveys, hardware/IoT, themes, demo providers, and test-only addons.
 
