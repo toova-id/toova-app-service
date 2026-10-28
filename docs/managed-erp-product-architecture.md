@@ -474,6 +474,8 @@ Canonical data tetap `mail.channel`, `mail.channel.member`, `mail.message`, `mai
 
 Inbox memakai dua panel: list kontekstual di kiri dan thread aktif di kanan. Tab `Pesan`, `Mention`, dan `Aktivitas` mengganti isi panel kiri. Pesan baru memakai drawer; pembuatan channel mendukung anggota private atau seluruh pengguna internal. Badge sidebar menunjukkan pesan belum dibaca; bell menunjukkan mention serta aktivitas terlambat atau jatuh tempo hari ini. Thread memakai bubble, pengelompokan pengirim, pemisah tanggal, dan divider unread.
 
+Composer Inbox mendukung emoji, lampiran native `ir.attachment`, reply melalui `mail.message.parent_id`, reaction native, optimistic sending/retry, receipt direct chat berbasis `fetched_message_id`/`seen_message_id`, typing indicator native bus, presence native `im_status`, dan sound opt-out per browser. Lampiran dibatasi 10 file per pesan dan 25 MB per file; executable diblokir. Managed layer tidak membuat model chat baru.
+
 Endpoint managed Inbox:
 
 ```text
@@ -481,6 +483,11 @@ GET  /api/v1/inbox
 GET  /api/v1/inbox/counts
 GET  /api/v1/inbox/channels/<id>
 POST /api/v1/inbox/channels/<id>/messages
+POST /api/v1/inbox/channels/<id>/attachments
+POST /api/v1/inbox/channels/<id>/attachments/delete
+POST /api/v1/inbox/channels/<id>/seen
+POST /api/v1/inbox/channels/<id>/typing
+POST /api/v1/inbox/channels/<id>/messages/<message_id>/reaction
 POST /api/v1/inbox/direct
 POST /api/v1/inbox/channels
 POST /api/v1/inbox/activities/<id>/done

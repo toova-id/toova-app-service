@@ -21,6 +21,7 @@ export function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openApps, setOpenApps] = useState<number[]>([]);
   const [inboxCounts, setInboxCounts] = useState({ messages: 0, mentions: 0, activities: 0, attention: 0 });
+  const soundRef = useState({ enabled: localStorage.getItem("toova.inbox.sound") !== "false", context: undefined as AudioContext | undefined })[0];
   const [dark, setDark] = useState(() => {
     const saved = localStorage.getItem("toova.theme");
     return saved ? saved === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
@@ -39,19 +40,44 @@ export function AppShell() {
   }, [dark]);
   useEffect(() => { setOpenApps((items) => [...new Set([...items, ...activeTrail])]); }, [activeMenu?.id]);
   useEffect(() => {
+    const playSound = () => {
+      if (!soundRef.enabled) return;
+      const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AudioContextClass) return;
+      const context = soundRef.context || new AudioContextClass();
+      soundRef.context = context;
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.frequency.setValueAtTime(660, context.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(880, context.currentTime + 0.09);
+      gain.gain.setValueAtTime(0.0001, context.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.08, context.currentTime + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.16);
+      oscillator.connect(gain).connect(context.destination);
+      oscillator.start(); oscillator.stop(context.currentTime + 0.17);
+    };
     const refresh = () => api<typeof inboxCounts>("/api/v1/inbox/counts").then(setInboxCounts).catch(() => undefined);
     const changed = (event: Event) => setInboxCounts((event as CustomEvent<typeof inboxCounts>).detail);
+    const soundChanged = (event: Event) => { soundRef.enabled = (event as CustomEvent<boolean>).detail; };
     const realtime = (event: Event) => {
       const notifications = (event as CustomEvent<{ type: string }[]>).detail;
-      if (notifications.some((notification) => notification.type.startsWith("mail."))) refresh();
+      const incoming = notifications.some((notification) => {
+        if (notification.type !== "mail.channel/new_message") return false;
+        const authorId = (notification as { payload?: { message?: { author?: { id?: number }; author_id?: number | [number, string] } } }).payload?.message?.author?.id
+          ?? (notification as { payload?: { message?: { author_id?: number | [number, string] } } }).payload?.message?.author_id;
+        return (Array.isArray(authorId) ? authorId[0] : authorId) !== session.user.partnerId;
+      });
+      if (incoming) { playSound(); refresh(); }
+      else if (notifications.some((notification) => notification.type.startsWith("mail."))) refresh();
     };
     refresh();
     const timer = window.setInterval(refresh, 30000);
     const visible = () => document.visibilityState === "visible" && refresh();
     document.addEventListener("visibilitychange", visible);
     window.addEventListener("toova:inbox-counts", changed);
+    window.addEventListener("toova:inbox-sound", soundChanged);
     window.addEventListener("toova:realtime", realtime);
-    return () => { clearInterval(timer); document.removeEventListener("visibilitychange", visible); window.removeEventListener("toova:inbox-counts", changed); window.removeEventListener("toova:realtime", realtime); };
+    return () => { clearInterval(timer); document.removeEventListener("visibilitychange", visible); window.removeEventListener("toova:inbox-counts", changed); window.removeEventListener("toova:inbox-sound", soundChanged); window.removeEventListener("toova:realtime", realtime); };
   }, []);
 
   const toggleApp = (id: number) => setOpenApps((items) => items.includes(id) ? items.filter((item) => item !== id) : [...items, id]);

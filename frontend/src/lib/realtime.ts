@@ -1,13 +1,19 @@
 export type RealtimeNotification = { type: string; payload: unknown };
 
 type WireNotification = { id: number; message: RealtimeNotification };
+const presencePartnerIds = new Set<number>();
+export function watchRealtimePresence(partnerId?: number) { if (partnerId) presencePartnerIds.add(partnerId); }
 
 export function connectRealtime(realtimeUrl: string | undefined, onNotifications: (notifications: RealtimeNotification[]) => void) {
   let socket: WebSocket | undefined;
   let stopped = false;
   let retry = 1000;
   let reconnectTimer: number | undefined;
+  let presenceTimer: number | undefined;
+  let lastActivity = Date.now();
   let last = Number(sessionStorage.getItem("toova.bus.last") || 0);
+  const activity = () => { lastActivity = Date.now(); };
+  for (const event of ["pointerdown", "keydown", "focus"] as const) window.addEventListener(event, activity, { passive: true });
 
   // ponytail: one socket per tab; move this transport into SharedWorker when multi-tab connection pressure matters.
   const connect = () => {
@@ -17,6 +23,13 @@ export function connectRealtime(realtimeUrl: string | undefined, onNotifications
     socket.addEventListener("open", () => {
       retry = 1000;
       socket?.send(JSON.stringify({ event_name: "subscribe", data: { channels: [], last } }));
+      const updatePresence = () => socket?.readyState === WebSocket.OPEN && socket.send(JSON.stringify({
+        event_name: "update_presence",
+        data: { inactivity_period: Date.now() - lastActivity, im_status_ids_by_model: { "res.partner": [...presencePartnerIds] } },
+      }));
+      updatePresence();
+      window.clearInterval(presenceTimer);
+      presenceTimer = window.setInterval(updatePresence, 30000);
     });
     socket.addEventListener("message", (event) => {
       try {
@@ -38,6 +51,8 @@ export function connectRealtime(realtimeUrl: string | undefined, onNotifications
   return () => {
     stopped = true;
     window.clearTimeout(reconnectTimer);
+    window.clearInterval(presenceTimer);
+    for (const event of ["pointerdown", "keydown", "focus"] as const) window.removeEventListener(event, activity);
     socket?.close(1000);
   };
 }

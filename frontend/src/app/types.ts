@@ -3,7 +3,7 @@ import type { ComponentType, LazyExoticComponent } from "react";
 
 export interface Company { id: number; name: string }
 export interface Session {
-  user: { id: number; name: string; login: string };
+  user: { id: number; partnerId: number; name: string; login: string };
   company: Company;
   companies: Company[];
   modules: string[];

@@ -67,7 +67,7 @@ class ManagedApp(http.Controller):
             raise AccessError('Internal access required.')
         modules = sorted(request.env.registry._init_modules)
         return request.make_json_response({
-            'user': {'id': user.id, 'name': user.name, 'login': user.login},
+            'user': {'id': user.id, 'partnerId': user.partner_id.id, 'name': user.name, 'login': user.login},
             'company': {
                 'id': user.company_id.id,
                 'name': user.company_id.name,

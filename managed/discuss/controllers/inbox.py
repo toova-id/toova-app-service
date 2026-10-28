@@ -1,5 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import json
+import re
+
 from odoo import fields, http, tools, _
 from odoo.exceptions import AccessError, MissingError, UserError, ValidationError
 from odoo.http import request
@@ -10,7 +13,6 @@ def _error(message, code='invalid_request', status=400):
 
 
 def _payload():
-    import json
     value = request.params.get('payload')
     if not value:
         return {}
@@ -41,23 +43,86 @@ def _initials(value):
     return ''.join(part[:1] for part in (value or '?').split()[:2]).upper()
 
 
-def _message_data(messages):
+def _message_data(messages, channel=None):
+    current_partner = request.env.user.partner_id
+    members = channel.sudo().channel_member_ids if channel else request.env['mail.channel.member']
+    other_members = members.filtered(lambda member: member.partner_id and member.partner_id != current_partner)
     result = []
     for message in messages.sorted('id'):
         author = message.author_id.name or message.email_from or _('Sistem')
+        mine = message.author_id == current_partner
+        receipt = 'sent'
+        read_count = 0
+        if mine and other_members:
+            read_count = len(other_members.filtered(lambda member: member.seen_message_id.id >= message.id))
+            fetched_count = len(other_members.filtered(lambda member: member.fetched_message_id.id >= message.id))
+            if channel and channel.channel_type != 'chat' and read_count:
+                receipt = 'read'
+            elif read_count == len(other_members):
+                receipt = 'read'
+            elif fetched_count == len(other_members):
+                receipt = 'delivered'
+        reactions = {}
+        for reaction in message.sudo().reaction_ids:
+            item = reactions.setdefault(reaction.content, {'content': reaction.content, 'count': 0, 'mine': False})
+            item['count'] += 1
+            item['mine'] = item['mine'] or reaction.partner_id == current_partner
+        parent = message.parent_id
         result.append({
             'id': message.id,
             'author': author,
             'authorInitials': _initials(author),
             'body': message.body or '',
             'date': fields.Datetime.to_string(message.date),
-            'mine': message.author_id == request.env.user.partner_id,
+            'mine': mine,
+            'status': receipt,
+            'readCount': read_count,
+            'reply': {
+                'id': parent.id,
+                'author': parent.author_id.name or parent.email_from or _('Sistem'),
+                'body': tools.html2plaintext(parent.body or '').strip()[:180],
+            } if parent else None,
+            'reactions': list(reactions.values()),
             'attachments': [
-                {'id': attachment.id, 'name': attachment.name, 'mimetype': attachment.mimetype, 'size': attachment.file_size}
+                {
+                    'id': attachment.id, 'name': attachment.name, 'mimetype': attachment.mimetype,
+                    'size': attachment.file_size, 'url': f'/mail/channel/{channel.id}/attachment/{attachment.id}?download=1' if channel else f'/web/content/{attachment.id}?download=1',
+                    'previewUrl': f'/mail/channel/{channel.id}/image/{attachment.id}' if channel else f'/web/content/{attachment.id}',
+                }
                 for attachment in message.attachment_ids
             ],
         })
     return result
+
+
+def _channel_presence(channel):
+    members = channel.sudo().channel_member_ids.filtered('partner_id')
+    others = members.filtered(lambda member: member.partner_id != request.env.user.partner_id)
+    if channel.channel_type == 'chat':
+        partner = others[:1].partner_id
+        return {
+            'otherPartnerId': partner.id or None,
+            'presence': partner.im_status if partner else 'offline',
+            'onlineCount': int(partner.im_status == 'online') if partner else 0,
+        }
+    return {
+        'otherPartnerId': None,
+        'presence': None,
+        'onlineCount': len(members.filtered(lambda member: member.partner_id.im_status == 'online')),
+    }
+
+
+def _check_inbox_write():
+    if hasattr(request.env.user, '_managed_has_permission') and not request.env.user._managed_has_permission('inbox.messages', 'write'):
+        raise AccessError(_('Tidak dapat mengirim atau mengubah pesan.'))
+
+
+_BLOCKED_ATTACHMENT_EXTENSIONS = {
+    'apk', 'app', 'bat', 'cmd', 'com', 'exe', 'gadget', 'hta', 'jar', 'js', 'jse',
+    'msi', 'msp', 'pif', 'ps1', 'reg', 'scr', 'sh', 'vbe', 'vbs', 'wsf',
+}
+_MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024
+_MAX_ATTACHMENTS = 10
 
 
 def _document_path(model, record_id):
@@ -178,8 +243,7 @@ class ManagedInboxApi(http.Controller):
             other = channel.channel_member_ids.filtered(
                 lambda item: item.partner_id and item.partner_id != request.env.user.partner_id
             )[:1].partner_id if channel.channel_type == 'chat' else request.env['res.partner']
-            if messages:
-                channel._channel_seen(messages[0].id)
+            channel.channel_fetched()
             return request.make_json_response({
                 'channel': {
                     'id': channel.id,
@@ -187,10 +251,90 @@ class ManagedInboxApi(http.Controller):
                     'type': channel.channel_type,
                     'avatarUrl': f'/web/image/res.partner/{other.id}/avatar_128' if other else None,
                     'memberCount': channel.member_count,
+                    **_channel_presence(channel),
                 },
-                'messages': _message_data(messages),
+                'messages': _message_data(messages, channel),
                 'firstUnreadId': first_unread.id,
             }, headers=[('Cache-Control', 'no-store')])
+        except (AccessError, MissingError) as error:
+            return _error(error, 'forbidden', 403)
+        except (UserError, ValidationError, ValueError) as error:
+            return _error(error)
+
+    @http.route('/api/v1/inbox/channels/<int:channel_id>/seen', type='http', auth='user', methods=['POST'])
+    def seen(self, channel_id):
+        try:
+            channel, _member_record = _channel(channel_id)
+            message_id = int(_payload().get('messageId') or 0)
+            if message_id <= 0:
+                return request.make_json_response({'seen': None})
+            message = request.env['mail.message'].search([
+                ('id', '=', message_id), ('model', '=', 'mail.channel'), ('res_id', '=', channel.id),
+            ], limit=1)
+            if not message:
+                return request.make_json_response({'seen': None})
+            channel._channel_seen(message.id)
+            return request.make_json_response({'seen': message.id})
+        except (AccessError, MissingError) as error:
+            return _error(error, 'forbidden', 403)
+        except (UserError, ValidationError, ValueError, TypeError) as error:
+            return _error(error)
+
+    @http.route('/api/v1/inbox/channels/<int:channel_id>/typing', type='http', auth='user', methods=['POST'])
+    def typing(self, channel_id):
+        try:
+            _check_inbox_write()
+            _channel_record, member = _channel(channel_id)
+            member.sudo()._notify_typing(bool(_payload().get('typing')))
+            return request.make_json_response({'typing': True})
+        except (AccessError, MissingError) as error:
+            return _error(error, 'forbidden', 403)
+        except (UserError, ValidationError, ValueError) as error:
+            return _error(error)
+
+    @http.route('/api/v1/inbox/channels/<int:channel_id>/attachments', type='http', auth='user', methods=['POST'], csrf=True)
+    def upload_attachment(self, channel_id, ufile=None, **kw):
+        try:
+            _check_inbox_write()
+            channel, _member_record = _channel(channel_id)
+            if not ufile or not ufile.filename:
+                raise ValidationError(_('Pilih lampiran.'))
+            filename = ufile.filename.rsplit('/', 1)[-1].rsplit('\\', 1)[-1][:255]
+            extension = filename.rpartition('.')[2].lower()
+            if extension in _BLOCKED_ATTACHMENT_EXTENSIONS:
+                raise ValidationError(_('Jenis lampiran tidak diizinkan.'))
+            content = ufile.read(_MAX_ATTACHMENT_BYTES + 1)
+            if len(content) > _MAX_ATTACHMENT_BYTES:
+                raise ValidationError(_('Ukuran lampiran maksimal 25 MB.'))
+            attachment = request.env['ir.attachment'].create({
+                'name': filename, 'raw': content, 'res_model': 'mail.compose.message', 'res_id': 0,
+            })
+            attachment._post_add_create()
+            return request.make_json_response({
+                'attachment': {
+                    'id': attachment.id, 'name': attachment.name, 'mimetype': attachment.mimetype,
+                    'size': attachment.file_size,
+                },
+            }, status=201)
+        except (AccessError, MissingError) as error:
+            return _error(error, 'forbidden', 403)
+        except (UserError, ValidationError, ValueError) as error:
+            return _error(error)
+
+    @http.route('/api/v1/inbox/channels/<int:channel_id>/attachments/delete', type='http', auth='user', methods=['POST'])
+    def delete_pending_attachments(self, channel_id):
+        try:
+            _check_inbox_write()
+            _channel(channel_id)
+            attachment_ids = _payload().get('attachmentIds') or []
+            if not isinstance(attachment_ids, list) or not all(isinstance(item, int) for item in attachment_ids):
+                raise ValidationError(_('Lampiran tidak valid.'))
+            attachments = request.env['ir.attachment'].sudo().search([
+                ('id', 'in', attachment_ids), ('create_uid', '=', request.env.uid),
+                ('res_model', '=', 'mail.compose.message'), ('res_id', '=', 0),
+            ])
+            attachments.unlink()
+            return request.make_json_response({'deleted': len(attachments)})
         except (AccessError, MissingError) as error:
             return _error(error, 'forbidden', 403)
         except (UserError, ValidationError, ValueError) as error:
@@ -199,14 +343,74 @@ class ManagedInboxApi(http.Controller):
     @http.route('/api/v1/inbox/channels/<int:channel_id>/messages', type='http', auth='user', methods=['POST'])
     def post_message(self, channel_id):
         try:
+            _check_inbox_write()
             channel, _member_record = _channel(channel_id)
-            body = (_payload().get('body') or '').strip()
-            if not body:
-                raise ValidationError(_('Pesan tidak boleh kosong.'))
+            payload = _payload()
+            body = (payload.get('body') or '').strip()
+            attachment_ids = payload.get('attachmentIds') or []
+            parent_id = payload.get('parentId')
+            request_id = payload.get('requestId')
+            if not body and not attachment_ids:
+                raise ValidationError(_('Pesan atau lampiran wajib diisi.'))
             if len(body) > 10000:
                 raise ValidationError(_('Pesan terlalu panjang.'))
-            message = channel.message_post(body=tools.plaintext2html(body), message_type='comment', subtype_xmlid='mail.mt_comment')
-            return request.make_json_response({'message': _message_data(message)[0]}, status=201)
+            if not isinstance(attachment_ids, list) or len(attachment_ids) > _MAX_ATTACHMENTS or not all(isinstance(item, int) for item in attachment_ids):
+                raise ValidationError(_('Lampiran tidak valid. Maksimal 10 file per pesan.'))
+            attachments = request.env['ir.attachment'].sudo().browse(attachment_ids).exists()
+            if len(attachments) != len(attachment_ids) or any(
+                attachment.create_uid != request.env.user or attachment.res_model != 'mail.compose.message' or attachment.res_id
+                for attachment in attachments
+            ):
+                raise AccessError(_('Lampiran tidak tersedia.'))
+            if not isinstance(request_id, str) or not re.fullmatch(r'[A-Za-z0-9-]{16,64}', request_id):
+                raise ValidationError(_('ID pengiriman tidak valid.'))
+            message_identifier = f'<managed-inbox-{request_id}@toova>'
+            existing = request.env['mail.message'].search([
+                ('message_id', '=', message_identifier), ('model', '=', 'mail.channel'), ('res_id', '=', channel.id),
+            ], limit=1)
+            if existing:
+                attachments.unlink()
+                return request.make_json_response({'message': _message_data(existing, channel)[0]}, status=200)
+            parent = request.env['mail.message']
+            if parent_id:
+                parent = request.env['mail.message'].search([
+                    ('id', '=', int(parent_id)), ('model', '=', 'mail.channel'), ('res_id', '=', channel.id),
+                ], limit=1)
+                if not parent:
+                    raise ValidationError(_('Pesan balasan tidak tersedia.'))
+            with request.env.cr.savepoint():
+                message = channel.message_post(
+                    body=tools.plaintext2html(body) if body else '', attachment_ids=attachment_ids,
+                    parent_id=parent.id, message_id=message_identifier,
+                    message_type='comment', subtype_xmlid='mail.mt_comment',
+                )
+            return request.make_json_response({'message': _message_data(message, channel)[0]}, status=201)
+        except (AccessError, MissingError) as error:
+            return _error(error, 'forbidden', 403)
+        except (UserError, ValidationError, ValueError, TypeError) as error:
+            return _error(error)
+
+    @http.route('/api/v1/inbox/channels/<int:channel_id>/messages/<int:message_id>/reaction', type='http', auth='user', methods=['POST'])
+    def reaction(self, channel_id, message_id):
+        try:
+            _check_inbox_write()
+            channel, _member_record = _channel(channel_id)
+            message = request.env['mail.message'].search([
+                ('id', '=', message_id), ('model', '=', 'mail.channel'), ('res_id', '=', channel.id),
+            ], limit=1)
+            if not message:
+                raise MissingError(_('Pesan tidak tersedia.'))
+            content = (_payload().get('content') or '').strip()
+            if not content or len(content) > 16:
+                raise ValidationError(_('Reaction tidak valid.'))
+            own = message.sudo().reaction_ids.filtered(
+                lambda item: item.partner_id == request.env.user.partner_id and item.content == content
+            )
+            if own:
+                message._message_remove_reaction(content)
+            else:
+                message._message_add_reaction(content)
+            return request.make_json_response({'message': _message_data(message, channel)[0]})
         except (AccessError, MissingError) as error:
             return _error(error, 'forbidden', 403)
         except (UserError, ValidationError, ValueError) as error:
@@ -215,6 +419,7 @@ class ManagedInboxApi(http.Controller):
     @http.route('/api/v1/inbox/direct', type='http', auth='user', methods=['POST'])
     def direct(self):
         try:
+            _check_inbox_write()
             partner_id = _payload().get('partnerId')
             partner = request.env['res.partner'].browse(int(partner_id or 0)).exists()
             if not partner or not partner.user_ids.filtered(lambda user: user.active and not user.share):
@@ -263,6 +468,8 @@ class ManagedInboxApi(http.Controller):
                 if set(valid) != set(partner_ids):
                     raise ValidationError(_('Anggota channel tidak valid.'))
                 partner_ids = valid + [request.env.user.partner_id.id]
+            if len(name) > 120:
+                raise ValidationError(_('Nama channel terlalu panjang.'))
             channel = request.env['mail.channel'].create({
                 'name': name,
                 'channel_type': 'channel' if visibility == 'public' else 'group',

@@ -22,6 +22,8 @@ class TestManagedInbox(HttpCase):
         thread = self.url_open(f'/api/v1/inbox/channels/{self.channel.id}')
         self.assertEqual(thread.status_code, 200)
         self.assertEqual(thread.json()['messages'][-1]['body'], '<p>Halo Inbox</p>')
+        self.assertEqual(thread.json()['messages'][-1]['status'], 'sent')
+        self.assertEqual(thread.json()['messages'][-1]['reactions'], [])
         counts = self.url_open('/api/v1/inbox/counts').json()
         self.assertEqual(counts['messages'], 0)
         self.assertEqual(counts['attention'], counts['mentions'] + counts['activities'])

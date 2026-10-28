@@ -546,7 +546,7 @@ npm run check
 npm run build
 ```
 
-Local runtime bind-mount `managed/core/static/app`, jadi perubahan TS/CSS tidak membutuhkan Docker image rebuild. Setelah build, hard refresh browser. Jika container perlu dibuat ulang tanpa rebuild image:
+Local runtime bind-mount seluruh `managed/`, jadi perubahan managed backend serta hasil build TS/CSS tidak membutuhkan Docker image rebuild. Setelah build, jalankan restart agar Python route/model dimuat ulang, lalu hard refresh browser:
 
 ```bash
 scripts/restart_local_app.sh
