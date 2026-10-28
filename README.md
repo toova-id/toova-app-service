@@ -1,13 +1,21 @@
-[![Build Status](https://github.com/alner-repository/alner-odoo-engine/actions/workflows/build-engine.yml/badge.svg?branch=master)](https://github.com/alner-repository/alner-odoo-engine/actions/workflows/build-engine.yml)
-[![Build Status](https://github.com/alner-repository/alner-odoo-engine/actions/workflows/build-engine.yml/badge.svg?branch=feat)](https://github.com/alner-repository/alner-odoo-engine/actions/workflows/build-engine.yml)
-[![Role Isolation](https://img.shields.io/badge/runtime-4%20isolated%20roles-blue)](docs/runtime-roles-storage-operations.md)
+[![Build](https://github.com/toova-id/toova-app-service/actions/workflows/build-engine.yml/badge.svg?branch=master)](https://github.com/toova-id/toova-app-service/actions/workflows/build-engine.yml)
+[![Role Isolation](https://img.shields.io/badge/runtime-HTTP%20%2B%20realtime-blue)](docs/runtime-roles-storage-operations.md)
 [![License](https://img.shields.io/badge/license-LGPLv3-blue)](LICENSE)
-[![Version](https://img.shields.io/badge/version-16.0-informational)](https://www.odoo.com/documentation/16.0)
+[![Odoo](https://img.shields.io/badge/Odoo-16-informational)](https://www.odoo.com/documentation/16.0)
 
-Odoo 16 Engine — Optimized
-==========================
+Toova App Service
+=================
 
-Extensible Odoo 16 Community engine base image. Client repositories inherit immutable releases, add private addons/dependencies, and run isolated HTTP/realtime, cron, or broker roles from identical engine source.
+Managed ERP Indonesia dengan Odoo Community sebagai business engine dan React sebagai UI utama. Toova menyediakan workflow terkurasi untuk Inbox, Contacts, Products, Sales, Settings, serta fondasi Inventory dan Finance tanpa menulis ulang compute, pricing, tax, stock, accounting, ACL, atau record rules native Odoo.
+
+Current managed baseline:
+
+- Inbox realtime melalui native Odoo Bus/WebSocket;
+- Customer, Vendor, Contact Person, dan Employee directory;
+- Product, Variant, Attribute, Category, Pricelist, dan UoM;
+- Penawaran dan Pesanan dengan native Sales onchange dan confirmation;
+- single-tenant settings, role, dan permission;
+- HTTP dan realtime role dengan shared Redis session.
 
 Verified Engine Milestones
 --------------------------
@@ -30,7 +38,7 @@ Base Image Contract
 -------------------
 
 ```dockerfile
-FROM ghcr.io/alner-repository/alner-odoo-engine:<immutable-tag>
+FROM ghcr.io/toova-id/toova-app-service:<immutable-tag>
 COPY --chown=odoo:odoo addons/ /mnt/extra-addons/
 ```
 
@@ -100,12 +108,27 @@ docker buildx build --platform linux/amd64 \
 
 ### Run
 ```bash
-# Local development
-docker compose -f docker/docker-compose.test.yml up -d
+# Local Toova stack: HTTP :8069, realtime :8072, Redis, PostgreSQL
+scripts/restart_local_app.sh
+
+# Seed idempotent showcase data on development DB erp_local
+docker exec -i erp-local-app python /opt/odoo/odoo-bin shell \
+  --db_host=erp-local-db --db_port=5432 \
+  --db_user=odoo --db_password=odoo \
+  -d erp_local --no-http < scripts/seed_managed_demo.py
 
 # Kubernetes reference deployment; replace image digest, Secrets, host, and endpoints first
 kubectl apply -f k8s/odoo-runtime-example.yaml
 kubectl apply -f k8s/odoo-routing-example.yaml
+```
+
+Local endpoints:
+
+```text
+Managed app: http://127.0.0.1:8069/app
+HTTP health: http://127.0.0.1:8069/web/health
+Realtime health: http://127.0.0.1:8072/websocket/health
+WebSocket: ws://127.0.0.1:8072/websocket
 ```
 
 ### Test
@@ -248,4 +271,4 @@ Support
 -------
 - [Documentation](https://www.odoo.com/documentation/16.0)
 - [Forum](https://www.odoo.com/forum/help-1)
-- [GitHub Issues](https://github.com/alner-repository/alner-odoo-engine/issues)
+- [GitHub Issues](https://github.com/toova-id/toova-app-service/issues)
