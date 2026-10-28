@@ -29,8 +29,8 @@ Ukuran working tree saat analisis:
 ```text
 working tree total:       sekitar 1.1GiB
 .git:                     sekitar 168MiB
-odoo/:                    sekitar 90MiB
-addons/:                  sekitar 850MiB
+src/odoo/:                sekitar 90MiB
+src/addons/:              sekitar 850MiB
 translation .po/.pot:     sekitar 688MiB
 Python source:            sekitar 32MiB
 JavaScript source:        sekitar 41MiB

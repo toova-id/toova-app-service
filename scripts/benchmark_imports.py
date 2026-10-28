@@ -6,9 +6,9 @@ import time
 from pathlib import Path
 
 project_root = Path(__file__).resolve().parents[1]
-if not (project_root / 'odoo').is_dir() and Path('/opt/odoo/odoo').is_dir():
+if not (project_root / 'src/odoo').is_dir() and Path('/opt/odoo/src/odoo').is_dir():
     project_root = Path('/opt/odoo')
-sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(project_root / 'src'))
 
 started = time.perf_counter()
 import odoo

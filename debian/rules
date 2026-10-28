@@ -7,7 +7,7 @@ export PYBUILD_DISABLE=test
 	dh ${@} --with=python3 --buildsystem=pybuild
 
 override_dh_auto_build:
-	cp -r addons/* odoo/addons/
+	cp -r src/addons/* src/odoo/addons/
 	dh_auto_build
 
 override_dh_auto_install:
@@ -18,4 +18,4 @@ override_dh_auto_install:
 
 override_dh_auto_clean:
 	dh_auto_clean
-	for d in addons/* ; do rm -fr odoo/$$d ; done
+	for d in src/addons/* ; do rm -fr src/odoo/$$d ; done

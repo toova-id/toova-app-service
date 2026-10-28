@@ -18,9 +18,9 @@ __pycache__/
 *.orig
 status
 # odoo filestore
-odoo/filestore
+src/odoo/filestore
 # maintenance migration scripts
-odoo/addons/base/maintenance
+src/odoo/addons/base/maintenance
 # window installation config file
 /odoo.conf
 
@@ -38,7 +38,7 @@ node_modules/
 *.tsbuildinfo
 frontend/vite.config.js
 frontend/vite.config.d.ts
-addons/web/static/app/
+managed/core/static/app/
 .husky/
 
 # various virtualenv

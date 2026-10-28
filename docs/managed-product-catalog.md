@@ -797,19 +797,19 @@ Jangan menambah model channel atau field Product sebelum contract connector dan 
 ## 15. Implementation map
 
 ```text
-addons/managed_products/models/product.py
-addons/managed_products/models/uom.py
-addons/managed_products/data/uom_data.xml
-addons/managed_products/views/actions.xml
-addons/managed_products/frontend/product-form.tsx
-addons/managed_products/frontend/variant-manager.tsx
-addons/managed_products/frontend/attribute-form.tsx
-addons/managed_products/frontend/attribute-values.tsx
-addons/managed_products/frontend/category-form.tsx
-addons/managed_products/frontend/pricelist-form.tsx
-addons/managed_products/frontend/pricelist-rules.tsx
-addons/managed_products/frontend/uom-form.tsx
-addons/managed_products/frontend/uom-units.tsx
-addons/web/controllers/ui_api.py
+managed/products/models/product.py
+managed/products/models/uom.py
+managed/products/data/uom_data.xml
+managed/products/views/actions.xml
+managed/products/frontend/product-form.tsx
+managed/products/frontend/variant-manager.tsx
+managed/products/frontend/attribute-form.tsx
+managed/products/frontend/attribute-values.tsx
+managed/products/frontend/category-form.tsx
+managed/products/frontend/pricelist-form.tsx
+managed/products/frontend/pricelist-rules.tsx
+managed/products/frontend/uom-form.tsx
+managed/products/frontend/uom-units.tsx
+managed/core/controllers/ui_api.py
 frontend/scripts/managed-products-self-check.mjs
 ```

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="action_product_attributes" model="ir.actions.act_window">
+    <field name="name">Atribut Produk</field>
+    <field name="res_model">product.attribute</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[]</field>
+    <field name="context">{}</field>
+  </record>
+
+  <record id="action_products" model="ir.actions.act_window">
+    <field name="name">Products</field>
+    <field name="res_model">product.template</field>
+    <field name="view_mode">kanban,tree,form</field>
+    <field name="domain">[]</field>
+    <field name="context">{'search_default_filter_to_sell': 0}</field>
+  </record>
+
+  <record id="action_product_categories" model="ir.actions.act_window">
+    <field name="name">Kategori Produk</field>
+    <field name="res_model">product.category</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[]</field>
+    <field name="context">{}</field>
+  </record>
+
+  <record id="action_product_pricelists" model="ir.actions.act_window">
+    <field name="name">Daftar Harga</field>
+    <field name="res_model">product.pricelist</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[]</field>
+    <field name="context">{'default_base': 'list_price'}</field>
+  </record>
+
+  <record id="action_uom_categories" model="ir.actions.act_window">
+    <field name="name">Satuan</field>
+    <field name="res_model">uom.category</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[]</field>
+    <field name="context">{}</field>
+  </record>
+
+  <menuitem id="menu_products_root" name="Products" sequence="25" groups="base.group_user"/>
+  <menuitem id="menu_products" name="Products" parent="menu_products_root" action="action_products" sequence="10" groups="base.group_user"/>
+  <menuitem id="menu_product_attributes" name="Atribut" parent="menu_products_root" action="action_product_attributes" sequence="15" groups="base.group_user"/>
+  <menuitem id="menu_product_categories" name="Kategori" parent="menu_products_root" action="action_product_categories" sequence="20" groups="base.group_user"/>
+  <menuitem id="menu_product_pricelists" name="Daftar Harga" parent="menu_products_root" action="action_product_pricelists" sequence="30" groups="base.group_user"/>
+  <menuitem id="menu_product_uom" name="Satuan" parent="menu_products_root" action="action_uom_categories" sequence="40" groups="base.group_user"/>
+</odoo>

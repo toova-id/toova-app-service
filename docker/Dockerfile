@@ -48,7 +48,7 @@ WORKDIR /src/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci
 COPY frontend/ ./
-COPY addons/ /src/addons/
+COPY managed/ /src/managed/
 RUN npm run build
 
 # ============================================================
@@ -132,8 +132,8 @@ WORKDIR /src
 COPY . /src
 RUN python /src/scripts/prune_translations.py /src --locales "${ODOO_LOCALES}" --apply \
     && if [ "${ODOO_STRIP_TESTS}" = "1" ]; then \
-        find /src/odoo/addons /src/addons -type d -name tests -prune -exec rm -rf '{}' +; \
-        find /src/odoo/addons /src/addons -mindepth 1 -maxdepth 1 -type d -name 'test_*' -prune -exec rm -rf '{}' +; \
+        find /src/src/odoo/addons /src/src/addons /src/managed -type d -name tests -prune -exec rm -rf '{}' +; \
+        find /src/src/odoo/addons /src/src/addons /src/managed -mindepth 1 -maxdepth 1 -type d -name 'test_*' -prune -exec rm -rf '{}' +; \
     fi \
     && rm -rf /src/.git /src/.github /src/.tx /src/doc /src/docs /src/debian /src/setup \
               /src/docker /src/k8s /src/scripts
@@ -148,7 +148,7 @@ LABEL org.opencontainers.image.title="Odoo 16 Engine Base" \
       org.opencontainers.image.licenses="LGPL-3.0-only"
 WORKDIR /opt/odoo
 COPY --from=source-pruner --chown=odoo:odoo /src /opt/odoo
-COPY --from=frontend-builder --chown=odoo:odoo /src/addons/web/static/app /opt/odoo/addons/web/static/app
+COPY --from=frontend-builder --chown=odoo:odoo /src/managed/core/static/app /opt/odoo/managed/core/static/app
 # Precompile immutable application code. Runtime still cannot write new bytecode.
 RUN python -m compileall -q /opt/odoo
 

@@ -1,12 +1,12 @@
 # Managed ERP Addon Scope
 
-This repository carries only Odoo Community modules needed by the Indonesian managed ERP product. Modules listed below are product roots; their manifest dependency closure is retained automatically.
+This repository carries only Odoo Community modules needed by the Indonesian managed ERP product. Native Odoo source lives under `src/`; product-owned addons live under `managed/`. Modules listed below are product roots; their manifest dependency closure is retained automatically.
 
 ## Product roots
 
 ```text
-Platform       managed_core managed_directory managed_indonesia_regions managed_customers managed_vendors
-               managed_contacts managed_people managed_products web contacts calendar base_automation
+Platform       core directory indonesia_regions customers vendors
+               contact_persons people products web contacts calendar base_automation
 Commercial     crm sale_management sale_stock sale_margin
 Procurement    purchase_stock purchase_requisition_stock
 Inventory      stock stock_account stock_picking_batch stock_dropshipping

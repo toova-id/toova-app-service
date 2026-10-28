@@ -1,4 +1,4 @@
-import { Boxes, Building2, CalendarDays, Contact, Factory, FileText, HandCoins, MessagesSquare, PackageSearch, ShoppingCart, Users, Wrench } from "lucide-react";
+import { Boxes, Building2, CalendarDays, Contact, Factory, FileText, HandCoins, MessagesSquare, PackageSearch, Settings, ShoppingCart, Users, Wrench } from "lucide-react";
 import { registerModuleIcon } from "./features/feature-registry";
 
 registerModuleIcon("mail", MessagesSquare);
@@ -14,3 +14,10 @@ registerModuleIcon("mrp", Factory);
 registerModuleIcon("maintenance", Wrench);
 registerModuleIcon("repair", PackageSearch);
 registerModuleIcon("hr", Users);
+registerModuleIcon("products", Boxes);
+registerModuleIcon("customers", Contact);
+registerModuleIcon("vendors", ShoppingCart);
+registerModuleIcon("contact_persons", Users);
+registerModuleIcon("people", Users);
+registerModuleIcon("sales", HandCoins);
+registerModuleIcon("settings", Settings);

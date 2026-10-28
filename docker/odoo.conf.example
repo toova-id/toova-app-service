@@ -1,6 +1,6 @@
 [options]
 data_dir = /var/lib/odoo
-addons_path = /opt/odoo/odoo/addons,/opt/odoo/addons,/mnt/extra-addons
+addons_path = /opt/odoo/src/odoo/addons,/opt/odoo/src/addons,/opt/odoo/managed,/mnt/extra-addons
 proxy_mode = True
 list_db = False
 workers = 1

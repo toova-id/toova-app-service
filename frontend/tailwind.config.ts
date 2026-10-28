@@ -2,7 +2,7 @@ import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
-  content: ["./src/**/*.{ts,tsx}", "../addons/*/frontend/**/*.{ts,tsx}"],
+  content: ["./src/**/*.{ts,tsx}", "../managed/*/frontend/**/*.{ts,tsx}"],
   theme: {
     container: { center: true, padding: "1.5rem" },
     extend: {

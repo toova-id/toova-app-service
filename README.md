@@ -34,7 +34,9 @@ FROM ghcr.io/alner-repository/alner-odoo-engine:<immutable-tag>
 COPY --chown=odoo:odoo addons/ /mnt/extra-addons/
 ```
 
-- Built-in Community addons: `/opt/odoo/addons`
+- Odoo framework: `/opt/odoo/src/odoo`
+- Built-in Community addons: `/opt/odoo/src/addons`
+- Managed product addons: `/opt/odoo/managed`
 - Client addons: `/mnt/extra-addons`
 - Runtime config: `/etc/odoo/odoo.conf`
 - Local data/scratch: `/var/lib/odoo`; persistent only when filesystem backend is deliberately used

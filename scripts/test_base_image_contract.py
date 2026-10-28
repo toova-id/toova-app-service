@@ -12,13 +12,14 @@ assert 'AS source-pruner' in dockerfile
 assert 'AS frontend-builder' in dockerfile
 assert 'RUN --mount=type=cache,target=/root/.npm npm ci' in dockerfile
 assert 'COPY --from=source-pruner --chown=odoo:odoo /src /opt/odoo' in dockerfile
-assert 'COPY addons/ /src/addons/' in dockerfile
-assert 'COPY --from=frontend-builder --chown=odoo:odoo /src/addons/web/static/app' in dockerfile
+assert 'COPY managed/ /src/managed/' in dockerfile
+assert 'COPY --from=frontend-builder --chown=odoo:odoo /src/managed/core/static/app' in dockerfile
 assert '/mnt/extra-addons' in dockerfile
 assert 'USER odoo' in dockerfile
 assert 'RUN if [ "${ODOO_STRIP_TESTS}" = "0" ]' not in dockerfile
 assert 'PYTHONOPTIMIZE' not in dockerfile
-assert 'addons' not in dockerignore
+assert 'src/addons' not in dockerignore
+assert 'managed/core/static/app' in dockerignore
 assert 'ODOO_LOCALES=id,en_US' in workflow
 assert 'if [ "$SIZE" -gt 900 ]' in workflow
 assert not (ROOT / 'Dockerfile').exists()

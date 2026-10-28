@@ -25,7 +25,7 @@ conf = odoo.tools.config
 
 # Path to the OpenERP Addons repository (comma-separated for
 # multiple locations)
-#conf['addons_path'] = './odoo/addons,./addons'
+#conf['addons_path'] = './src/odoo/addons,./src/addons,./managed'
 
 # Optional database config if not using local socket
 #conf['db_name'] = 'mycompany'

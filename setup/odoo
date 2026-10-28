@@ -2,6 +2,7 @@
 
 # set server timezone in UTC before time module imported
 __import__('os').environ['TZ'] = 'UTC'
+__import__('sys').path.insert(0, __import__('os').path.join(__import__('os').path.dirname(__file__), '..', 'src'))
 import odoo
 
 if __name__ == "__main__":

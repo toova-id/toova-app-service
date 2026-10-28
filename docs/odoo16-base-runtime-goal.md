@@ -20,8 +20,9 @@ USER odoo
 Base contract:
 
 ```text
-Odoo core                  /opt/odoo/odoo
-Community runtime addons   /opt/odoo/addons
+Odoo core                  /opt/odoo/src/odoo
+Community runtime addons   /opt/odoo/src/addons
+Managed product addons     /opt/odoo/managed
 Client addons              /mnt/extra-addons
 Runtime config             /etc/odoo/odoo.conf
 Temporary files            /tmp

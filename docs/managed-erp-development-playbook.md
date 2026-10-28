@@ -74,7 +74,7 @@ managed_<domain>.action_<intent>
 Contoh:
 
 ```text
-managed_products.action_product_pricelists
+products.action_product_pricelists
 ```
 
 Action menentukan intent, visibility, model, dan contract. Jangan mendeteksi form hanya dari model karena satu model dapat memiliki beberapa intent.
@@ -154,7 +154,7 @@ POST /api/v1/ui/actions/<action_id>/relations/<field_name>/onchange
 
 ### 3.5 Relation domain
 
-Filter relation penting harus ditegakkan server-side di `addons/web/controllers/ui_api.py`, bukan hanya frontend.
+Filter relation penting harus ditegakkan server-side di `managed/core/controllers/ui_api.py`, bukan hanya frontend.
 
 Contoh:
 
@@ -226,6 +226,29 @@ Gunakan custom React form bila:
 - workflow tidak aman sebagai generic CRUD.
 
 Custom form tetap menerima schema contract. Jangan hard-code permission terpisah dari schema.
+
+### 3.9 UI copy dan layout
+
+Managed UI harus terasa seamless dengan workspace lain:
+
+```text
+Satu judul utama
+Konten full-width
+Whitespace + separator tipis
+Label singkat
+Helper text hanya saat berguna
+```
+
+Hindari:
+
+- badge atau eyebrow yang mengulang judul;
+- subtitle generik seperti “kelola data” tanpa informasi baru;
+- card di dalam card, rounded container bertingkat, dan shadow dekoratif;
+- list sempit yang menggantung di tengah area lebar;
+- label campur bahasa, istilah teknis Odoo, typo, atau copy berulang;
+- action bar, submenu, atau header ganda untuk intent yang sama.
+
+Review copy bersama layout. Hapus teks sebelum menambah komponen baru.
 
 ## 4. Domain pattern yang sudah ditetapkan
 
@@ -477,6 +500,14 @@ npm run check
 npm run build
 ```
 
+Local runtime bind-mount `managed/core/static/app`, jadi perubahan TS/CSS tidak membutuhkan Docker image rebuild. Setelah build, hard refresh browser. Jika container perlu dibuat ulang tanpa rebuild image:
+
+```bash
+scripts/restart_local_app.sh
+```
+
+Rebuild Docker image hanya saat source backend, dependency, Dockerfile, atau packaging runtime berubah. Jangan rebuild image untuk perubahan CSS/copy/frontend-only karena menghabiskan disk dan build cache.
+
 ### Runtime change
 
 ```bash
@@ -504,7 +535,7 @@ Update documentation in same commit when changing:
 - canonical model;
 - user-visible workflow;
 - validation/invariant;
-- permission/capability;
+- permission atau managed module activation;
 - roadmap status;
 - operational boundary.
 

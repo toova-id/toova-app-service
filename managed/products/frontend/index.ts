@@ -1,0 +1,28 @@
+import "./views";
+import "./navigation";
+import { registerFieldEditor, registerFieldRenderer } from "@luma/views/field-registry";
+import { registerActionFormView } from "@luma/views/view-registry";
+import { registerSettingsSection } from "@luma/features/settings/settings-registry";
+import AttributeForm from "./attribute-form";
+import { AttributeValuesEditor, AttributeValuesValue } from "./attribute-values";
+import CategoryForm from "./category-form";
+import PricelistForm from "./pricelist-form";
+import { PricelistRulesEditor, PricelistRulesValue } from "./pricelist-rules";
+import ProductForm from "./product-form";
+import ProductSettings from "./settings";
+import UomForm from "./uom-form";
+import { UomUnitsEditor, UomUnitsValue } from "./uom-units";
+
+registerFieldEditor("managed_attribute_values", AttributeValuesEditor);
+registerFieldRenderer("managed_attribute_values", AttributeValuesValue);
+registerFieldEditor("managed_pricelist_rules", PricelistRulesEditor);
+registerFieldRenderer("managed_pricelist_rules", PricelistRulesValue);
+registerFieldEditor("managed_uom_units", UomUnitsEditor);
+registerFieldRenderer("managed_uom_units", UomUnitsValue);
+registerActionFormView("products.action_product_attributes", AttributeForm);
+registerActionFormView("products.action_product_categories", CategoryForm);
+registerActionFormView("products.action_product_pricelists", PricelistForm);
+registerActionFormView("products.action_uom_categories", UomForm);
+registerActionFormView("products.action_products", ProductForm);
+registerActionFormView("sale.product_template_action", ProductForm);
+registerSettingsSection("products", ProductSettings);

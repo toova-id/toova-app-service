@@ -35,6 +35,16 @@ Perubahan managed dibuat untuk mengurangi kesalahan tersebut tanpa mengganti eng
 
 ## 3. Batas arsitektur
 
+Source ownership:
+
+```text
+src/odoo    = framework Odoo
+src/addons  = retained native Community addons
+managed     = managed product addons
+```
+
+Nama teknis addon managed mengikuti folder langsung, misalnya `core`, `directory`, `products`, dan `sales`. Karena XML ID berubah, database lama tidak dimigrasikan untuk refactor ini; development database dibuat ulang.
+
 ### 3.1 Odoo tetap memiliki business engine
 
 Managed layer tidak menulis ulang:
@@ -69,7 +79,7 @@ Managed layer bertanggung jawab atas:
 - istilah dan layout bisnis;
 - validation tambahan pada managed context;
 - normalization dan duplicate guard;
-- defaults dan capability gate;
+- defaults dan managed module activation;
 - relation editor yang aman;
 - workflow guidance;
 - archive policy;
@@ -109,14 +119,14 @@ Action XML ID menjadi anchor. Model yang sama dapat memiliki form berbeda untuk 
 Contoh:
 
 ```text
-managed_customers.action_customers
-managed_vendors.action_vendors
-managed_contacts.action_contacts
-managed_products.action_products
-managed_products.action_product_attributes
-managed_products.action_product_categories
-managed_products.action_product_pricelists
-managed_products.action_uom_categories
+customers.action_customers
+vendors.action_vendors
+contact_persons.action_contacts
+products.action_products
+products.action_product_attributes
+products.action_product_categories
+products.action_product_pricelists
+products.action_uom_categories
 ```
 
 Prinsip keamanan:
@@ -256,30 +266,45 @@ Alasan:
 - nested onchange tetap bisa dipanggil tanpa premature write;
 - validation parent dan child tetap atomic pada save.
 
-## 9. Capability dan progressive disclosure
+## 9. Aktivasi managed module dan permission
 
-Fitur tidak muncul hanya karena module terpasang.
+Managed addon yang terpasang langsung menampilkan seluruh workflow miliknya. Tidak ada feature flag per sub-feature.
 
-Contoh capability:
-
-```text
-managed_product_variants = false secara default
-lots/serial tampil hanya jika lotsSerials aktif
-attribute/variant tab tampil hanya jika productVariants aktif
-```
-
-Permission tetap harus lulus selain capability:
+Contoh:
 
 ```text
-product.group_product_variant
-product.group_product_pricelist
-uom.group_uom
-account.group_account_user
+products terpasang → Product, Atribut, Kategori, Daftar Harga, Satuan, dan Variant aktif
+customers terpasang → Customer aktif
+vendors terpasang → Vendor aktif
+contact_persons terpasang → Contact Person/PIC aktif
+people terpasang → Employee directory aktif untuk user yang lolos ACL HR
 ```
 
-Capability menentukan product experience; ACL menentukan siapa yang boleh membaca atau mengubah data.
+Visibility bukan pengganti security. ACL, record rules, company scope, dan write allowlist tetap menentukan siapa yang boleh membaca atau mengubah data. Feature flag per managed module dapat dirancang nanti jika ada kebutuhan produk konkret; belum diimplementasikan sekarang.
 
-## 10. Navigation policy
+## 10. Tenant Settings dan role
+
+Managed ERP memakai invariant operasional:
+
+```text
+1 tenant = 1 database = 1 legal company = 1 data boundary
+```
+
+Company tambahan diprovision sebagai tenant baru; Managed Settings tidak menyediakan create, switch, atau assignment multi-company. Billing ditunda.
+
+Addon `settings` menyediakan General Information, Pengguna, Role & Akses, serta setting kontribusi dari managed addon aktif. `managed.settings.registry` mengumpulkan section, provider, readiness, action/menu permission, dan permission catalog. Products dan Sales sudah menjadi contribution pertama. Permission memakai level `None`, `Read`, atau `Write`; user mendapat role tenant-wide dan effective permission mengambil level tertinggi. Tidak ada direct per-user override, deny override, raw ACL editor, sub-feature flag, atau custom audit. Native Odoo ACL, record rules, metadata audit, dan chatter tetap boundary akhir.
+
+UX managed wajib seamless dan clean:
+
+- gunakan satu judul utama; jangan ulangi label konteks pada badge, eyebrow, card, dan section;
+- hapus subtitle yang hanya mengulang judul atau menjelaskan hal yang sudah terlihat;
+- list dan form mengisi lebar area konten, tidak menggantung di tengah tanpa alasan;
+- hindari card, rounded container, border, dan shadow bertingkat; gunakan hierarchy, whitespace, dan separator tipis;
+- label field harus singkat, konsisten, bebas typo, dan memakai istilah bisnis;
+- status atau helper text hanya tampil jika membantu keputusan atau mencegah kesalahan;
+- satu aksi utama per konteks; hindari tombol atau navigasi duplikat.
+
+## 11. Navigation policy
 
 Navigation disusun berdasarkan task bisnis, bukan daftar model.
 
@@ -307,7 +332,7 @@ Products
 
 Tidak ada menu factor UoM, raw attribute line, Product Variant CRUD terpisah, atau Pricelist Item CRUD terpisah.
 
-## 11. Status implementasi
+## 12. Status implementasi
 
 | Domain | Status | Catatan |
 |---|---|---|
@@ -327,7 +352,7 @@ Tidak ada menu factor UoM, raw attribute line, Product Variant CRUD terpisah, at
 | Contact duplicate candidate flow | Belum lengkap | Exact legal identity block sudah ada |
 | Full browser visual QA | Belum lengkap | Perlu desktop/mobile dan role matrix |
 
-## 12. Roadmap
+## 13. Roadmap
 
 Urutan produk:
 
@@ -339,7 +364,7 @@ Urutan produk:
 6. Jika omnichannel dimulai, buat connector/store mapping ke Pricelist dan Product Variant canonical.
 7. Catat marketplace fee dan settlement di Accounting; jangan mengurangi harga katalog.
 
-## 13. Release gate
+## 14. Release gate
 
 Perubahan managed domain wajib memeriksa:
 
@@ -369,13 +394,13 @@ curl http://127.0.0.1:8069/web/health
 
 Full Odoo test suite tetap release gate. Local runner saat ini masih dapat terhambat dependency `odoo.addons.website` dan port conflict; runtime API checks bukan pengganti test suite tersebut.
 
-## 14. Implementation map
+## 15. Implementation map
 
 Core contract dan API:
 
 ```text
-addons/managed_core/models/base.py
-addons/web/controllers/ui_api.py
+managed/core/models/base.py
+managed/core/controllers/ui_api.py
 frontend/src/views/view-metadata.ts
 frontend/src/views/view-registry.ts
 frontend/src/views/field-registry.tsx
@@ -384,29 +409,29 @@ frontend/src/views/field-registry.tsx
 Directory:
 
 ```text
-addons/managed_directory/models/directory.py
-addons/managed_directory/frontend/party-form.tsx
-addons/managed_indonesia_regions/models/region.py
-addons/managed_indonesia_regions/data/regions.csv
+managed/directory/models/directory.py
+managed/directory/frontend/party-form.tsx
+managed/indonesia_regions/models/region.py
+managed/indonesia_regions/data/regions.csv
 ```
 
 Product catalog:
 
 ```text
-addons/managed_products/models/product.py
-addons/managed_products/models/uom.py
-addons/managed_products/frontend/product-form.tsx
-addons/managed_products/frontend/variant-manager.tsx
-addons/managed_products/frontend/attribute-form.tsx
-addons/managed_products/frontend/category-form.tsx
-addons/managed_products/frontend/pricelist-form.tsx
-addons/managed_products/frontend/pricelist-rules.tsx
-addons/managed_products/frontend/uom-form.tsx
-addons/managed_products/frontend/uom-units.tsx
-addons/managed_products/views/actions.xml
+managed/products/models/product.py
+managed/products/models/uom.py
+managed/products/frontend/product-form.tsx
+managed/products/frontend/variant-manager.tsx
+managed/products/frontend/attribute-form.tsx
+managed/products/frontend/category-form.tsx
+managed/products/frontend/pricelist-form.tsx
+managed/products/frontend/pricelist-rules.tsx
+managed/products/frontend/uom-form.tsx
+managed/products/frontend/uom-units.tsx
+managed/products/views/actions.xml
 ```
 
-## 15. Traceability commit
+## 16. Traceability commit
 
 Baseline yang dibahas dokumen ini dibangun lewat commit berikut:
 

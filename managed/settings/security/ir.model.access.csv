@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_managed_role_read,managed.settings.role.read,model_managed_settings_role,settings.group_settings_roles_read,1,0,0,0
+access_managed_role_write,managed.settings.role.write,model_managed_settings_role,settings.group_settings_roles_write,1,1,1,0
+access_managed_role_grant_read,managed.settings.role.grant.read,model_managed_settings_role_grant,settings.group_settings_roles_read,1,0,0,0
+access_managed_role_grant_write,managed.settings.role.grant.write,model_managed_settings_role_grant,settings.group_settings_roles_write,1,1,1,1
+access_managed_user_read,managed.settings.user.read,model_managed_settings_user,settings.group_settings_users_read,1,0,0,0
+access_managed_user_write,managed.settings.user.write,model_managed_settings_user,settings.group_settings_users_write,1,1,1,0
+access_managed_company_read,managed.settings.company.read,model_managed_settings_company,settings.group_settings_company_read,1,0,0,0
+access_managed_company_write,managed.settings.company.write,model_managed_settings_company,settings.group_settings_company_write,1,1,0,0

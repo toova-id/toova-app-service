@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <template id="managed_app" name="Managed ERP App">&lt;!DOCTYPE html&gt;
+<html lang="id">
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <meta name="theme-color" content="#020617"/>
+        <title>Luma</title>
+        <link t-foreach="styles" t-as="stylesheet" rel="stylesheet" t-att-href="stylesheet"/>
+    </head>
+    <body>
+        <div id="root"/>
+        <script type="module" t-att-src="script"/>
+    </body>
+</html>
+  </template>
+</odoo>

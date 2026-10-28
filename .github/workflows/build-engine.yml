@@ -5,16 +5,18 @@ on:
     branches: [master, 'feat/**']
     paths:
       - '.github/workflows/build-engine.yml'
-      - 'odoo/**'
-      - 'addons/**'
+      - 'src/**'
+      - 'managed/**'
+      - 'frontend/**'
       - 'docker/**'
       - 'requirements.txt'
   pull_request:
     branches: [master]
     paths:
       - '.github/workflows/build-engine.yml'
-      - 'odoo/**'
-      - 'addons/**'
+      - 'src/**'
+      - 'managed/**'
+      - 'frontend/**'
       - 'docker/**'
       - 'requirements.txt'
   workflow_dispatch:
@@ -242,14 +244,15 @@ jobs:
             --workers=0 --max-cron-threads=0
           curl --fail --show-error --silent --retry 30 --retry-delay 2 \
             http://localhost:8069/web/health
-          docker exec odoo-test test -f /opt/odoo/addons/web/__manifest__.py
-          docker exec odoo-test test -f /opt/odoo/addons/mail/__manifest__.py
-          docker exec odoo-test test -f /opt/odoo/addons/sale/__manifest__.py
-          docker exec odoo-test test -f /opt/odoo/addons/account/__manifest__.py
-          docker exec odoo-test test -f /opt/odoo/addons/stock/__manifest__.py
-          docker exec odoo-test test -f /opt/odoo/addons/crm/__manifest__.py
-          docker exec odoo-test test -f /opt/odoo/addons/l10n_id/__manifest__.py
-          docker exec odoo-test test ! -e /opt/odoo/addons/website/__manifest__.py
+          docker exec odoo-test test -f /opt/odoo/src/addons/web/__manifest__.py
+          docker exec odoo-test test -f /opt/odoo/src/addons/mail/__manifest__.py
+          docker exec odoo-test test -f /opt/odoo/src/addons/sale/__manifest__.py
+          docker exec odoo-test test -f /opt/odoo/src/addons/account/__manifest__.py
+          docker exec odoo-test test -f /opt/odoo/src/addons/stock/__manifest__.py
+          docker exec odoo-test test -f /opt/odoo/src/addons/crm/__manifest__.py
+          docker exec odoo-test test -f /opt/odoo/src/addons/l10n_id/__manifest__.py
+          docker exec odoo-test test -f /opt/odoo/managed/core/__manifest__.py
+          docker exec odoo-test test ! -e /opt/odoo/src/addons/website/__manifest__.py
           docker exec odoo-test python -c 'import sys; assert sys.flags.optimize == 0'
           docker exec odoo-test wkhtmltopdf --version
 

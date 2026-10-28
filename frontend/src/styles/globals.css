@@ -657,3 +657,89 @@
   .luma-document-overview, .luma-document-section, .luma-document-summary { @apply px-4; }
   .luma-document-meta .workspace-datetime { @apply grid-cols-1; }
 }
+
+
+@layer components {
+  .luma-settings-workspace { @apply grid min-h-[calc(100vh-44px)] grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)]; }
+  .luma-settings-sidebar { @apply border-b lg:border-b-0 lg:border-r; }
+  .luma-settings-sidebar > header { @apply border-b px-5 py-4; }
+  .luma-settings-sidebar > header h1 { @apply text-base font-semibold; }
+  .luma-settings-sidebar > header p { @apply mt-1 text-[11px] text-muted-foreground; }
+  .luma-settings-sidebar nav { @apply flex gap-1 overflow-x-auto p-2 lg:flex-col lg:overflow-visible; }
+  .luma-settings-sidebar nav > button { @apply flex min-w-52 items-center gap-3 px-3 py-2.5 text-left hover:bg-muted lg:min-w-0; }
+  .luma-settings-sidebar nav > button.module-start { @apply lg:relative lg:mt-3; }
+  .luma-settings-sidebar nav > button.module-start::before { content: ""; @apply hidden lg:absolute lg:-top-2 lg:left-0 lg:right-0 lg:block lg:h-px lg:bg-border; }
+  .luma-settings-sidebar nav > button.active { @apply bg-accent text-accent-foreground; }
+  .luma-settings-sidebar nav button > svg:first-child { @apply h-4 w-4 shrink-0 text-muted-foreground; }
+  .luma-settings-sidebar nav button > svg:last-child { @apply ml-auto h-3.5 w-3.5 shrink-0 text-muted-foreground; }
+  .luma-settings-sidebar nav button > span { @apply flex min-w-0 flex-col; }
+  .luma-settings-sidebar nav button strong { @apply text-xs font-semibold; }
+  .luma-settings-sidebar nav button small { @apply max-w-40 truncate text-[10px] text-muted-foreground; }
+  .luma-settings-content { @apply min-w-0; }
+  .luma-settings-content-header { @apply flex min-h-[70px] flex-col justify-between gap-2 border-b px-6 py-4 md:flex-row md:items-center; }
+  .luma-settings-content-header h2 { @apply text-lg font-semibold; }
+  .luma-settings-content-header p { @apply text-xs text-muted-foreground; }
+  .luma-settings-content-header > b { @apply text-[10px] font-medium text-emerald-700 dark:text-emerald-300; }
+  .luma-settings-content-header > b.warning { @apply text-amber-700 dark:text-amber-300; }
+  .luma-settings-content-body { @apply min-w-0; }
+  .luma-settings-content > footer { @apply border-t px-6 py-3 text-[10px] text-muted-foreground; }
+
+  .luma-settings-provider { @apply flex flex-col; }
+  .luma-settings-provider-actions { @apply sticky top-11 z-10 flex min-h-12 items-center justify-between border-b bg-background/95 px-6 py-2 text-xs text-muted-foreground backdrop-blur; }
+  .luma-settings-provider-actions svg { @apply h-3.5 w-3.5; }
+  .luma-settings-provider > section { @apply border-b px-6 py-5 last:border-b-0; }
+  .luma-settings-provider > section > header h2 { @apply text-sm font-semibold; }
+  .luma-settings-provider > section > header p { @apply mt-1 text-xs text-muted-foreground; }
+  .luma-settings-options { @apply mt-4 grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2; }
+  .luma-settings-options > label, .luma-settings-info { @apply flex min-h-16 flex-col justify-between gap-2 border-b pb-4 text-xs; }
+  .luma-settings-options > label > span, .luma-settings-info strong { @apply font-semibold; }
+  .luma-settings-info p { @apply text-muted-foreground; }
+  .luma-settings-profile { @apply flex min-h-[88px] items-center gap-4 border-b px-6 py-4; }
+  .luma-settings-profile-mark { @apply grid h-11 w-11 shrink-0 place-items-center bg-primary/10 text-primary; }
+  .luma-settings-profile-mark svg { @apply h-5 w-5; }
+  .luma-settings-profile > div:nth-child(2) { @apply min-w-0 flex-1; }
+  .luma-settings-profile span { @apply text-[10px] font-medium text-muted-foreground; }
+  .luma-settings-profile h2 { @apply truncate text-base font-semibold; }
+  .luma-settings-profile p { @apply truncate text-xs text-muted-foreground; }
+  .luma-settings-record-grid { @apply mt-4 grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2; }
+  .luma-settings-record-grid > label { @apply flex flex-col gap-1.5 text-xs; }
+  .luma-settings-record-grid > label > span { @apply text-[11px] font-medium text-muted-foreground; }
+
+  .luma-settings-record { @apply flex flex-col; }
+  .luma-settings-record > header { @apply grid min-h-[74px] grid-cols-[auto_auto_1fr_auto] items-center gap-3 border-b px-6 py-3; }
+  .luma-settings-record-icon { @apply grid h-10 w-10 place-items-center bg-primary/10 text-primary; }
+  .luma-settings-record-icon svg { @apply h-5 w-5; }
+  .luma-settings-record header h1 { @apply text-base font-semibold; }
+  .luma-settings-record header p { @apply text-xs text-muted-foreground; }
+  .luma-settings-record > main > section { @apply border-b px-6 py-5 last:border-b-0; }
+  .luma-settings-record > main > section > h2 { @apply text-sm font-semibold; }
+  .luma-settings-record > main > section > p { @apply mt-1 text-xs text-muted-foreground; }
+
+  .luma-settings-collection { @apply flex flex-col; }
+  .luma-settings-collection > header { @apply flex min-h-[60px] w-full items-center justify-between gap-3 border-b px-6 py-3; }
+  .luma-settings-collection-search { @apply relative w-full max-w-none md:max-w-md; }
+  .luma-settings-collection-search > svg { @apply absolute left-3 top-2 h-4 w-4 text-muted-foreground; }
+  .luma-settings-collection-search input { @apply pl-9; }
+  .luma-settings-collection-list { @apply w-full; }
+  .luma-settings-collection-list > button { @apply grid min-h-14 w-full grid-cols-[36px_minmax(140px,1fr)_minmax(140px,1fr)_64px] items-center gap-3 border-b px-6 text-left hover:bg-muted/50; }
+  .luma-settings-collection-list > button:last-of-type { @apply border-b-0; }
+  .luma-settings-collection-list > button > span { @apply grid h-8 w-8 place-items-center bg-muted text-muted-foreground; }
+  .luma-settings-collection-list > button > span svg { @apply h-4 w-4; }
+  .luma-settings-collection-list > button strong { @apply min-w-0 truncate text-xs; }
+  .luma-settings-collection-list > button small { @apply min-w-0 truncate text-[11px] text-muted-foreground; }
+  .luma-settings-collection-list > button > b { @apply justify-self-end text-[9px] font-medium; }
+  .luma-settings-collection-list > button > b.active { @apply text-emerald-700; }
+  .luma-settings-collection-list > button > b.inactive { @apply text-muted-foreground; }
+
+  .luma-role-matrix { @apply mt-4 flex flex-col border-t; }
+  .luma-role-matrix > section { @apply border-b; }
+  .luma-role-matrix > section > header { @apply flex flex-col justify-between gap-3 bg-muted/30 px-4 py-3 md:flex-row md:items-center; }
+  .luma-role-matrix > section > header h3 { @apply text-xs font-semibold; }
+  .luma-role-matrix > section > header div { @apply flex gap-1; }
+  .luma-role-matrix button { @apply border px-2.5 py-1.5 text-[10px] font-medium text-muted-foreground hover:bg-muted disabled:opacity-50; }
+  .luma-role-row { @apply flex flex-col justify-between gap-3 border-t px-4 py-3 md:flex-row md:items-center; }
+  .luma-role-row > span { @apply text-xs font-medium; }
+  .luma-role-row > div { @apply grid grid-cols-3 bg-muted p-0.5; }
+  .luma-role-row > div button { @apply border-0 bg-transparent; }
+  .luma-role-row > div button.active { @apply bg-background text-foreground shadow-[var(--shadow-control)]; }
+}

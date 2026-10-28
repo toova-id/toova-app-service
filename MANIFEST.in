@@ -1,6 +1,8 @@
 include requirements.txt
 include LICENSE
 include README.md
-graft odoo
+graft src/odoo
+graft src/addons
+graft managed
 recursive-exclude * *.py[co]
 recursive-exclude .git *

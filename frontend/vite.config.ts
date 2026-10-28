@@ -11,7 +11,7 @@ function addonFrontends(): Plugin {
     resolveId(id) { return id === virtualId ? resolvedId : undefined; },
     load(id) {
       if (id !== resolvedId) return undefined;
-      const addons = path.resolve(__dirname, "../addons");
+      const addons = path.resolve(__dirname, "../managed");
       return fs.readdirSync(addons, { withFileTypes: true })
         .filter((entry) => entry.isDirectory() && fs.existsSync(path.join(addons, entry.name, "frontend/index.ts")))
         .map((entry) => `import ${JSON.stringify(path.join(addons, entry.name, "frontend/index.ts"))};`)
@@ -35,7 +35,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "../addons/web/static/app",
+    outDir: "../managed/core/static/app",
     emptyOutDir: true,
     manifest: "manifest.json",
     rollupOptions: {

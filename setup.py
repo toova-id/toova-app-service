@@ -5,7 +5,7 @@ from setuptools import find_packages, setup
 from os.path import join, dirname
 
 
-exec(open(join(dirname(__file__), 'odoo', 'release.py'), 'rb').read())  # Load release variables
+exec(open(join(dirname(__file__), 'src', 'odoo', 'release.py'), 'rb').read())  # Load release variables
 lib_name = 'odoo'
 
 setup(
@@ -19,8 +19,8 @@ setup(
     classifiers=[c for c in classifiers.split('\n') if c],
     license=license,
     scripts=['setup/odoo'],
-    packages=find_packages(),
-    package_dir={'%s' % lib_name: 'odoo'},
+    packages=find_packages('src'),
+    package_dir={'%s' % lib_name: 'src/odoo'},
     include_package_data=True,
     install_requires=[
         'babel >= 1.0',
