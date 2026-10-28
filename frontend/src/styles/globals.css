@@ -109,6 +109,9 @@
   .luma-nav-row-active .luma-nav-icon { @apply bg-primary text-primary-foreground; }
   .luma-nav-label { @apply hidden min-w-0 overflow-hidden text-ellipsis whitespace-nowrap; }
   .luma-sidebar-expanded .luma-nav-label { @apply block; }
+  .luma-nav-badge { @apply ml-auto grid min-w-4 place-items-center bg-primary px-1 text-[9px] font-semibold text-primary-foreground; }
+  .luma-notification-button { @apply relative; }
+  .luma-notification-button > b { @apply absolute right-0 top-0 grid min-w-3.5 place-items-center bg-destructive px-0.5 text-[8px] font-semibold leading-[14px] text-destructive-foreground; }
   .luma-submenus { @apply mb-2 ml-[19px] border-l border-border/80 pb-1 pt-0.5; }
   .luma-submenu-item { @apply relative; }
   .luma-submenu-row { @apply relative flex min-h-8 items-center rounded-md pr-1 text-muted-foreground; padding-left: calc(8px + var(--menu-depth, 0) * 12px); }
@@ -742,4 +745,147 @@
   .luma-role-row > div { @apply grid grid-cols-3 bg-muted p-0.5; }
   .luma-role-row > div button { @apply border-0 bg-transparent; }
   .luma-role-row > div button.active { @apply bg-background text-foreground shadow-[var(--shadow-control)]; }
+}
+
+@layer components {
+  .luma-inbox { @apply grid min-h-[calc(100vh-44px)] grid-cols-1 md:grid-cols-[380px_minmax(0,1fr)]; }
+  .luma-inbox-list { @apply min-w-0 border-r; }
+  .luma-inbox-list > header { @apply border-b; }
+  .luma-inbox-list-title { @apply flex h-12 items-center justify-between px-4; }
+  .luma-inbox-list-title h1 { @apply text-base font-semibold; }
+  .luma-inbox-list-title svg { @apply h-4 w-4; }
+  .luma-inbox-tabs { @apply flex h-10 items-end gap-4 px-4; }
+  .luma-inbox-tabs button { @apply relative flex h-10 items-center gap-1 text-[11px] text-muted-foreground; }
+  .luma-inbox-tabs button.active { @apply font-medium text-foreground; }
+  .luma-inbox-tabs button.active::after { content: ""; @apply absolute bottom-0 left-0 right-0 h-0.5 bg-primary; }
+  .luma-inbox-tabs svg { @apply h-3.5 w-3.5; }
+  .luma-inbox-tabs b { @apply grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[8px] text-primary-foreground; }
+  .luma-inbox-list > header > label { @apply relative m-3 block; }
+  .luma-inbox-list > header > label svg { @apply absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground; }
+  .luma-inbox-list > header > label input { @apply pl-8; }
+  .luma-inbox-filters { @apply flex h-10 items-center gap-1 overflow-x-auto border-b px-3; }
+  .luma-inbox-filters button { @apply h-6 whitespace-nowrap rounded-full bg-muted px-2.5 text-[10px] leading-none text-muted-foreground; }
+  .luma-inbox-filters button.active { @apply bg-primary/15 text-primary; }
+  .luma-inbox-conversations > button { @apply relative grid min-h-16 w-full grid-cols-[42px_minmax(0,1fr)_max-content] items-center gap-2 border-b px-3 text-left hover:bg-muted/50; }
+  .luma-inbox-conversations > button.active { @apply bg-accent; }
+  .luma-inbox-conversations > button:has(> b) strong, .luma-inbox-conversations > button:has(> b) time { @apply font-semibold text-foreground; }
+  .luma-inbox-conversations > button:has(> b) small { @apply text-foreground; }
+  .luma-inbox-avatar { @apply grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-muted text-[10px] font-semibold text-muted-foreground; }
+  .luma-inbox-avatar img { @apply h-full w-full object-cover; }
+  .luma-inbox-avatar svg { @apply h-4 w-4; }
+  .luma-inbox-conversations > button > div { @apply min-w-0; }
+  .luma-inbox-conversations > button strong { @apply block truncate text-xs; }
+  .luma-inbox-conversations > button small { @apply block truncate text-[10px] text-muted-foreground; }
+  .luma-inbox-conversations > button time { @apply self-start pt-3 text-[9px] text-muted-foreground; }
+  .luma-inbox-conversations > button > b { @apply absolute bottom-2 right-3 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[9px] text-primary-foreground; }
+  .luma-inbox-items article { @apply border-b px-4 py-3; }
+  .luma-inbox-items article > div:first-child { @apply flex items-center justify-between gap-2; }
+  .luma-inbox-items article strong { @apply text-xs; }
+  .luma-inbox-items article small, .luma-inbox-items article time { @apply text-[10px] text-muted-foreground; }
+  .luma-inbox-items article p { @apply my-2 text-xs text-muted-foreground; }
+  .luma-inbox-items article a, .luma-inbox-items article button { @apply mr-3 text-[10px] font-medium text-primary; }
+  .luma-inbox-items article.overdue { @apply border-l-2 border-l-destructive; }
+  .luma-inbox-items article.today { @apply border-l-2 border-l-amber-500; }
+  .luma-inbox-thread { @apply flex min-w-0 flex-col; }
+  .luma-inbox-thread > header { @apply flex h-14 shrink-0 items-center gap-2 border-b px-4; }
+  .luma-inbox-thread > header > button { @apply grid h-8 w-8 place-items-center md:hidden; }
+  .luma-inbox-thread > header svg { @apply h-4 w-4; }
+  .luma-inbox-thread > header > .luma-inbox-avatar { @apply ml-1; }
+  .luma-inbox-thread h2 { @apply text-sm font-semibold; }
+  .luma-inbox-thread > header small { @apply text-[9px] text-muted-foreground; }
+  .luma-inbox-messages { @apply flex flex-1 flex-col gap-1 overflow-y-auto bg-secondary/40 px-5 py-4; }
+  .luma-inbox-day { @apply my-4 flex justify-center; }
+  .luma-inbox-day span { @apply rounded-full bg-background px-3 py-1 text-[9px] font-medium text-muted-foreground shadow-[var(--shadow-control)]; }
+  .luma-inbox-unread { @apply my-4 flex items-center gap-3 text-[9px] font-medium text-primary; }
+  .luma-inbox-unread::before, .luma-inbox-unread::after { content: ""; @apply h-px flex-1 bg-primary/30; }
+  .luma-inbox-messages article { @apply flex max-w-[76%] items-end gap-2; }
+  .luma-inbox-messages article.mine { @apply ml-auto flex-row-reverse; }
+  .luma-inbox-messages article.direct { @apply max-w-[72%]; }
+  .luma-inbox-messages article.grouped { @apply mt-0.5; }
+  .luma-inbox-messages article:not(.mine):not(.direct):not(.grouped) { @apply mt-2; }
+  .luma-inbox-messages article > span { @apply mb-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-muted text-[9px] font-semibold text-muted-foreground; }
+  .luma-inbox-messages article.grouped:not(.mine):not(.direct) { @apply ml-9; }
+  .luma-inbox-messages article > div { @apply relative min-w-24 rounded-2xl rounded-bl-sm border border-border/70 bg-card px-3 py-2 shadow-[var(--shadow-control)]; }
+  .luma-inbox-messages article.mine > div { @apply rounded-bl-2xl rounded-br-sm border-primary/15 bg-primary/15; }
+  .luma-inbox-messages article header { @apply mb-1 flex items-center gap-2; }
+  .luma-inbox-messages strong { @apply text-[11px] font-semibold leading-4 text-primary; }
+  .luma-inbox-messages time { @apply float-right ml-3 mt-1.5 whitespace-nowrap text-[9px] leading-4 text-muted-foreground; }
+  .luma-inbox-messages p { @apply whitespace-pre-wrap break-words text-[13px] leading-[1.45rem] tracking-[-.005em]; }
+  .luma-inbox-messages a { @apply mt-2 block text-[10px] text-primary; }
+  .luma-inbox-thread > footer { @apply grid grid-cols-[32px_minmax(0,1fr)_36px] items-end gap-2 border-t p-3; }
+  .luma-inbox-thread > footer > button:first-child { @apply grid h-8 w-8 place-items-center rounded-full text-muted-foreground disabled:opacity-40; }
+  .luma-inbox-thread > footer textarea { @apply max-h-32 min-h-9 resize-none; }
+  .luma-inbox-thread > footer svg { @apply h-4 w-4; }
+  .luma-inbox-empty { @apply grid min-h-48 place-items-center content-center gap-2 text-xs text-muted-foreground; }
+  .luma-inbox-empty svg { @apply h-5 w-5; }
+  .luma-inbox-drawer { @apply fixed inset-0 z-[80] bg-black/20; }
+  .luma-inbox-drawer > section { @apply ml-auto flex h-full w-full max-w-md flex-col bg-background shadow-[var(--shadow-floating)]; }
+  .luma-inbox-drawer > section > header, .luma-inbox-modal > section > header { @apply flex h-14 items-center justify-between border-b px-4; }
+  .luma-inbox-drawer h2, .luma-inbox-modal h2 { @apply text-sm font-semibold; }
+  .luma-inbox-drawer header button, .luma-inbox-modal header button { @apply grid h-8 w-8 place-items-center hover:bg-muted; }
+  .luma-inbox-drawer header svg, .luma-inbox-modal header svg { @apply h-4 w-4; }
+  .luma-inbox-drawer > section > input { @apply m-3 w-[calc(100%-1.5rem)]; }
+  .luma-inbox-drawer > section > div { @apply flex-1 overflow-y-auto; }
+  .luma-inbox-drawer > section > div > button { @apply flex min-h-14 w-full items-center gap-3 border-b px-4 text-left hover:bg-muted/50; }
+  .luma-inbox-drawer > section > div > button > span:last-child { @apply min-w-0; }
+  .luma-inbox-drawer strong { @apply block truncate text-xs; }
+  .luma-inbox-drawer small { @apply block truncate text-[10px] text-muted-foreground; }
+  .luma-inbox-drawer footer { @apply border-t p-3; }
+  .luma-inbox-drawer footer button { @apply flex h-10 w-full items-center gap-3 px-2 text-xs hover:bg-muted; }
+  .luma-inbox-drawer footer svg { @apply h-4 w-4; }
+  .luma-inbox-modal { @apply fixed inset-0 z-[80] grid place-items-center bg-black/20 p-4; }
+  .luma-inbox-modal > section { @apply w-full max-w-sm border bg-background p-0 shadow-[var(--shadow-floating)]; }
+  .luma-inbox-modal > section > label { @apply grid gap-1.5 border-b px-4 py-3 text-[11px]; }
+  .luma-inbox-modal > section > label > span { @apply text-muted-foreground; }
+  .luma-inbox-modal .flex-wrap label { @apply flex items-center gap-2; }
+  .luma-inbox-modal > section > footer { @apply mt-0 border-t p-3; }
+}
+
+@media (max-width: 767px) {
+  .luma-inbox { @apply block; }
+  .luma-inbox-list { @apply border-r-0; }
+  .luma-inbox-thread { @apply hidden; }
+  .luma-inbox.thread-open .luma-inbox-list { @apply hidden; }
+  .luma-inbox.thread-open .luma-inbox-thread { @apply flex min-h-[calc(100vh-44px)]; }
+  .luma-inbox-drawer > section { @apply max-w-none; }
+}
+
+
+@layer components {
+  .luma-inbox-avatar { @apply grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-muted text-[10px] font-semibold text-muted-foreground; }
+  .luma-inbox-avatar img { @apply h-full w-full object-cover; }
+  .luma-inbox-avatar svg { @apply h-4 w-4; }
+  .luma-inbox-filters { @apply flex h-10 items-center gap-1 overflow-x-auto border-b px-3; }
+  .luma-inbox-filters button { @apply h-6 whitespace-nowrap rounded-full bg-muted px-2.5 text-[10px] leading-none text-muted-foreground; }
+  .luma-inbox-filters button.active { @apply bg-primary/15 text-primary; }
+  .luma-inbox-thread > header > .luma-inbox-avatar { @apply ml-1; }
+  .luma-inbox-thread > header small { @apply text-[9px] text-muted-foreground; }
+  .luma-inbox-unread { @apply my-4 flex items-center gap-3 text-[9px] font-medium text-primary; }
+  .luma-inbox-unread::before, .luma-inbox-unread::after { content: ""; @apply h-px flex-1 bg-primary/30; }
+  .luma-inbox-thread > footer { @apply grid-cols-[32px_minmax(0,1fr)_36px]; }
+  .luma-inbox-thread > footer > button:first-child { @apply grid h-8 w-8 place-items-center rounded-full text-muted-foreground disabled:opacity-40; }
+  .luma-inbox-drawer { @apply fixed inset-0 z-[80] bg-black/20; }
+  .luma-inbox-drawer > section { @apply ml-auto flex h-full w-full max-w-md flex-col bg-background shadow-[var(--shadow-floating)]; }
+  .luma-inbox-drawer > section > header, .luma-inbox-modal > section > header { @apply flex h-14 items-center justify-between border-b px-4; }
+  .luma-inbox-drawer h2, .luma-inbox-modal h2 { @apply text-sm font-semibold; }
+  .luma-inbox-drawer header button, .luma-inbox-modal header button { @apply grid h-8 w-8 place-items-center hover:bg-muted; }
+  .luma-inbox-drawer header svg, .luma-inbox-modal header svg { @apply h-4 w-4; }
+  .luma-inbox-drawer > section > input { @apply m-3 w-[calc(100%-1.5rem)]; }
+  .luma-inbox-drawer > section > div { @apply flex-1 overflow-y-auto; }
+  .luma-inbox-drawer > section > div > button { @apply flex min-h-14 w-full items-center gap-3 border-b px-4 text-left hover:bg-muted/50; }
+  .luma-inbox-drawer > section > div > button > span:last-child { @apply min-w-0; }
+  .luma-inbox-drawer strong { @apply block truncate text-xs; }
+  .luma-inbox-drawer small { @apply block truncate text-[10px] text-muted-foreground; }
+  .luma-inbox-drawer footer { @apply border-t p-3; }
+  .luma-inbox-drawer footer button { @apply flex h-10 w-full items-center gap-3 px-2 text-xs hover:bg-muted; }
+  .luma-inbox-drawer footer svg { @apply h-4 w-4; }
+  .luma-inbox-modal > section { @apply p-0; }
+  .luma-inbox-modal > section > label { @apply grid gap-1.5 border-b px-4 py-3 text-[11px]; }
+  .luma-inbox-modal > section > label > span { @apply text-muted-foreground; }
+  .luma-inbox-modal .flex-wrap label { @apply flex items-center gap-2; }
+  .luma-inbox-modal > section > footer { @apply mt-0 border-t p-3; }
+}
+
+@media (max-width: 767px) {
+  .luma-inbox-drawer > section { @apply max-w-none; }
 }

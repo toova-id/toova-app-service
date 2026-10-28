@@ -306,7 +306,7 @@ UX managed wajib seamless dan clean:
 
 ## 11. Navigation policy
 
-Navigation disusun berdasarkan task bisnis, bukan daftar model.
+Navigation disusun berdasarkan task bisnis, bukan daftar model. Managed app hanya mengirim menu yang action-nya menjadi anchor managed terdaftar; parent native dapat tampil hanya untuk mengelompokkan child managed. Menu native lain tidak tampil sebelum workflow managed-nya tersedia. Allowlist ini juga berlaku pada endpoint action managed; action native yang tidak terdaftar ditolak server-side.
 
 Contoh Contacts:
 
@@ -337,6 +337,7 @@ Tidak ada menu factor UoM, raw attribute line, Product Variant CRUD terpisah, at
 | Domain | Status | Catatan |
 |---|---|---|
 | Managed UI contract | Selesai baseline | Action anchor, read/write allowlist, custom renderer, XML fallback |
+| Inbox | Selesai baseline | Channel, pesan langsung, mention, aktivitas, unread, composer; native Mail tetap engine |
 | Customer | Selesai baseline | Profile, address, PIC, sales/finance, tax |
 | Vendor | Selesai baseline | Purchase/finance, tax, bank, supplier price |
 | Contact Person | Selesai baseline | Context “Terhubung ke” dan role contact |
@@ -446,3 +447,32 @@ fe9f7e67 Fix variant pricelist selection
 ```
 
 Commit membantu audit perubahan, tetapi contract dan dokumen pada branch aktif tetap menjadi rujukan status terbaru.
+
+## 17. Inbox dan komunikasi
+
+`managed/discuss` menjadi product layer atas native Odoo Mail:
+
+```text
+Inbox      = perhatian user
+Channel    = komunikasi tim
+Aktivitas  = pekerjaan terjadwal
+Chatter    = konteks record bisnis
+```
+
+Canonical data tetap `mail.channel`, `mail.channel.member`, `mail.message`, `mail.activity`, `mail.followers`, dan `ir.attachment`. Managed layer hanya memberi curated API, unread aggregation, deep link, composer, permission, dan React UX. Channel membership serta akses record tetap security boundary. Fresh tenant membuat satu channel `Umum`; tidak ada channel otomatis per customer atau transaksi. Internal note dan outbound customer message wajib tetap dipisah saat contextual chatter ditambahkan.
+
+Inbox memakai dua panel: list kontekstual di kiri dan thread aktif di kanan. Tab `Pesan`, `Mention`, dan `Aktivitas` mengganti isi panel kiri. Pesan baru memakai drawer; pembuatan channel mendukung anggota private atau seluruh pengguna internal. Badge sidebar menunjukkan pesan belum dibaca; bell menunjukkan mention serta aktivitas terlambat atau jatuh tempo hari ini. Thread memakai bubble, pengelompokan pengirim, pemisah tanggal, dan divider unread.
+
+Endpoint managed Inbox:
+
+```text
+GET  /api/v1/inbox
+GET  /api/v1/inbox/counts
+GET  /api/v1/inbox/channels/<id>
+POST /api/v1/inbox/channels/<id>/messages
+POST /api/v1/inbox/direct
+POST /api/v1/inbox/channels
+POST /api/v1/inbox/activities/<id>/done
+```
+
+Tidak ada model pesan, channel, notifikasi, atau aktivitas pengganti di managed layer.

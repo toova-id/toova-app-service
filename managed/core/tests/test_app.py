@@ -32,8 +32,16 @@ class TestManagedApp(HttpCase):
         self.assertEqual(navigation.status_code, 200)
         items = navigation.json()['items']
         self.assertIsInstance(items, list)
-        self.assertNotIn('Apps', {item['label'] for item in items})
-        self.assertNotIn('Settings', {item['label'] for item in items})
+        labels = {item['label'] for item in items}
+        self.assertNotIn('Apps', labels)
+        self.assertNotIn('Settings', labels)
+        self.assertNotIn('CRM', labels)
+        self.assertNotIn('Invoicing', labels)
+        self.assertNotIn('Inventory', labels)
+        self.assertNotIn('Purchase', labels)
+        self.assertNotIn('Manufacturing', labels)
+        self.assertNotIn('Repairs', labels)
+        self.assertTrue(all(item['actionId'] or item['children'] for item in items))
         paths = [item['path'] for item in items if item['path']]
         self.assertTrue(all(path.startswith('/app/') for path in paths))
         self.assertTrue(all('ir.actions.' not in path for path in paths))

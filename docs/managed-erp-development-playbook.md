@@ -355,6 +355,27 @@ IDs are local fixtures, not stable contract. Never hard-code them.
 
 ## 6. Next execution plan
 
+### Inbox checkpoint
+
+`managed/discuss` sudah menyediakan Inbox dua panel atas native Mail:
+
+```text
+Panel kiri  → Pesan, Mention, Aktivitas, pencarian, dan filter list
+Panel kanan → thread aktif dan composer
+```
+
+Checklist runtime Inbox:
+
+- hanya anggota channel dapat membaca thread atau mengirim pesan;
+- direct chat memakai partner lawan sebagai nama/avatar;
+- channel baru memvalidasi visibility dan anggota internal server-side;
+- badge sidebar hanya unread chat;
+- badge bell hanya mention serta aktivitas overdue/hari ini;
+- buka thread menandai seen, scroll ke unread pertama bila ada;
+- refresh polling 30 detik dan saat browser tab kembali aktif.
+
+Navigation managed adalah allowlist action registry. Jangan membuka action native baru melalui `/api/v1/ui/actions/<id>` atau menu sampai action managed, permission mapping, dan workflow-nya ada.
+
 ### Phase A — catalog closeout
 
 Goal: declare catalog safe enough for Sales integration.

@@ -358,6 +358,7 @@ class ManagedSettingsRegistry(models.AbstractModel):
     def _managed_action_permissions(self):
         return {
             **super()._managed_action_permissions(),
+            'settings.action_settings': 'settings.company',
             'settings.action_company_profile': 'settings.company',
             'settings.action_users': 'settings.users',
             'settings.action_roles': 'settings.roles',

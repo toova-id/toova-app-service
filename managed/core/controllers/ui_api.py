@@ -54,8 +54,22 @@ def _managed_permission(key, level='read'):
 def _action_permission(action):
     return request.env[action.res_model]._managed_action_permission(_action_xmlid(action))
 
+def _managed_action_ids(action_model=None):
+    """Return explicit managed action anchors, never every installed Odoo action."""
+    action_ids = set()
+    for xmlid in request.env['managed.settings.registry']._managed_registry()['actions']:
+        action = request.env.ref(xmlid, raise_if_not_found=False)
+        if action and (action_model is None or action._name == action_model):
+            action_ids.add(action.id)
+    return action_ids
+
+
 def _menu_tree():
     menus = request.env['ir.ui.menu'].load_web_menus(request.session.debug)
+    managed_actions = {
+        'ir.actions.act_window': _managed_action_ids('ir.actions.act_window'),
+        'ir.actions.client': _managed_action_ids('ir.actions.client'),
+    }
     hidden_xmlids = {
         'base.menu_management', 'base.menu_administration',
         'settings.menu_company_profile', 'settings.menu_users', 'settings.menu_roles',
@@ -76,7 +90,7 @@ def _menu_tree():
             menu_path = f'{parent_path}/{slug}'
             children = serialize_many(menu['children'], menu_path)
             action_model = menu.get('actionModel')
-            action_id = menu.get('actionID') if action_model in ('ir.actions.act_window', 'ir.actions.client') else None
+            action_id = menu.get('actionID') if menu.get('actionID') in managed_actions.get(action_model, set()) else None
             if not action_id and not children:
                 continue
             items.append({
@@ -95,12 +109,7 @@ def _menu_tree():
 
 
 def _visible_action_ids(action_model):
-    return {
-        menu['actionID']
-        for menu in request.env['ir.ui.menu'].load_web_menus(request.session.debug).values()
-        if menu.get('actionModel') == action_model and menu.get('actionID')
-        and menu.get('xmlid') not in {'base.menu_management', 'base.menu_administration'}
-    }
+    return _managed_action_ids(action_model)
 
 
 def _visible_action(action_id):
@@ -109,10 +118,7 @@ def _visible_action(action_id):
     except (TypeError, ValueError) as error:
         raise MissingError('Action not found.') from error
     if action_id not in _visible_action_ids('ir.actions.act_window'):
-        candidate = request.env['ir.actions.act_window'].sudo().browse(action_id).exists()
-        permission = candidate and _action_permission(candidate)
-        if not candidate or not permission or not _managed_permission(permission):
-            raise AccessError('Action is not available for this user.')
+        raise AccessError('Action is not available for this user.')
     action = request.env['ir.actions.act_window'].sudo().browse(action_id).exists()
     if not action:
         raise MissingError('Action not found.')

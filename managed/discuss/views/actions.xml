@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="mail.action_discuss" model="ir.actions.client">
+    <field name="name">Inbox</field>
+    <field name="tag">managed.inbox</field>
+  </record>
+  <record id="mail.menu_root_discuss" model="ir.ui.menu">
+    <field name="name">Inbox</field>
+    <field name="sequence">5</field>
+  </record>
+</odoo>

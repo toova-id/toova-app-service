@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="group_inbox_read" model="res.groups"><field name="name">Inbox / Messages / Read</field><field name="category_id" ref="settings.module_category_managed_permissions"/></record>
+  <record id="group_inbox_write" model="res.groups"><field name="name">Inbox / Messages / Write</field><field name="category_id" ref="settings.module_category_managed_permissions"/><field name="implied_ids" eval="[(4, ref('group_inbox_read'))]"/></record>
+  <record id="group_channel_manage_read" model="res.groups"><field name="name">Inbox / Channel Management / Read</field><field name="category_id" ref="settings.module_category_managed_permissions"/></record>
+  <record id="group_channel_manage_write" model="res.groups"><field name="name">Inbox / Channel Management / Write</field><field name="category_id" ref="settings.module_category_managed_permissions"/><field name="implied_ids" eval="[(4, ref('group_channel_manage_read')), (4, ref('group_inbox_write'))]"/></record>
+  <record id="group_activities_read" model="res.groups"><field name="name">Inbox / Activities / Read</field><field name="category_id" ref="settings.module_category_managed_permissions"/></record>
+  <record id="group_activities_write" model="res.groups"><field name="name">Inbox / Activities / Write</field><field name="category_id" ref="settings.module_category_managed_permissions"/><field name="implied_ids" eval="[(4, ref('group_activities_read'))]"/></record>
+</odoo>
