@@ -421,7 +421,11 @@
   .toova-sale-line-copy { @apply flex min-w-0 flex-col; }
   .toova-sale-line-copy strong { @apply truncate text-xs font-medium; }
   .toova-sale-line-copy span, .toova-sale-line-copy small { @apply mt-1 truncate text-[10px] text-muted-foreground; }
-  .toova-sale-line-total { @apply text-xs font-medium tabular-nums; }
+  .toova-sale-line-copy small b { @apply font-medium text-amber-700 dark:text-amber-300; }
+  .toova-sale-line-subtotal { @apply flex min-w-32 flex-col items-end gap-0.5 text-right tabular-nums; }
+  .toova-sale-line-subtotal del { @apply text-[9px] font-normal text-muted-foreground; }
+  .toova-sale-line-subtotal i { @apply rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[8px] font-medium not-italic text-amber-700 dark:text-amber-300; }
+  .toova-sale-line-subtotal strong { @apply text-xs font-semibold; }
   .toova-sale-lines > .workspace-relation-add { @apply border-x border-b; }
 
   .toova-finance-document, .toova-delivery-document, .toova-payment-document { @apply min-h-[calc(100vh-44px)] bg-background; }

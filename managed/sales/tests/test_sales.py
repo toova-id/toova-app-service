@@ -17,6 +17,10 @@ class TestSaleManagedUiContract(TransactionCase):
         self.assertEqual(fields['order_line']['widget'], 'managed_sale_order_lines')
         self.assertEqual(fields['order_line']['relation']['columns'][0]['name'], 'product_id')
         self.assertEqual(fields['order_line']['relation']['columns'][0]['widget'], 'managed_sale_product_many2one')
+        columns = {column['name'] for column in fields['order_line']['relation']['columns']}
+        self.assertIn('price_total', columns)
+        self.assertIn('managed_discount_mode', columns)
+        self.assertIn('managed_discount_fixed', columns)
         self.assertIn('picking_ids', fields)
         self.assertIn('invoice_ids', fields)
         self.assertNotIn('amount_total', contract['form']['write_fields'])
@@ -29,6 +33,15 @@ class TestSaleManagedUiContract(TransactionCase):
         self.assertEqual(first, 'SO2603000001')
         self.assertEqual(second, 'SO2603000002')
         self.assertEqual(april, 'SO2604000001')
+
+    def test_fixed_discount_uses_native_percentage_engine(self):
+        product = self.env.ref('product.product_product_4')
+        line = self.env['sale.order.line'].with_context(managed_ui=True).new({
+            'product_id': product.id, 'product_uom_qty': 2, 'price_unit': 100000,
+            'managed_discount_mode': 'fixed', 'managed_discount_fixed': 30000,
+        })
+        line._onchange_managed_fixed_discount()
+        self.assertEqual(line.discount, 15)
 
     def test_orders_cannot_be_created_from_order_action(self):
         contract = self.env['sale.order']._managed_ui_contract('sales.action_orders')

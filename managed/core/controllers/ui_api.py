@@ -983,6 +983,10 @@ class ManagedUiApi(http.Controller):
             allowed = set(_allowed_fields(schema, 'form'))
             values = _normalize_form_values({name: value[0] if isinstance(value, (list, tuple)) and _form_fields(schema).get(name, {}).get('type') == 'many2one' and value else value for name, value in values.items() if name in allowed}, schema)
             spec = {name: onchange_spec for name, onchange_spec in schema['form']['onchange'].items()}
+            if field_name == 'order_line' and action.res_model == 'sale.order':
+                for name in ('amount_untaxed', 'amount_tax', 'amount_total'):
+                    if name in allowed:
+                        spec[name] = ''
             context, _domain = _eval_action(action)
             model = request.env[action.res_model].with_context(**context)
             result = model.onchange(values, field_name, spec)
@@ -1025,6 +1029,10 @@ class ManagedUiApi(http.Controller):
                     for name, value in parent_values.items() if name in parent_allowed and name != field_name
                 }
                 line_values[inverse_field] = parent
+            if field.get('widget') == 'managed_sale_order_lines':
+                for name in ('price_subtotal', 'price_total'):
+                    if name in columns:
+                        onchange_spec[name] = ''
             result = relation_model.with_context(**_eval_action(action)[0]).onchange(
                 line_values, changed_field, onchange_spec,
             )

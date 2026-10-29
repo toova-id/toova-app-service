@@ -1,8 +1,56 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models, _
+from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
+
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+
+    managed_discount_mode = fields.Selection(
+        [('percentage', 'Persentase'), ('fixed', 'Nominal tetap')],
+        default='percentage', required=True, string='Jenis diskon',
+    )
+    managed_discount_fixed = fields.Monetary(
+        currency_field='currency_id', default=0, string='Diskon tetap',
+    )
+
+    @api.onchange('managed_discount_mode', 'managed_discount_fixed', 'product_uom_qty', 'price_unit')
+    def _onchange_managed_fixed_discount(self):
+        for line in self:
+            if line.managed_discount_mode == 'fixed':
+                base = line.product_uom_qty * line.price_unit
+                line.discount = line.managed_discount_fixed / base * 100 if base else 0
+            else:
+                line.managed_discount_fixed = 0
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        if self.env.context.get('managed_ui'):
+            vals_list = [self._managed_prepare_discount_values(values) for values in vals_list]
+        return super().create(vals_list)
+
+    def write(self, values):
+        relevant = {'managed_discount_mode', 'managed_discount_fixed', 'product_uom_qty', 'price_unit'}
+        if self.env.context.get('managed_ui') and relevant.intersection(values):
+            for line in self:
+                super(SaleOrderLine, line).write(line._managed_prepare_discount_values(values))
+            return True
+        return super().write(values)
+
+    def _managed_prepare_discount_values(self, values):
+        values = dict(values)
+        record = self if len(self) == 1 else self.browse()
+        mode = values.get('managed_discount_mode', record.managed_discount_mode or 'percentage')
+        if mode == 'fixed':
+            quantity = values.get('product_uom_qty', record.product_uom_qty or 0)
+            price = values.get('price_unit', record.price_unit or 0)
+            fixed = values.get('managed_discount_fixed', record.managed_discount_fixed or 0)
+            base = quantity * price
+            values['discount'] = fixed / base * 100 if base else 0
+        else:
+            values['managed_discount_fixed'] = 0
+        return values
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -61,9 +109,12 @@ class SaleOrder(models.Model):
                         {'name': 'product_uom_qty', 'label': 'Kuantitas'},
                         {'name': 'product_uom', 'label': 'Satuan', 'widget': 'managed_sale_uom_many2one'},
                         {'name': 'price_unit', 'label': 'Harga satuan'},
+                        {'name': 'managed_discount_mode', 'label': 'Jenis diskon'},
                         {'name': 'discount', 'label': 'Diskon', 'widget': 'percentage'},
+                        {'name': 'managed_discount_fixed', 'label': 'Diskon tetap'},
                         {'name': 'tax_id', 'label': 'Pajak', 'widget': 'many2many_tags'},
                         {'name': 'price_subtotal', 'label': 'Subtotal'},
+                        {'name': 'price_total', 'label': 'Total setelah pajak'},
                         {'name': 'currency_id', 'label': 'Mata uang'},
                         {'name': 'display_type', 'label': 'Tipe baris'},
                     ],
