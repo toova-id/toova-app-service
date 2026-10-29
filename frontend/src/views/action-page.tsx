@@ -14,6 +14,7 @@ export default function ActionPage({ actionId, basePath }: { actionId: number; b
   const navigate = useNavigate();
   const suffix = location.pathname.slice(basePath.length).replace(/^\//, "");
   const recordId = suffix || undefined;
+  const relatedIds = new URLSearchParams(location.search).get("ids") || "";
   const [schema, setSchema] = useState<ActionSchema>();
   const [data, setData] = useState<RecordsResponse>();
   const [values, setValues] = useState<Record<string, unknown>>({});
@@ -47,13 +48,13 @@ export default function ActionPage({ actionId, basePath }: { actionId: number; b
       api<{ id: number | null; values: Record<string, unknown> }>(`/api/v1/ui/actions/${actionId}/records/${recordId}`, { signal: controller.signal }).then((response) => { if (sequence === requestSequence.current) setValues(response.values); }).catch((reason) => { if (reason.name !== "AbortError") setError(reason.message); }).finally(() => { if (sequence === requestSequence.current) setLoading(false); });
     } else {
       const timeout = setTimeout(() => {
-        const params = new URLSearchParams({ page: String(page), ...(query ? { q: query } : {}), ...(filters.length ? { filters: filters.join(",") } : {}) });
+        const params = new URLSearchParams({ page: String(page), ...(query ? { q: query } : {}), ...(filters.length ? { filters: filters.join(",") } : {}), ...(relatedIds ? { ids: relatedIds } : {}) });
         api<RecordsResponse>(`/api/v1/ui/actions/${actionId}/records?${params}`, { signal: controller.signal }).then((response) => { if (sequence === requestSequence.current) { setData(response); setSelected([]); } }).catch((reason) => { if (reason.name !== "AbortError") setError(reason.message); }).finally(() => { if (sequence === requestSequence.current) setLoading(false); });
       }, query ? 250 : 0);
       return () => { clearTimeout(timeout); controller.abort(); };
     }
     return () => controller.abort();
-  }, [schema, actionId, recordId, page, query, filters, reload]);
+  }, [schema, actionId, recordId, relatedIds, page, query, filters, reload]);
 
   async function save() {
     if (!schema) return;
@@ -101,7 +102,7 @@ export default function ActionPage({ actionId, basePath }: { actionId: number; b
   if (recordId) {
     if (loading && !Object.keys(values).length) return <ViewLoading/>;
     const CustomForm = getFormView(schema) || FormView;
-    return <><CustomForm schema={schema} basePath={basePath} id={recordId === "new" ? undefined : Number(recordId)} values={values} editing={editing} saving={saving} onEdit={() => setEditing(true)} onChange={changeField} onSave={save} onButton={runButton}/>{loading && <div className="workspace-form-loading"/>}{modal && <ActionModal action={modal} onClose={() => setModal(undefined)} onDone={() => { setModal(undefined); setReload((value) => value + 1); }}/>} {error && <div className="workspace-toast-error">{error}</div>}</>;
+    return <><CustomForm schema={schema} basePath={basePath} id={recordId === "new" ? undefined : Number(recordId)} values={values} editing={editing} saving={saving} onEdit={() => setEditing(true)} onChange={changeField} onSave={save} onButton={runButton}/>{loading && <div className="workspace-form-loading"/>}{modal && <ActionModal action={modal} onClose={() => setModal(undefined)} onDone={(next) => { setModal(next); if (!next) setReload((value) => value + 1); }}/>} {error && <div className="workspace-toast-error">{error}</div>}</>;
   }
   const CustomList = getListView(schema) || ListView;
   return <><CustomList schema={schema} basePath={basePath} data={data} query={query} page={page} loading={loading} selected={selected} filters={filters} onQuery={(value) => { setQuery(value); setPage(1); }} onPage={setPage} onSelected={setSelected} onFilters={(value) => { setFilters(value); setPage(1); }} onRefresh={() => setReload((value) => value + 1)} onDelete={remove} onBulkAction={bulkAction}/>{error && <div className="workspace-toast-error">{error}</div>}</>;

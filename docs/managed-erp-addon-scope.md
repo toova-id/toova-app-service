@@ -6,7 +6,8 @@ This repository carries only Odoo Community modules needed by the Indonesian man
 
 ```text
 Platform       core directory indonesia_regions customers vendors
-               contact_persons people products web contacts calendar base_automation
+               contact_persons people products sales inventory finance settings discuss
+               web contacts calendar base_automation
 Commercial     crm sale_management sale_stock sale_margin
 Procurement    purchase_stock purchase_requisition_stock
 Inventory      stock stock_account stock_picking_batch stock_dropshipping

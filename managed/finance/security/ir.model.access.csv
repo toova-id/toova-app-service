@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_managed_customer_invoice_read,managed customer invoice read,account.model_account_move,finance.group_customer_invoices_read,1,0,0,0
+access_managed_customer_invoice_line_read,managed customer invoice line read,account.model_account_move_line,finance.group_customer_invoices_read,1,0,0,0
+access_managed_payment_read,managed payment read,account.model_account_payment,finance.group_payments_read,1,0,0,0

@@ -268,6 +268,7 @@ editors.managed_order_fiscal_position_many2one = editors.many2one;
 editors.managed_order_warehouse_many2one = editors.many2one;
 editors.managed_sale_product_many2one = editors.many2one;
 editors.managed_sale_uom_many2one = editors.many2one;
+editors.managed_stock_lot_many2one = editors.many2one;
 editors.state_selection = editors.selection;
 editors.label_selection = editors.selection;
 editors.selection_badge = editors.selection;

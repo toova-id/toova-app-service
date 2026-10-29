@@ -63,6 +63,10 @@ class SaleOrder(models.Model):
             {'name': 'amount_tax', 'label': 'Pajak'},
             {'name': 'amount_total', 'label': 'Total'},
             {'name': 'currency_id', 'label': 'Mata uang'},
+            {'name': 'picking_ids', 'label': 'Pengiriman'},
+            {'name': 'invoice_ids', 'label': 'Faktur pelanggan'},
+            {'name': 'delivery_count', 'label': 'Jumlah pengiriman'},
+            {'name': 'invoice_count', 'label': 'Jumlah faktur'},
             {'name': 'delivery_status', 'label': 'Status pengiriman', 'selection': [
                 ('pending', 'Belum diproses'), ('started', 'Diproses'), ('partial', 'Sebagian dikirim'), ('full', 'Selesai dikirim'),
             ]},
@@ -121,6 +125,10 @@ class SaleOrder(models.Model):
                         'modifiers': {'invisible': [('state', 'not in', ['draft', 'sent'])]},
                     },
                     {
+                        'name': 'action_create_managed_invoice', 'label': 'Buat faktur', 'type': 'object', 'primary': True,
+                        'modifiers': {'invisible': ['|', ('state', 'not in', ['sale', 'done']), ('invoice_status', 'not in', ['to invoice', 'no'])]},
+                    },
+                    {
                         'name': 'action_cancel', 'label': 'Batalkan', 'type': 'object',
                         'modifiers': {'invisible': [('state', 'not in', ['draft', 'sent', 'sale'])]},
                     },
@@ -131,6 +139,20 @@ class SaleOrder(models.Model):
                 ],
             },
         }
+
+    def action_create_managed_invoice(self):
+        self.ensure_one()
+        if self.state not in ('sale', 'done'):
+            raise ValidationError(_('Hanya pesanan terkonfirmasi yang dapat dibuatkan faktur.'))
+        action = self.env['ir.actions.actions']._for_xml_id('sale.action_view_sale_advance_payment_inv')
+        action['context'] = {
+            **self.env.context,
+            'active_model': 'sale.order',
+            'active_id': self.id,
+            'active_ids': self.ids,
+            'default_sale_order_ids': [(6, 0, self.ids)],
+        }
+        return action
 
     def _check_managed_sales_contract(self):
         if not self.env.context.get('managed_ui'):

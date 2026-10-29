@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_managed_delivery_read,managed delivery read,stock.model_stock_picking,inventory.group_deliveries_read,1,0,0,0

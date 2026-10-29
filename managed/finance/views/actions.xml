@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="action_customer_invoices" model="ir.actions.act_window">
+    <field name="name">Faktur Pelanggan</field>
+    <field name="res_model">account.move</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[('move_type', 'in', ('out_invoice', 'out_refund'))]</field>
+    <field name="context">{'default_move_type': 'out_invoice', 'create': False}</field>
+  </record>
+
+  <record id="action_payments" model="ir.actions.act_window">
+    <field name="name">Pembayaran</field>
+    <field name="res_model">account.payment</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[]</field>
+    <field name="context">{'create': False}</field>
+  </record>
+
+  <record id="account.menu_finance" model="ir.ui.menu">
+    <field name="name">Keuangan</field>
+    <field name="active" eval="True"/>
+    <field name="sequence">50</field>
+    <field name="groups_id" eval="[(4, ref('finance.group_customer_invoices_read')), (4, ref('finance.group_payments_read'))]"/>
+  </record>
+  <menuitem id="menu_customer_invoices" name="Faktur Pelanggan" parent="account.menu_finance" action="action_customer_invoices" sequence="10" groups="base.group_user"/>
+  <menuitem id="menu_payments" name="Pembayaran" parent="account.menu_finance" action="action_payments" sequence="30" groups="base.group_user"/>
+</odoo>

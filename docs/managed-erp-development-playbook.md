@@ -459,7 +459,7 @@ Managed Penawaran action
 → view confirmed document under Pesanan
 ```
 
-Pengiriman, invoice, dan payment tidak menjadi duplicate CRUD di Sales. Pesanan menampilkan computed status dan nanti deep-link ke managed Persediaan/Keuangan. Do not start those pages before quotation line behavior and permission tests pass.
+Pengiriman, invoice, dan payment tidak menjadi duplicate CRUD di Sales. Baseline managed sekarang tersedia sebagai `inventory.action_deliveries`, `finance.action_customer_invoices`, dan `finance.action_payments`; Pesanan menampilkan computed status, deep-link, dan CTA pembuatan draft faktur lewat wizard native `sale.advance.payment.inv`. Tahap berikutnya mengeraskan quantity done, lot/serial, partial/backorder, invoice review/posting, payment registration, permission, dan browser sequence.
 
 Acceptance for first slice:
 
@@ -470,6 +470,27 @@ Acceptance for first slice:
 - foreign currency works through native Pricelist currency;
 - save/reopen preserves price and selected Variant;
 - unauthorized fields are not accepted by API.
+
+### Phase B2 — fulfillment hardening
+
+Goal: complete native Delivery → Invoice → Payment operations behind managed task ownership.
+
+Tasks:
+
+Selesai baseline:
+
+- managed Delivery quantity-done editor;
+- lot/serial editor dan server-side relation domain;
+- `button_validate()` immediate transfer/backorder wizard handling;
+- invoice draft review dan posting;
+- `account.payment.register` managed dialog dan reconciliation verification;
+- direct deep-link untuk satu related record dan filtered list untuk banyak record;
+- runnable rollback-only quote-to-cash check di `scripts/test_managed_fulfillment_runtime.py`.
+
+Tersisa release hardening:
+
+- return dan credit note;
+- warehouse, finance, dan sales browser role matrix.
 
 ### Phase C — directory hardening
 

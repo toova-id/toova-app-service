@@ -201,6 +201,10 @@ def _relation_domain(field, parent_values):
         product_id = _domain_value(parent_values.get('product_id'))
         product = request.env['product.product'].browse(product_id).exists() if product_id else request.env['product.product']
         return [('category_id', '=', product.uom_id.category_id.id)] if product else [('id', '=', 0)]
+    if field.get('widget') == 'managed_stock_lot_many2one' and field.get('relation') == 'stock.lot':
+        product_id = _domain_value(parent_values.get('product_id'))
+        company_id = _domain_value(parent_values.get('company_id')) or request.env.company.id
+        return [('product_id', '=', product_id), ('company_id', '=', company_id)] if product_id else [('id', '=', 0)]
     if field.get('relation') != 'managed.indonesia.region':
         return domain
     mapping = {
@@ -630,8 +634,12 @@ def _window_action(payload):
     if not isinstance(payload, dict) or payload.get('type') != 'ir.actions.act_window':
         raise ValidationError('Invalid window action.')
     model_name = payload.get('res_model')
-    if model_name not in request.env:
-        raise ValidationError('Invalid action model.')
+    allowed_models = {
+        'sale.advance.payment.inv', 'account.payment.register',
+        'stock.immediate.transfer', 'stock.backorder.confirmation',
+    }
+    if model_name not in allowed_models or model_name not in request.env:
+        raise AccessError('Dialog is not available.')
     request.env[model_name].check_access_rights('read')
     return payload
 
@@ -648,7 +656,7 @@ def _window_action_schema(payload):
     for node in root.xpath('.//field[@name]'):
         name = node.get('name')
         modifiers = json.loads(node.get('modifiers', '{}'))
-        if name in seen or modifiers.get('invisible') is True or name not in metadata:
+        if name in seen or name not in metadata:
             continue
         seen.add(name)
         fields_schema.append(_field_meta(metadata, node))
@@ -684,7 +692,7 @@ def _normalize_form_values(values, schema):
         columns = {column['name']: column for column in relation_view['columns']}
         allowed = {name for name, column in columns.items() if not column.get('readonly')}
         existing_ids = [row['id'] for row in rows if isinstance(row.get('id'), int) and row.get('active', True) is not False]
-        if field.get('widget') in ('contact_persons', 'managed_bank_accounts', 'managed_supplier_prices', 'managed_attribute_lines', 'managed_variants', 'managed_attribute_values', 'managed_pricelist_rules', 'managed_uom_units'):
+        if field.get('widget') in ('contact_persons', 'managed_bank_accounts', 'managed_supplier_prices', 'managed_attribute_lines', 'managed_variants', 'managed_attribute_values', 'managed_pricelist_rules', 'managed_uom_units', 'managed_stock_move_lines'):
             commands = []
         else:
             commands = [(6, 0, existing_ids)]
@@ -824,9 +832,10 @@ class ManagedUiApi(http.Controller):
     def window_action(self, payload=None):
         try:
             action, model, schema = _window_action_schema(json.loads(payload or '{}'))
-            record = model.browse(action.get('res_id')).exists() if action.get('res_id') else model.browse()
             field_names = [field['name'] for field in schema['fields']]
-            values = record.read(field_names)[0] if record else model.default_get(field_names)
+            record = model.browse(action.get('res_id')).exists() if action.get('res_id') else model.new(model.default_get(field_names))
+            values = record.read(field_names)[0] if record.id else record._convert_to_write(record._cache)
+            values = {name: values.get(name, False) for name in field_names}
             return request.make_json_response({'schema': schema, 'values': values})
         except (AccessError, MissingError) as error:
             return _error(error, 'forbidden', 403)
@@ -844,17 +853,30 @@ class ManagedUiApi(http.Controller):
             if (button_name, button_type) not in allowed:
                 raise AccessError('Button is not available.')
             allowed_fields = {field['name'] for field in schema['fields']}
-            values = {name: value[0] if isinstance(value, (list, tuple)) and model._fields[name].type == 'many2one' and value else value for name, value in payload.get('values', {}).items() if name in allowed_fields}
-            record = model.browse(action.get('res_id')).exists() if action.get('res_id') else model.create(values)
-            if action.get('res_id') and values:
-                record.write(values)
-            if button_type == 'object':
-                result = getattr(record, button_name)()
-            else:
-                target = request.env['ir.actions.actions'].browse(int(button_name)).exists()
-                if not target:
-                    raise MissingError('Action not found.')
-                result = request.env[target.type].browse(target.id).read()[0]
+            raw_values = payload.get('values', {})
+            if not isinstance(raw_values, dict):
+                raise ValidationError('Payload must contain field values.')
+            values = {}
+            for name, value in raw_values.items():
+                if name not in allowed_fields or model._fields[name].readonly:
+                    continue
+                field = model._fields[name]
+                if field.type == 'many2one' and isinstance(value, (list, tuple)):
+                    value = value[0] if value else False
+                elif field.type in ('one2many', 'many2many') and isinstance(value, list) and (not value or not isinstance(value[0], (list, tuple))):
+                    value = [(6, 0, [item[0] if isinstance(item, (list, tuple)) else item for item in value])]
+                values[name] = value
+            with request.env.cr.savepoint():
+                record = model.browse(action.get('res_id')).exists() if action.get('res_id') else model.create(values)
+                if action.get('res_id') and values:
+                    record.write(values)
+                if button_type == 'object':
+                    result = getattr(record, button_name)()
+                else:
+                    target = request.env['ir.actions.actions'].browse(int(button_name)).exists()
+                    if not target:
+                        raise MissingError('Action not found.')
+                    result = request.env[target.type].browse(target.id).read()[0]
             return request.make_json_response({'result': _action_payload(result)})
         except (AccessError, MissingError) as error:
             return _error(error, 'forbidden', 403)
@@ -871,12 +893,20 @@ class ManagedUiApi(http.Controller):
             return _error(error)
 
     @http.route('/api/v1/ui/actions/<int:action_id>/records', type='http', auth='user', methods=['GET'])
-    def records(self, action_id, page=1, q='', order=None, filters=None, **kw):
+    def records(self, action_id, page=1, q='', order=None, filters=None, ids=None, **kw):
         try:
             action = _visible_action(action_id)
             schema = _view_schema(action)
             context, domain = _eval_action(action)
             model = request.env[action.res_model].with_context(**context)
+            if ids:
+                try:
+                    related_ids = [int(value) for value in ids.split(',') if value]
+                except ValueError as error:
+                    raise ValidationError('Invalid related record filter.') from error
+                if not related_ids:
+                    raise ValidationError('Invalid related record filter.')
+                domain = expression.AND([domain, [('id', 'in', related_ids)]])
             page = max(int(page), 1)
             page_size = min(schema['limit'], 100)
             field_names = _allowed_fields(schema, 'list')

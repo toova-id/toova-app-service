@@ -15,6 +15,8 @@ class TestSaleManagedUiContract(TransactionCase):
         self.assertEqual(fields['order_line']['widget'], 'managed_sale_order_lines')
         self.assertEqual(fields['order_line']['relation']['columns'][0]['name'], 'product_id')
         self.assertEqual(fields['order_line']['relation']['columns'][0]['widget'], 'managed_sale_product_many2one')
+        self.assertIn('picking_ids', fields)
+        self.assertIn('invoice_ids', fields)
         self.assertNotIn('amount_total', contract['form']['write_fields'])
 
     def test_orders_cannot_be_created_from_order_action(self):
@@ -22,6 +24,7 @@ class TestSaleManagedUiContract(TransactionCase):
         self.assertFalse(contract['list']['create'])
         self.assertFalse(contract['form']['create'])
         self.assertFalse(contract['form']['write'])
+        self.assertIn('action_create_managed_invoice', {button['name'] for button in contract['form']['buttons']})
         self.assertIsNone(self.env['sale.order']._managed_ui_contract('sale.unknown_action'))
 
     def test_managed_sale_rejects_non_customer(self):

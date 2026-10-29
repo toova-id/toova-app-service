@@ -1,0 +1,21 @@
+import fs from "node:fs";
+
+const inventory = fs.readFileSync(new URL("../../managed/inventory/models/stock_picking.py", import.meta.url), "utf8");
+const finance = fs.readFileSync(new URL("../../managed/finance/models/account_move.py", import.meta.url), "utf8");
+const inventoryNavigation = fs.readFileSync(new URL("../../managed/inventory/frontend/navigation.ts", import.meta.url), "utf8");
+const financeNavigation = fs.readFileSync(new URL("../../managed/finance/frontend/navigation.ts", import.meta.url), "utf8");
+const inventoryIndex = fs.readFileSync(new URL("../../managed/inventory/frontend/index.ts", import.meta.url), "utf8");
+const financeIndex = fs.readFileSync(new URL("../../managed/finance/frontend/index.ts", import.meta.url), "utf8");
+const deliveryForm = fs.readFileSync(new URL("../../managed/inventory/frontend/delivery-form.tsx", import.meta.url), "utf8");
+const invoiceForm = fs.readFileSync(new URL("../../managed/finance/frontend/invoice-form.tsx", import.meta.url), "utf8");
+const paymentForm = fs.readFileSync(new URL("../../managed/finance/frontend/payment-form.tsx", import.meta.url), "utf8");
+for (const token of ["inventory.action_deliveries", "action_assign", "button_validate", "action_cancel", "move_ids_without_package"]) if (!inventory.includes(token)) throw new Error(`managed inventory missing ${token}`);
+for (const token of ["finance.action_customer_invoices", "finance.action_payments", "action_post", "action_register_payment", "payment_state"]) if (!finance.includes(token)) throw new Error(`managed finance missing ${token}`);
+if (!inventoryNavigation.includes('label: "Persediaan"') || !inventoryNavigation.includes("inventory.menu_deliveries")) throw new Error("managed inventory navigation incomplete");
+if (!financeNavigation.includes('label: "Keuangan"') || !financeNavigation.includes("finance.menu_customer_invoices") || !financeNavigation.includes("finance.menu_payments")) throw new Error("managed finance navigation incomplete");
+if (!inventoryIndex.includes('registerActionFormView("inventory.action_deliveries", DeliveryForm)')) throw new Error("managed delivery custom form missing");
+for (const token of ["Operasi pengiriman", "Dikirim ke", "Isi jumlah selesai dan lot/serial"]) if (!deliveryForm.includes(token)) throw new Error(`managed delivery form missing ${token}`);
+for (const token of ["Rincian tagihan", "Sisa tagihan", "Status dokumen", "Pembayaran"]) if (!invoiceForm.includes(token)) throw new Error(`managed invoice form missing ${token}`);
+for (const token of ["Detail pembayaran", "Pembayaran masuk", "is_reconciled"]) if (!paymentForm.includes(token)) throw new Error(`managed payment form missing ${token}`);
+if (!financeIndex.includes('registerActionFormView("finance.action_customer_invoices", InvoiceForm)') || !financeIndex.includes('registerActionFormView("finance.action_payments", PaymentForm)')) throw new Error("managed finance custom forms missing");
+console.log("managed fulfillment self-check passed");

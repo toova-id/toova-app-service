@@ -338,9 +338,16 @@ Sales memakai ownership berbasis task:
 Penjualan
 ├── Penawaran
 └── Pesanan
+
+Persediaan
+└── Pengiriman
+
+Keuangan
+├── Faktur Pelanggan
+└── Pembayaran
 ```
 
-Customer tetap dikelola di Contacts, Product/Variant serta Daftar Harga tetap di Products, pengiriman operasional dimiliki Persediaan/Warehouse, invoice dan pembayaran dimiliki Keuangan, pengaturan penjualan berada di Pengaturan, dan analitik akan menjadi workspace lintas domain terpisah. Sales hanya menampilkan status pengiriman dan tagihan dalam konteks Pesanan; tidak membuat CRUD Stock atau Accounting kedua.
+Customer tetap dikelola di Contacts, Product/Variant serta Daftar Harga tetap di Products, pengiriman operasional dimiliki Persediaan, invoice dan pembayaran dimiliki Keuangan, pengaturan penjualan berada di Pengaturan, dan analitik akan menjadi workspace lintas domain terpisah. Pesanan menjadi control tower kecil: menampilkan status native, membuka Pengiriman/Faktur managed, dan membuat draft faktur melalui wizard native; tidak membuat CRUD Stock atau Accounting kedua di Sales.
 
 ## 12. Status implementasi
 
@@ -359,7 +366,7 @@ Customer tetap dikelola di Contacts, Product/Variant serta Daftar Harga tetap di
 | Pricelist | Selesai baseline | Global/category/product/variant rules, fixed/discount/formula |
 | UoM | Selesai baseline | Category-centered editor, `ml`, conversion facade, transaction lock |
 | Sales quotation | Baseline aktif | Managed Penawaran/Pesanan, Customer selector, Variant line editor, native onchange/pricing, confirmation |
-| Sales fulfillment | Berikutnya | Status/deep-link Delivery → Invoice → Payment tanpa duplicate Stock/Finance CRUD |
+| Sales fulfillment | Baseline aktif | Pesanan merangkum dan deep-link ke custom managed Pengiriman/Faktur/Pembayaran; native Delivery, invoice wizard, posting, dan payment tetap engine |
 | Marketplace connector | Belum ada | Store mapping, price sync, order import, settlement perlu domain terpisah |
 | Contact duplicate candidate flow | Belum lengkap | Exact legal identity block sudah ada |
 | Full browser visual QA | Belum lengkap | Perlu desktop/mobile dan role matrix |
@@ -407,6 +414,20 @@ curl http://127.0.0.1:8069/web/health
 Full Odoo test suite tetap release gate. Local runner saat ini masih dapat terhambat dependency `odoo.addons.website` dan port conflict; runtime API checks bukan pengganti test suite tersebut.
 
 ## 15. Implementation map
+
+Fulfillment dan finance:
+
+```text
+managed/inventory/models/stock_picking.py
+managed/inventory/views/actions.xml
+managed/inventory/frontend/delivery-form.tsx
+managed/finance/models/account_move.py
+managed/finance/views/actions.xml
+managed/finance/frontend/invoice-form.tsx
+managed/finance/frontend/payment-form.tsx
+managed/sales/models/sale_order.py
+managed/sales/frontend/sale-order-form.tsx
+```
 
 Core contract dan API:
 

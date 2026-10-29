@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="group_deliveries_read" model="res.groups">
+    <field name="name">Inventory / Deliveries / Read</field>
+    <field name="category_id" ref="settings.module_category_managed_permissions"/>
+  </record>
+  <record id="group_deliveries_write" model="res.groups">
+    <field name="name">Inventory / Deliveries / Write</field>
+    <field name="category_id" ref="settings.module_category_managed_permissions"/>
+    <field name="implied_ids" eval="[(4, ref('group_deliveries_read')), (4, ref('stock.group_stock_user'))]"/>
+  </record>
+</odoo>
