@@ -345,6 +345,7 @@ def _contract_field(metadata, item, parent=None):
         columns = [
             _contract_field(relation_metadata, column, parent=name)
             for column in relation_config.get('columns', [])
+            if (column if isinstance(column, str) else column.get('name')) != 'company_id'
         ]
         relation_model = request.env[relation]
         relation_fields = [relation_model._fields[column['name']] for column in columns]
@@ -377,7 +378,10 @@ def _managed_view_schema(action):
     form_contract = contract.get('form', {})
     columns = [_contract_field(metadata, field) for field in list_contract.get('fields', [])]
     form_fields = [_contract_field(metadata, field) for field in form_contract.get('fields', [])]
+    if model._fields.get('company_id') and model._fields['company_id'].type == 'many2one' and model._fields['company_id'].comodel_name == 'res.company':
+        form_fields = [field for field in form_fields if field['name'] != 'company_id']
     write_fields = list(form_contract.get('write_fields', [field['name'] for field in form_fields]))
+    write_fields = [name for name in write_fields if name != 'company_id']
     if set(write_fields) - {field['name'] for field in form_fields}:
         raise ValidationError('Managed UI contract contains invalid write fields.')
     read_fields = list(dict.fromkeys(
@@ -952,7 +956,8 @@ class ManagedUiApi(http.Controller):
             model = request.env[action.res_model].with_context(**context)
             fields_to_read = _allowed_fields(schema, 'form')
             if record_id == 'new':
-                values = _serialize_form_values(model, model.default_get(fields_to_read), schema)
+                defaults = model._managed_apply_company_default(model.default_get(fields_to_read))
+                values = _serialize_form_values(model, defaults, schema)
                 return request.make_json_response({'id': None, 'values': values}, headers=[('Cache-Control', 'no-store')])
             record = _scoped_record(action, int(record_id))
             values = _serialize_form_values(model, record.read(fields_to_read)[0], schema)
@@ -1079,6 +1084,7 @@ class ManagedUiApi(http.Controller):
             values = {name: value for name, value in values.items() if name in allowed}
             values = {name: value[0] if isinstance(value, (list, tuple)) and _form_fields(schema).get(name, {}).get('type') == 'many2one' and value else value for name, value in values.items()}
             values = _normalize_form_values(values, schema)
+            values = request.env[action.res_model].with_context(**context)._managed_apply_company_default(values)
             with request.env.cr.savepoint():
                 record = request.env[action.res_model].with_context(**context).create(values)
             return request.make_json_response({'id': record.id}, status=201)

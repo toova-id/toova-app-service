@@ -64,6 +64,14 @@ Default decision:
 Native Odoo model + managed contract + focused React workflow
 ```
 
+Single-tenant company rule:
+
+```text
+Managed form tidak menampilkan selector company_id
+Managed create memaksa env.company server-side
+Existing record tetap mengikuti native ACL dan record rules
+```
+
 Hindari:
 
 - model pengganti untuk model native;
@@ -556,6 +564,7 @@ Pricelist is ready as pricing foundation. Connector, publishing, order import, a
 ```bash
 python3 -m py_compile <changed-files>
 python3 scripts/test_managed_addon_scope.py
+python3 scripts/test_managed_no_company_selector.py
 git diff --check
 ```
 

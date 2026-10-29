@@ -65,7 +65,6 @@ class StockPicking(models.Model):
                             {'name': 'lot_id', 'label': 'Lot / Serial', 'widget': 'managed_stock_lot_many2one'},
                             {'name': 'lot_name', 'label': 'Lot / Serial baru'},
                             {'name': 'tracking', 'label': 'Tracking'},
-                            {'name': 'company_id', 'label': 'Perusahaan'},
                         ],
                     }},
                     {'name': 'move_ids_without_package', 'label': 'Permintaan', 'relation': {
@@ -80,7 +79,6 @@ class StockPicking(models.Model):
                         ],
                     }},
                     {'name': 'note', 'label': 'Catatan'},
-                    {'name': 'company_id', 'label': 'Perusahaan'},
                     {'name': 'state', 'label': 'Status', 'widget': 'statusbar', 'selection': [
                         ('draft', 'Draf'), ('waiting', 'Menunggu'), ('confirmed', 'Siap diproses'),
                         ('assigned', 'Siap dikirim'), ('done', 'Selesai'), ('cancel', 'Dibatalkan'),

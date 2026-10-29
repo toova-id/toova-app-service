@@ -290,7 +290,7 @@ Managed ERP memakai invariant operasional:
 1 tenant = 1 database = 1 legal company = 1 data boundary
 ```
 
-Company tambahan diprovision sebagai tenant baru; Managed Settings tidak menyediakan create, switch, atau assignment multi-company. Billing ditunda.
+Company tambahan diprovision sebagai tenant baru; Managed Settings tidak menyediakan create, switch, atau assignment multi-company. Semua managed create yang modelnya memiliki `company_id` memaksa current tenant company server-side, dan selector Company disembunyikan dari managed form. Billing ditunda.
 
 Addon `settings` menyediakan General Information, Pengguna, Role & Akses, serta setting kontribusi dari managed addon aktif. `managed.settings.registry` mengumpulkan section, provider, readiness, action/menu permission, dan permission catalog. Products dan Sales sudah menjadi contribution pertama. Permission memakai level `None`, `Read`, atau `Write`; user mendapat role tenant-wide dan effective permission mengambil level tertinggi. Tidak ada direct per-user override, deny override, raw ACL editor, sub-feature flag, atau custom audit. Native Odoo ACL, record rules, metadata audit, dan chatter tetap boundary akhir.
 
@@ -405,6 +405,7 @@ Minimum checks saat ini:
 ```bash
 python3 -m py_compile <changed-python-files>
 python3 scripts/test_managed_addon_scope.py
+python3 scripts/test_managed_no_company_selector.py
 cd frontend && npm run check
 cd frontend && npm run build
 git diff --check

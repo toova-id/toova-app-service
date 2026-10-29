@@ -11,6 +11,14 @@ class Base(models.AbstractModel):
         return None
 
     @api.model
+    def _managed_apply_company_default(self, values):
+        """Managed tenant owns company selection; users never choose it."""
+        field = self._fields.get('company_id')
+        if not field or field.type != 'many2one' or field.comodel_name != 'res.company' or field.related or field.compute:
+            return values
+        return {**values, 'company_id': self.env.company.id}
+
+    @api.model
     def _managed_action_permission(self, action_xmlid):
         return self.env['managed.settings.registry']._managed_registry()['actions'].get(action_xmlid)
 

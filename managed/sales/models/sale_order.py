@@ -29,7 +29,6 @@ class SaleOrder(models.Model):
             {'name': 'commitment_date', 'label': 'Tanggal kirim janji', 'modifiers': locked},
             {'name': 'user_id', 'label': 'Salesperson', 'widget': 'many2one_avatar_user', 'modifiers': confirmed},
             {'name': 'team_id', 'label': 'Tim penjualan', 'modifiers': confirmed},
-            {'name': 'company_id', 'label': 'Perusahaan', 'modifiers': confirmed},
             {'name': 'pricelist_id', 'label': 'Daftar harga', 'widget': 'managed_order_pricelist_many2one', 'modifiers': confirmed},
             {'name': 'payment_term_id', 'label': 'Termin pembayaran', 'widget': 'managed_order_payment_term_many2one', 'modifiers': locked},
             {'name': 'fiscal_position_id', 'label': 'Posisi fiskal', 'widget': 'managed_order_fiscal_position_many2one', 'modifiers': locked},
@@ -79,7 +78,7 @@ class SaleOrder(models.Model):
         ]
         writable = {
             'partner_id', 'partner_invoice_id', 'partner_shipping_id', 'client_order_ref',
-            'date_order', 'validity_date', 'commitment_date', 'user_id', 'team_id', 'company_id',
+            'date_order', 'validity_date', 'commitment_date', 'user_id', 'team_id',
             'pricelist_id', 'payment_term_id', 'fiscal_position_id', 'warehouse_id', 'picking_policy',
             'incoterm', 'incoterm_location', 'order_line', 'note',
         }

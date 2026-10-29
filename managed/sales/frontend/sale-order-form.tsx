@@ -30,7 +30,7 @@ export default function SaleOrderForm({ schema, basePath, id, values, editing, s
     const required = Boolean(meta.required) || modifierActive(meta.modifiers, "required", values);
     return <label className={`toova-document-field ${className}`} title={meta.help}><span>{meta.label}{required && <b>*</b>}</span><div>{editing && !readonly ? <FieldEditor actionId={schema.id} field={meta} value={values[name]} parentValues={values} onChange={(value) => onChange(name, value)}/> : <FieldValue field={meta} value={values[name]} record={values}/>}</div></label>;
   };
-  const advanced = ["pricelist_id", "payment_term_id", "fiscal_position_id", "warehouse_id", "picking_policy", "incoterm", "incoterm_location", "commitment_date", "user_id", "team_id", "company_id"];
+  const advanced = ["pricelist_id", "payment_term_id", "fiscal_position_id", "warehouse_id", "picking_policy", "incoterm", "incoterm_location", "commitment_date", "user_id", "team_id"];
   const relationIds = (name: string) => Array.isArray(values[name]) ? (values[name] as unknown[]).map((item) => Array.isArray(item) ? Number(item[0]) : Number(item)).filter(Boolean) : [];
   const pickingIds = relationIds("picking_ids");
   const invoiceIds = relationIds("invoice_ids");

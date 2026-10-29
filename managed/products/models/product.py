@@ -301,7 +301,6 @@ class ProductPricelist(models.Model):
                 'fields': [
                     {'name': 'name', 'label': 'Nama daftar harga'},
                     {'name': 'currency_id', 'label': 'Mata uang'},
-                    {'name': 'company_id', 'label': 'Perusahaan'},
                     {'name': 'active', 'label': 'Aktif'},
                 ],
                 'default_order': 'sequence asc, name asc',
@@ -313,7 +312,6 @@ class ProductPricelist(models.Model):
                 'fields': [
                     {'name': 'name', 'label': 'Nama daftar harga', 'placeholder': 'Contoh: Retail IDR, Grosir, Export USD'},
                     {'name': 'currency_id', 'label': 'Mata uang'},
-                    {'name': 'company_id', 'label': 'Perusahaan', 'help': 'Kosongkan agar dapat digunakan semua perusahaan yang diizinkan.'},
                     {'name': 'active', 'label': 'Aktif'},
                     {'name': 'discount_policy', 'label': 'Tampilan diskon', 'selection': [
                         ('with_discount', 'Tampilkan harga akhir'),
@@ -326,7 +324,7 @@ class ProductPricelist(models.Model):
                         'columns': relation_columns,
                     }},
                 ],
-                'write_fields': ['name', 'currency_id', 'company_id', 'active', 'discount_policy', 'country_group_ids', 'item_ids'],
+                'write_fields': ['name', 'currency_id', 'active', 'discount_policy', 'country_group_ids', 'item_ids'],
                 'buttons': [],
             },
         }
@@ -481,7 +479,7 @@ class ProductTemplate(models.Model):
             *(('property_account_income_id', 'property_account_expense_id') if self.env.user.has_group('account.group_account_user') else ()),
             'weight', 'volume', 'description_sale', 'description_purchase', 'description',
             'attribute_line_ids', 'product_variant_ids', 'product_variant_count', 'managed_variant_preview_count',
-            'company_id', 'currency_id', 'qty_available', 'virtual_available',
+            'currency_id', 'qty_available', 'virtual_available',
         )
         readonly = {'currency_id', 'qty_available', 'virtual_available', 'detailed_type', 'product_variant_count', 'managed_variant_preview_count'}
         write_fields = [name for name in form_fields if name not in readonly]

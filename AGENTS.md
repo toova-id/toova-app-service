@@ -31,6 +31,7 @@ Minimum checks:
 
 ```bash
 python3 scripts/test_managed_addon_scope.py
+python3 scripts/test_managed_no_company_selector.py
 cd frontend && npm run check
 cd frontend && npm run build
 git diff --check
