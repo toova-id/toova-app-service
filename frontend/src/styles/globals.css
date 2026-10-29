@@ -355,17 +355,24 @@
   .toova-document-title h1 { @apply overflow-hidden text-ellipsis whitespace-nowrap text-lg font-semibold tracking-[-.025em]; }
   .toova-document-title h1 + span { @apply mt-0.5 block text-[10px] font-medium text-primary; }
   .toova-document-actions { @apply flex flex-wrap justify-end gap-1; }
-  .toova-document-workflow { @apply border-b bg-muted/15 px-8 py-4; }
-  .toova-document-workflow ol { @apply flex max-w-3xl items-start; }
-  .toova-document-workflow li { @apply relative flex min-w-0 flex-1 flex-col items-center gap-1.5 text-[10px] text-muted-foreground; }
-  .toova-document-workflow li:not(:last-child)::after { @apply absolute left-[calc(50%+18px)] right-[calc(-50%+18px)] top-3 h-px bg-border; content: ""; }
-  .toova-document-workflow li i { @apply relative z-10 grid h-6 w-6 place-items-center rounded-full border bg-background text-[9px] not-italic; }
-  .toova-document-workflow li i svg { @apply h-3 w-3; }
-  .toova-document-workflow li.completed { @apply text-foreground; }
-  .toova-document-workflow li.completed i { @apply border-primary bg-primary text-primary-foreground; }
-  .toova-document-workflow li.completed:not(:last-child)::after { @apply bg-primary; }
-  .toova-document-workflow li.current { @apply font-semibold text-foreground; }
-  .toova-document-workflow li.current i { @apply border-primary text-primary ring-4 ring-primary/10; }
+  .toova-document-state { @apply flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-b px-8 py-3; }
+  .toova-document-state ol { @apply flex min-w-[18rem] flex-1 gap-1.5; }
+  .toova-document-state li { @apply flex min-w-0 flex-1 flex-col gap-1.5; }
+  .toova-document-state li i { @apply block h-1 skew-x-[-24deg] bg-border; }
+  .toova-document-state li em { @apply flex items-center gap-1 truncate text-[10px] not-italic text-muted-foreground; }
+  .toova-document-state li em svg { @apply h-2.5 w-2.5 shrink-0; }
+  .toova-document-state li.completed i { @apply bg-primary/35; }
+  .toova-document-state li.completed em { @apply text-foreground; }
+  .toova-document-state li.current i { @apply h-1.5 -translate-y-px bg-primary; }
+  .toova-document-state li.current em { @apply font-semibold text-primary; }
+  .toova-document-state-meta { @apply flex shrink-0 flex-wrap gap-x-6 gap-y-2; }
+  .toova-document-state-meta span { @apply flex flex-col gap-0.5 border-l pl-3 text-[10px]; }
+  .toova-document-state-meta i { @apply not-italic uppercase tracking-wide text-muted-foreground; }
+  .toova-document-state-meta b { @apply relative pl-3 font-medium text-foreground; }
+  .toova-document-state-meta b::before { @apply absolute left-0 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-muted-foreground/40; content: ""; }
+  .toova-document-state-meta [data-tone="work"] b::before { @apply bg-primary; }
+  .toova-document-state-meta [data-tone="warn"] b::before { @apply bg-amber-500; }
+  .toova-document-state-meta [data-tone="done"] b::before { @apply bg-emerald-500; }
   .toova-document-body { @apply w-full; }
   .toova-document-overview { @apply min-h-40 border-b px-8 py-7; }
   .toova-document-overview > h2 { @apply mb-5 text-sm font-semibold tracking-[-.015em]; }
@@ -403,7 +410,6 @@
   .toova-document-advanced { @apply border-b px-8 py-5; }
   .toova-document-advanced > summary { @apply cursor-pointer text-xs font-medium; }
   .toova-document-advanced > div { @apply mt-5 grid grid-cols-1 gap-x-10 gap-y-3 md:grid-cols-2 xl:grid-cols-3; }
-  .toova-document-progress > div { @apply grid grid-cols-1 gap-x-10 gap-y-3 md:grid-cols-2; }
   .toova-sale-line-list { @apply grid gap-px border bg-border; }
   .toova-sale-line-list > article { @apply grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-4 bg-background px-4 py-3; }
   .toova-sale-line-copy { @apply flex min-w-0 flex-col; }
@@ -677,6 +683,9 @@
   .workspace-search { @apply col-span-1 row-start-2; }
   .workspace-control-actions { @apply absolute right-4 top-[55px]; }
   .toova-document-overview, .toova-document-section, .toova-document-summary { @apply px-4; }
+  .toova-document-state { @apply px-4; }
+  .toova-document-state ol { @apply min-w-full; }
+  .toova-document-state-meta { @apply w-full; }
   .toova-document-meta .workspace-datetime { @apply grid-cols-1; }
 }
 
