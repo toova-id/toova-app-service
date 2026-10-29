@@ -821,6 +821,9 @@ class ManagedUiApi(http.Controller):
             action = request.env['ir.actions.client'].sudo().browse(action_id).exists()
             if not action:
                 raise MissingError('Action not found.')
+            permission = request.env['base']._managed_action_permission(_action_xmlid(action))
+            if not _managed_permission(permission):
+                raise AccessError('Action is not available for this user.')
             return request.make_json_response({
                 'id': action.id,
                 'name': action.name,

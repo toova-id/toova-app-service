@@ -15,8 +15,28 @@ class TestManagedInventory(TransactionCase):
         self.assertFalse(contract['list']['delete'])
         self.assertEqual(fields['managed_move_line_ids']['widget'], 'managed_stock_move_lines')
         self.assertEqual(fields['managed_move_line_ids']['relation']['columns'][0]['name'], 'product_id')
-        self.assertEqual(buttons, {'action_assign', 'button_validate', 'action_cancel'})
+        self.assertEqual(buttons, {
+            'action_assign', 'action_set_quantities_to_reservation',
+            'action_clear_quantities_to_zero', 'button_validate', 'action_cancel',
+        })
         self.assertIsNone(self.env['stock.picking']._managed_ui_contract('stock.unknown_action'))
+
+    def test_operation_summary_uses_native_state_and_quantities(self):
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        picking = self.env['stock.picking'].new({
+            'picking_type_id': warehouse.out_type_id.id,
+            'state': 'assigned',
+            'move_ids': [(0, 0, {
+                'name': 'Test', 'product_id': self.env.ref('product.product_product_4').id,
+                'product_uom_qty': 5, 'quantity_done': 2,
+                'product_uom': self.env.ref('uom.product_uom_unit').id,
+                'location_id': warehouse.lot_stock_id.id,
+                'location_dest_id': self.env.ref('stock.stock_location_customers').id,
+            })],
+        })
+        self.assertEqual(picking.managed_operation_kind, 'Pengiriman')
+        self.assertEqual(picking.managed_operation_status, 'Siap diproses')
+        self.assertEqual(picking.managed_operation_progress, '2.0 dari 5.0 unit')
 
     def test_stock_sequences_use_operation_codes_and_monthly_reset(self):
         picking_types = self.env['stock.picking.type']._managed_configure_document_sequences()

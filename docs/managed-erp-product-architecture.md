@@ -341,6 +341,7 @@ Penjualan
 └── Pesanan
 
 Persediaan
+├── Operasi Gudang
 └── Pengiriman
 
 Keuangan
@@ -391,9 +392,23 @@ Sequence hanya diterapkan pada dokumen bisnis dan operasi yang membutuhkan refer
 | UoM | Selesai baseline | Category-centered editor, `ml`, conversion facade, transaction lock |
 | Sales quotation | Baseline aktif | Managed Penawaran/Pesanan, Customer selector, Variant line editor, native onchange/pricing, confirmation |
 | Sales fulfillment | Baseline aktif | Pesanan merangkum dan deep-link ke custom managed Pengiriman/Faktur/Pembayaran; native Delivery, invoice wizard, posting, dan payment tetap engine |
+| Warehouse operations | Foundation aktif | `Operasi Gudang` memakai shell full-screen tablet/handheld, antrean lintas native `stock.picking`, filter siap/menunggu/terlambat, dan entry ke task; form Pengiriman memakai satu tabel kerja serta native reservation/validation |
 | Marketplace connector | Belum ada | Store mapping, price sync, order import, settlement perlu domain terpisah |
 | Contact duplicate candidate flow | Belum lengkap | Exact legal identity block sudah ada |
 | Full browser visual QA | Belum lengkap | Perlu desktop/mobile dan role matrix |
+
+### 12.1 Warehouse execution UX
+
+Persediaan memakai dua presentation shell atas data dan workflow sama:
+
+```text
+Workspace supervisor → antrean, prioritas, exception, review
+Mode Gudang          → full-screen tablet/handheld, scan-first, satu task aktif
+```
+
+Keduanya tetap membaca dan menulis `stock.picking`, `stock.move`, `stock.move.line`, `stock.quant.package`, `stock.lot`, dan `stock.location`. Mode Gudang bukan engine, state, atau dokumen baru. `stock.picking.state == done` berarti operasi stok selesai, bukan status kurir sudah mengantar ke pelanggan.
+
+Foundation aktif menyediakan antrean lintas penerimaan, pengiriman, transfer internal, dan retur yang sudah dibuat engine native. MVP eksekusi detail masih membuka form operasional Pengiriman. Tahap berikutnya menambahkan Penerimaan, responsive scan quantity/lot/serial, packing/package, assignment operator, dan manual shipment tracking. Offline sync serta carrier connector tetap ditunda.
 
 ## 13. Roadmap
 

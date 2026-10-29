@@ -513,6 +513,36 @@ Tersisa release hardening:
 - return dan credit note;
 - warehouse, finance, dan sales browser role matrix.
 
+### Phase B3 — warehouse operations foundation
+
+Foundation aktif:
+
+```text
+Persediaan → Operasi Gudang
+Supervisor shell → antrean lintas stock.picking, siap/menunggu/terlambat
+Mode Gudang → full-screen tablet/handheld tanpa sidebar ERP
+Pengiriman → satu tabel kerja quantity/reservasi/sisa/lot
+```
+
+Batas implementasi:
+
+- satu frontend codebase dan session;
+- satu managed API;
+- canonical model dan workflow Stock native;
+- shell khusus hanya presentation;
+- online only;
+- form Pengiriman menjadi fallback detail selama scan execution belum lengkap.
+
+Next acceptance:
+
+- Penerimaan punya managed action/form sendiri;
+- mode task mengedit quantity serta lot/serial tanpa pindah shell;
+- native immediate transfer/backorder dialog tetap dipakai;
+- 2-step/3-step warehouse menampilkan picking/packing sebagai task terpisah;
+- packing memakai `stock.quant.package`;
+- operator assignment tercatat tanpa DB lock panjang;
+- status kurir terpisah dari `stock.picking.state`.
+
 ### Phase C — directory hardening
 
 Goal: prevent duplicate business identities during operational use.

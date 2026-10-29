@@ -66,6 +66,24 @@ class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
     managed_move_line_ids = fields.One2many('stock.move.line', 'picking_id', string='Managed Operations')
+    managed_operation_kind = fields.Char(compute='_compute_managed_operation_summary', string='Operasi')
+    managed_operation_status = fields.Char(compute='_compute_managed_operation_summary', string='Status operasional')
+    managed_operation_progress = fields.Char(compute='_compute_managed_operation_summary', string='Progres')
+
+    @api.depends('state', 'picking_type_code', 'picking_type_id.sequence_code', 'move_ids.product_uom_qty', 'move_ids.quantity_done')
+    def _compute_managed_operation_summary(self):
+        kind_by_code = {'incoming': 'Penerimaan', 'outgoing': 'Pengiriman', 'internal': 'Transfer internal'}
+        status_by_state = {
+            'draft': 'Belum siap', 'waiting': 'Menunggu proses sebelumnya',
+            'confirmed': 'Menunggu ketersediaan', 'partially_available': 'Stok tersedia sebagian',
+            'assigned': 'Siap diproses', 'done': 'Selesai', 'cancel': 'Dibatalkan',
+        }
+        for picking in self:
+            demand = sum(picking.move_ids.mapped('product_uom_qty'))
+            done = sum(picking.move_ids.mapped('quantity_done'))
+            picking.managed_operation_kind = 'Retur' if picking.picking_type_id.sequence_code == 'RET' else kind_by_code.get(picking.picking_type_code, 'Operasi gudang')
+            picking.managed_operation_status = status_by_state.get(picking.state, picking.state or 'Belum siap')
+            picking.managed_operation_progress = _('%(done)s dari %(demand)s unit', done=done, demand=demand)
 
     @api.model
     def _managed_ui_contract(self, action_xmlid):
@@ -119,7 +137,7 @@ class StockPicking(models.Model):
                             {'name': 'tracking', 'label': 'Tracking'},
                         ],
                     }},
-                    {'name': 'move_ids_without_package', 'label': 'Permintaan', 'relation': {
+                    {'name': 'move_ids_without_package', 'label': 'Permintaan', 'widget': 'managed_stock_move_lines', 'relation': {
                         'editable': False,
                         'inverse_field': 'picking_id',
                         'columns': [
@@ -144,11 +162,19 @@ class StockPicking(models.Model):
                 'buttons': [] if read_only else [
                     {
                         'name': 'action_assign', 'label': 'Cek ketersediaan', 'type': 'object', 'primary': True,
-                        'modifiers': {'invisible': [('state', 'not in', ['waiting', 'confirmed', 'assigned'])]},
+                        'modifiers': {'invisible': [('state', 'not in', ['waiting', 'confirmed'])]},
                     },
                     {
-                        'name': 'button_validate', 'label': 'Validasi pengiriman', 'type': 'object', 'primary': True,
-                        'modifiers': {'invisible': [('state', 'in', ['draft', 'done', 'cancel'])]},
+                        'name': 'action_set_quantities_to_reservation', 'label': 'Isi dari reservasi', 'type': 'object',
+                        'modifiers': {'invisible': [('state', 'not in', ['partially_available', 'assigned'])]},
+                    },
+                    {
+                        'name': 'action_clear_quantities_to_zero', 'label': 'Set semua nol', 'type': 'object',
+                        'modifiers': {'invisible': [('state', 'not in', ['partially_available', 'assigned'])]},
+                    },
+                    {
+                        'name': 'button_validate', 'label': 'Selesaikan pengiriman', 'type': 'object', 'primary': True,
+                        'modifiers': {'invisible': [('state', 'not in', ['partially_available', 'assigned'])]},
                     },
                     {
                         'name': 'action_cancel', 'label': 'Batalkan', 'type': 'object',
@@ -210,8 +236,16 @@ class ManagedSettingsRegistry(models.AbstractModel):
 
     @api.model
     def _managed_action_permissions(self):
-        return {**super()._managed_action_permissions(), 'inventory.action_deliveries': 'inventory.deliveries'}
+        return {
+            **super()._managed_action_permissions(),
+            'inventory.action_operations': 'inventory.deliveries',
+            'inventory.action_deliveries': 'inventory.deliveries',
+        }
 
     @api.model
     def _managed_menu_permissions(self):
-        return {**super()._managed_menu_permissions(), 'inventory.menu_deliveries': 'inventory.deliveries'}
+        return {
+            **super()._managed_menu_permissions(),
+            'inventory.menu_operations': 'inventory.deliveries',
+            'inventory.menu_deliveries': 'inventory.deliveries',
+        }

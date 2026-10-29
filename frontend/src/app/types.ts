@@ -18,6 +18,7 @@ export interface ServerNavigationItem {
   actionModel: "ir.actions.act_window" | "ir.actions.client" | null;
   xmlid: string;
   module: string | null;
+  hidden?: boolean;
   children: ServerNavigationItem[];
 }
 export interface NavigationItem {

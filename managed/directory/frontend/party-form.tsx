@@ -40,7 +40,7 @@ export default function PartyForm(props: CustomFormViewProps & { kind: Kind }) {
 
   return <div className="toova-customer">
     <header className="toova-customer-header">
-      <div className="toova-customer-title"><Button asChild variant="ghost" size="icon"><Link to={basePath}><ArrowLeft className="h-3.5 w-3.5"/></Link></Button><div className="toova-customer-avatar">{values.company_type === "person" ? <UserRound/> : <Building2/>}</div><div><span>{noun}</span><h1>{id ? String(values.name || values.display_name || noun) : `${noun} baru`}</h1><p>{values.company_type === "person" ? "Individu" : "Perusahaan"} · {values.active === false ? "Diarsipkan" : "Aktif"}</p></div></div>
+      <div className="toova-customer-title"><Button asChild variant="ghost" size="icon"><Link to={basePath}><ArrowLeft className="h-3.5 w-3.5"/></Link></Button><div className="toova-customer-avatar">{values.company_type === "person" ? <UserRound/> : <Building2/>}</div><div><h1>{id ? String(values.name || values.display_name || noun) : `${noun} baru`}</h1><p>{values.company_type === "person" ? "Individu" : "Perusahaan"} · {values.active === false ? "Diarsipkan" : "Aktif"}</p></div></div>
       <div className="toova-customer-actions">{(id ? schema.form.write : schema.form.create) && (editing ? <Button onClick={onSave} disabled={saving}><Save className="h-3.5 w-3.5"/>{saving ? "Menyimpan..." : "Simpan"}</Button> : <Button variant="outline" onClick={onEdit}>Edit</Button>)}</div>
     </header>
 

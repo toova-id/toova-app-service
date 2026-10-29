@@ -492,6 +492,88 @@
   .toova-delivery-lines td button svg { @apply h-3.5 w-3.5; }
   .toova-delivery-demand > header { @apply mb-4; }
   .toova-delivery-notes { @apply px-8 py-6; }
+  .toova-delivery-lines td:first-child strong, .toova-delivery-lines td:first-child small { @apply block; }
+  .toova-delivery-lines td:first-child small { @apply mt-0.5 text-[9px] text-muted-foreground; }
+
+  .toova-warehouse-launch { @apply hidden gap-1.5 text-[10px] sm:inline-flex; }
+  .toova-warehouse-launch svg { @apply h-3.5 w-3.5; }
+  .toova-warehouse-shell { @apply min-h-screen bg-muted/20; }
+  .toova-warehouse-mode { @apply min-h-screen bg-muted/20; }
+  .toova-warehouse-bar { @apply sticky top-0 z-40 flex h-14 items-center justify-between border-b bg-background px-4 md:px-6; }
+  .toova-warehouse-bar > div { @apply flex items-center gap-3; }
+  .toova-warehouse-bar .toova-brand-mark { @apply h-7 w-7; }
+  .toova-warehouse-bar strong { @apply text-sm font-semibold; }
+  .toova-warehouse-bar i { @apply border-l pl-3 text-[10px] not-italic text-muted-foreground; }
+  .toova-warehouse-bar b { @apply hidden text-[10px] font-medium sm:block; }
+  .toova-warehouse-bar .online { @apply flex items-center gap-1 text-[9px] font-medium text-emerald-700 before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500; }
+  .toova-warehouse-bar svg { @apply h-3.5 w-3.5; }
+  .toova-warehouse-workspace { @apply mx-auto w-full max-w-[1400px] px-4 py-6 md:px-8 md:py-8; }
+  .toova-warehouse-heading { @apply flex items-end justify-between gap-4; }
+  .toova-warehouse-heading span { @apply text-[9px] font-semibold uppercase tracking-[.1em] text-muted-foreground; }
+  .toova-warehouse-heading h1 { @apply mt-1 text-2xl font-semibold tracking-[-.035em]; }
+  .toova-warehouse-heading p { @apply mt-1 text-[11px] text-muted-foreground; }
+  .toova-warehouse-heading svg { @apply h-3.5 w-3.5; }
+  .toova-warehouse-metrics { @apply mt-6 grid gap-2 sm:grid-cols-2 xl:grid-cols-4; }
+  .toova-warehouse-metrics button { @apply flex min-h-24 items-center gap-4 rounded-lg border bg-background px-5 text-left shadow-[var(--shadow-control)] transition hover:border-muted-foreground/40; }
+  .toova-warehouse-metrics button.active { @apply border-primary bg-primary/[.03] ring-1 ring-primary/20; }
+  .toova-warehouse-metrics button > svg { @apply h-5 w-5 text-muted-foreground; }
+  .toova-warehouse-metrics button.active > svg { @apply text-primary; }
+  .toova-warehouse-metrics button > span { @apply flex flex-1 items-center justify-between; }
+  .toova-warehouse-metrics small { @apply text-[10px] text-muted-foreground; }
+  .toova-warehouse-metrics strong { @apply text-2xl font-semibold tabular-nums; }
+  .toova-warehouse-tools { @apply mt-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-center; }
+  .toova-warehouse-tools label { @apply flex h-11 w-full max-w-xl items-center gap-3 rounded-lg border bg-background px-4 shadow-[var(--shadow-control)] focus-within:border-[var(--focus-border)]; }
+  .toova-warehouse-tools label svg { @apply h-4 w-4 text-muted-foreground; }
+  .toova-warehouse-tools input { @apply min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground; }
+  .toova-warehouse-tools > span { @apply text-[10px] text-muted-foreground; }
+  .toova-warehouse-queue { @apply mt-4 overflow-hidden rounded-lg border bg-background shadow-[var(--shadow-control)]; }
+  .toova-warehouse-task { @apply grid w-full grid-cols-[42px_minmax(0,1fr)_auto_20px] items-center gap-4 border-b px-4 py-4 text-left last:border-b-0 hover:bg-muted/30; }
+  .toova-warehouse-task-icon { @apply grid h-10 w-10 place-items-center rounded-lg bg-muted; }
+  .toova-warehouse-task-icon svg { @apply h-4 w-4 text-muted-foreground; }
+  .toova-warehouse-task-main { @apply min-w-0; }
+  .toova-warehouse-task-main header { @apply flex items-center gap-2; }
+  .toova-warehouse-task-main header span, .toova-warehouse-task-main header i { @apply rounded bg-muted px-1.5 py-0.5 text-[8px] font-medium not-italic text-muted-foreground; }
+  .toova-warehouse-task-main header i { @apply bg-amber-500/10 text-amber-700; }
+  .toova-warehouse-task-main header b { @apply text-[10px] font-semibold; }
+  .toova-warehouse-task-main h2 { @apply mt-1 truncate text-sm font-medium; }
+  .toova-warehouse-task-main p { @apply mt-1 flex items-center gap-1 truncate text-[9px] text-muted-foreground; }
+  .toova-warehouse-task-main p svg { @apply h-3 w-3 shrink-0; }
+  .toova-warehouse-task-progress { @apply hidden min-w-36 flex-col items-end md:flex; }
+  .toova-warehouse-task-progress strong { @apply text-[10px] font-medium; }
+  .toova-warehouse-task-progress span, .toova-warehouse-task-progress time { @apply mt-0.5 text-[9px] text-muted-foreground; }
+  .toova-warehouse-task-open { @apply h-4 w-4 text-muted-foreground; }
+  .toova-warehouse-empty { @apply grid min-h-52 place-items-center content-center gap-2 text-center; }
+  .toova-warehouse-empty svg { @apply h-7 w-7 text-muted-foreground; }
+  .toova-warehouse-empty strong { @apply text-xs font-medium; }
+  .toova-warehouse-empty span { @apply text-[10px] text-muted-foreground; }
+  .toova-warehouse-error { @apply mt-4 flex items-center gap-3 rounded-md border border-destructive/20 bg-background p-3 text-xs text-destructive; }
+  .toova-warehouse-error svg { @apply h-4 w-4; }
+  .toova-warehouse-error span { @apply flex-1; }
+  .toova-warehouse-error button { @apply font-medium underline; }
+  .toova-warehouse-execution { @apply mx-auto flex min-h-[calc(100vh-56px)] w-full max-w-4xl flex-col bg-background md:my-6 md:min-h-[calc(100vh-104px)] md:rounded-xl md:border md:shadow-[var(--shadow-floating)]; }
+  .toova-warehouse-execution > header { @apply flex items-center gap-4 border-b p-4 md:p-6; }
+  .toova-warehouse-execution > header > button { @apply flex items-center gap-1 text-[10px] text-muted-foreground; }
+  .toova-warehouse-execution > header > button svg { @apply h-3.5 w-3.5; }
+  .toova-warehouse-execution > header > div { @apply min-w-0 flex-1; }
+  .toova-warehouse-execution > header span { @apply text-[9px] uppercase tracking-wide text-muted-foreground; }
+  .toova-warehouse-execution > header h1 { @apply text-xl font-semibold; }
+  .toova-warehouse-execution > header p { @apply truncate text-[10px] text-muted-foreground; }
+  .toova-warehouse-execution > header > b { @apply rounded-full bg-primary/10 px-3 py-1 text-[10px] font-medium text-primary; }
+  .toova-warehouse-route { @apply flex gap-3 border-b bg-muted/20 px-6 py-4; }
+  .toova-warehouse-route > svg { @apply mt-0.5 h-4 w-4 text-muted-foreground; }
+  .toova-warehouse-route div { @apply grid gap-1; }
+  .toova-warehouse-route span { @apply text-[9px] text-muted-foreground; }
+  .toova-warehouse-route strong { @apply flex items-center gap-2 text-xs font-medium; }
+  .toova-warehouse-route strong svg { @apply h-3 w-3; }
+  .toova-warehouse-focus { @apply mx-auto grid w-full max-w-lg flex-1 place-items-center content-center gap-3 p-6 text-center; }
+  .toova-warehouse-focus > svg { @apply h-12 w-12 text-primary; }
+  .toova-warehouse-focus > span { @apply rounded-full bg-emerald-500/10 px-3 py-1 text-[9px] font-medium text-emerald-700; }
+  .toova-warehouse-focus h2 { @apply text-xl font-semibold; }
+  .toova-warehouse-focus p { @apply max-w-md text-[10px] leading-relaxed text-muted-foreground; }
+  .toova-warehouse-focus input { @apply mt-3 h-12 w-full rounded-lg border bg-background px-4 text-center text-sm outline-none focus:border-[var(--focus-border)]; }
+  .toova-warehouse-focus a { @apply mt-2 w-full; }
+  .toova-warehouse-focus a svg { @apply h-4 w-4; }
+  .toova-warehouse-execution > footer { @apply flex justify-between border-t px-6 py-4 text-[10px] text-muted-foreground; }
   .toova-payment-body { @apply mx-auto grid w-full max-w-[1200px] gap-0 lg:grid-cols-[minmax(320px,.8fr)_minmax(480px,1.2fr)]; }
   .toova-payment-hero { @apply flex min-h-[520px] flex-col items-center justify-center border-b px-8 py-12 text-center lg:border-b-0 lg:border-r; }
   .toova-payment-direction { @apply mb-5 grid h-14 w-14 place-items-center rounded-full border; }

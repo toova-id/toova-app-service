@@ -6,7 +6,7 @@ export function NavigationProvider({ items, children }: { items: ServerNavigatio
 export function useNavigation() { return useContext(NavigationContext); }
 
 export function firstAction(item: ServerNavigationItem): ServerNavigationItem | undefined {
-  if (item.path) return item;
+  if (item.path && !item.hidden) return item;
   for (const child of item.children) { const action = firstAction(child); if (action) return action; }
 }
 
@@ -27,7 +27,7 @@ function visibleLeafCount(item: ServerNavigationItem): number {
 
 export function flattenNavigationChildren(items: ServerNavigationItem[]): ServerNavigationItem[] {
   const result: ServerNavigationItem[] = [];
-  for (const item of items) {
+  for (const item of items.filter((item) => !item.hidden)) {
     if (!item.path && visibleLeafCount(item) <= 2) result.push(...flattenNavigationChildren(item.children));
     else result.push({ ...item, children: flattenNavigationChildren(item.children) });
   }

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+  <record id="action_operations" model="ir.actions.client">
+    <field name="name">Operasi Gudang</field>
+    <field name="tag">managed.warehouse</field>
+  </record>
+
   <record id="action_deliveries" model="ir.actions.act_window">
     <field name="name">Pengiriman</field>
     <field name="res_model">stock.picking</field>
@@ -14,5 +19,6 @@
     <field name="sequence">40</field>
     <field name="groups_id" eval="[(4, ref('inventory.group_deliveries_read'))]"/>
   </record>
+  <menuitem id="menu_operations" name="Operasi Gudang" parent="stock.menu_stock_root" action="action_operations" sequence="10" groups="base.group_user"/>
   <menuitem id="menu_deliveries" name="Pengiriman" parent="stock.menu_stock_root" action="action_deliveries" sequence="20" groups="base.group_user"/>
 </odoo>

@@ -1,6 +1,6 @@
 import type { ServerNavigationItem } from "./types";
 
-interface ManagedNavigationItem { xmlid: string; label?: string }
+interface ManagedNavigationItem { xmlid: string; label?: string; hidden?: boolean }
 interface ManagedNavigationDefinition { label?: string; items: ManagedNavigationItem[] }
 
 const definitions = new Map<string, ManagedNavigationDefinition>();
@@ -19,9 +19,9 @@ export function applyManagedNavigation(items: ServerNavigationItem[]): ServerNav
   return items.map((root) => {
     const definition = root.module ? definitions.get(root.module) : undefined;
     if (!definition) return root;
-    const children = definition.items.flatMap(({ xmlid, label }) => {
+    const children = definition.items.flatMap(({ xmlid, label, hidden }) => {
       const item = findByXmlid([root], xmlid);
-      return item ? [{ ...item, label: label || item.label, children: [] }] : [];
+      return item ? [{ ...item, label: label || item.label, hidden, children: [] }] : [];
     });
     return { ...root, label: definition.label || root.label, children };
   }).filter((item) => item.path || item.children.length);
