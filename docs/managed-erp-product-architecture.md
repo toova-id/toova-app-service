@@ -155,6 +155,7 @@ Prinsip keamanan:
 | Packaging | Gunakan `product.packaging`, bukan UoM global | Rasio dus/pack berbeda per Product dan tidak boleh mengubah makna quantity global |
 | Stock | Read-only dari stock engine | Menulis On Hand dari Product form akan melewati stock move dan valuation |
 | Delete master | Archive atau pindahkan referensi | Histori transaksi harus tetap dapat membaca Product, Pricelist, UoM, Address, dan relation lama |
+| Nomor dokumen | Native sequence dengan format `KODEYYMMNNNNNN` dan reset bulanan | Nomor ringkas, bebas separator teknis Odoo, tetap transaction-safe |
 
 ## 6. Identity dan directory
 
@@ -348,6 +349,29 @@ Keuangan
 ```
 
 Customer tetap dikelola di Contacts, Product/Variant serta Daftar Harga tetap di Products, pengiriman operasional dimiliki Persediaan, invoice dan pembayaran dimiliki Keuangan, pengaturan penjualan berada di Pengaturan, dan analitik akan menjadi workspace lintas domain terpisah. Pesanan menjadi control tower kecil: menampilkan status native, membuka Pengiriman/Faktur managed, dan membuat draft faktur melalui wizard native; tidak membuat CRUD Stock atau Accounting kedua di Sales.
+
+Nomor dokumen managed memakai kode industri fixed tanpa konfigurasi user:
+
+```text
+SO    Penawaran/Pesanan Penjualan
+PO    Pesanan Pembelian
+DO    Pengiriman Customer
+GR    Penerimaan Barang
+ST    Transfer Stok Internal
+RTN   Retur Stok
+INV   Faktur Customer / Sales Receipt
+BILL  Tagihan Vendor / Purchase Receipt
+CN    Nota Kredit Customer
+DN    Nota Debit Vendor
+JE    Entri Jurnal
+RCPT  Pembayaran Masuk
+PAY   Pembayaran Keluar
+ADJ   Penyesuaian Stok (saat managed adjustment document tersedia)
+```
+
+Format `KODEYYMMNNNNNN`, contoh `SO2603000001`; urutan reset setiap bulan. Penawaran dan Pesanan mempertahankan nomor `SO` yang sama. Counter Accounting dipisah per jenis dokumen dan perusahaan, bukan per jurnal, agar dua jurnal tidak menghasilkan nomor yang sama. Placeholder accounting `/` tidak pernah tampil di managed UI; bila native Accounting sudah menghitung nomor pada draft, nomor tersebut tampil dan tetap dipertahankan saat posting. Prefix belum dapat diedit user.
+
+Sequence hanya diterapkan pada dokumen bisnis dan operasi yang membutuhkan referensi user. Master/reference teknis seperti SKU, barcode, lot/serial vendor, package SSCC, nomor rekening, journal code, dan nomor pajak tetap mengikuti identity atau standard native masing-masing; semuanya bukan counter dokumen managed.
 
 ## 12. Status implementasi
 

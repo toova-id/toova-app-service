@@ -1,5 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from datetime import datetime
+
 from odoo.exceptions import ValidationError
 from odoo.tests.common import TransactionCase
 
@@ -18,6 +20,15 @@ class TestSaleManagedUiContract(TransactionCase):
         self.assertIn('picking_ids', fields)
         self.assertIn('invoice_ids', fields)
         self.assertNotIn('amount_total', contract['form']['write_fields'])
+
+    def test_sales_order_sequence_uses_monthly_industry_format(self):
+        sequence = self.env['sale.order']._managed_configure_document_sequence()
+        first = sequence.next_by_id(sequence_date=datetime(2026, 3, 1))
+        second = sequence.next_by_id(sequence_date=datetime(2026, 3, 31))
+        april = sequence.next_by_id(sequence_date=datetime(2026, 4, 1))
+        self.assertEqual(first, 'SO2603000001')
+        self.assertEqual(second, 'SO2603000002')
+        self.assertEqual(april, 'SO2604000001')
 
     def test_orders_cannot_be_created_from_order_action(self):
         contract = self.env['sale.order']._managed_ui_contract('sales.action_orders')

@@ -7,7 +7,7 @@ Run with:
     -d erp_local --no-http < scripts/seed_managed_demo.py
 """
 
-from datetime import timedelta
+from datetime import date, timedelta
 
 from odoo import Command, fields
 
@@ -90,6 +90,36 @@ def ensure_order(name, values, state='draft'):
     order.message_post(body='Data demo managed ERP untuk preview alur penjualan.')
     return order
 
+def ensure_purchase_order(name, values, confirm=False):
+    order = existing(name)
+    if order:
+        return order
+    order = remember(name, env['purchase.order'].create(values))
+    if confirm:
+        order.button_confirm()
+    return order
+
+def validate_picking(picking):
+    picking.action_assign()
+    for line in picking.move_line_ids_without_package:
+        line.qty_done = line.reserved_uom_qty or line.product_uom_qty
+    result = picking.button_validate()
+    if isinstance(result, dict) and result.get('res_model') in ('stock.immediate.transfer', 'stock.backorder.confirmation'):
+        env[result['res_model']].with_context(**result.get('context', {})).create({}).process()
+    return picking
+
+def ensure_paid_invoice(name, order, journal):
+    invoice = existing(name)
+    if invoice:
+        return invoice
+    invoice = remember(name, order._create_invoices())
+    invoice.action_post()
+    payment = env['account.payment.register'].with_context(
+        active_model='account.move', active_ids=invoice.ids,
+    ).create({'journal_id': journal.id, 'amount': invoice.amount_residual})._create_payments()
+    remember(f'{name}_payment', payment)
+    return invoice
+
 
 company = env.company
 country_id = env.ref('base.id')
@@ -107,6 +137,9 @@ unit = env.ref('uom.product_uom_unit')
 kg = env.ref('uom.product_uom_kgm')
 sale_tax = env['account.tax'].search([('company_id', '=', company.id), ('type_tax_use', '=', 'sale'), ('active', '=', True)], limit=1)
 payment_term = env['account.payment.term'].search([('company_id', 'in', [False, company.id])], limit=1)
+bank_journal = env['account.journal'].search([
+    ('type', 'in', ('bank', 'cash')), ('company_id', '=', company.id),
+], limit=1)
 
 # Directory: customers, vendors, contacts, addresses, bank accounts.
 customer_nusantara = ensure_role(ensure('customer_nusantara', 'res.partner', {
@@ -302,6 +335,71 @@ if not order_invoice.invoice_ids and order_invoice.invoice_status == 'to invoice
     invoice = order_invoice._create_invoices()
     remember('invoice_service', invoice)
 
+# Numbering showcase: PO, GR, DO, INV, CN, RCPT, and PAY use KODEYYMMNNNNNN.
+purchase_order = ensure_purchase_order('purchase_textile', {
+    'partner_id': vendor_textile.id,
+    'company_id': company.id,
+    'picking_type_id': warehouse.in_type_id.id,
+    'date_order': fields.Datetime.now(),
+    'order_line': [Command.create({
+        'product_id': shirt.product_variant_ids[:1].id,
+        'name': 'Kaos Nusantara untuk restock demo',
+        'product_qty': 20,
+        'product_uom': unit.id,
+        'price_unit': 60000,
+        'date_planned': fields.Datetime.now() + timedelta(days=7),
+    })],
+}, confirm=True)
+receipt = existing('receipt_textile') or purchase_order.picking_ids[:1]
+if receipt and receipt.state != 'done':
+    receipt = validate_picking(receipt)
+    remember('receipt_textile', receipt)
+
+order_paid = ensure_order('order_paid', {
+    **order_base, 'partner_id': customer_cakrawala.id, 'pricelist_id': wholesale.id,
+    'client_order_ref': 'PO-DEMO-5505',
+    'order_line': [Command.create({'product_id': shirt_l.id, 'product_uom_qty': 12})],
+}, 'sale')
+delivery = existing('delivery_paid') or order_paid.picking_ids[:1]
+if delivery and delivery.state != 'done':
+    delivery = validate_picking(delivery)
+    remember('delivery_paid', delivery)
+if bank_journal and order_paid.invoice_status == 'to invoice':
+    ensure_paid_invoice('invoice_paid', order_paid, bank_journal)
+
+credit_note = existing('credit_note_demo')
+if not credit_note:
+    credit_note = env['account.move'].create({
+        'move_type': 'out_refund',
+        'partner_id': customer_nusantara.id,
+        'invoice_date': fields.Date.today(),
+        'ref': 'Koreksi harga demo',
+        'invoice_line_ids': [Command.create({
+            'product_id': service.product_variant_id.id,
+            'name': 'Koreksi biaya implementasi',
+            'quantity': 1,
+            'price_unit': 250000,
+        })],
+    })
+    credit_note.action_post()
+    remember('credit_note_demo', credit_note)
+
+vendor_payment = existing('vendor_payment_demo')
+if not vendor_payment and bank_journal:
+    payment_method = bank_journal.outbound_payment_method_line_ids[:1]
+    vendor_payment = env['account.payment'].create({
+        'payment_type': 'outbound',
+        'partner_type': 'supplier',
+        'partner_id': vendor_textile.id,
+        'amount': 1200000,
+        'date': fields.Date.today(),
+        'journal_id': bank_journal.id,
+        'payment_method_line_id': payment_method.id,
+        'payment_reference': purchase_order.name,
+    })
+    vendor_payment.action_post()
+    remember('vendor_payment_demo', vendor_payment)
+
 activity_type = env.ref('mail.mail_activity_data_todo', raise_if_not_found=False)
 if activity_type and not quote_draft.activity_ids:
     quote_draft.activity_schedule('mail.mail_activity_data_todo', date_deadline=fields.Date.today() + timedelta(days=2), summary='Follow-up penawaran demo')
@@ -328,6 +426,22 @@ for key in permission_keys:
 env.flush_all()
 assert existing('customer_nusantara') and existing('product_shirt') and existing('quote_draft')
 assert quote_draft.order_line and quote_sent.state == 'sent' and order_pending.state == 'sale'
+numbered = {
+    'penawaran': quote_draft.name,
+    'pembelian': purchase_order.name,
+    'penerimaan': receipt.name if receipt else None,
+    'pengiriman': delivery.name if delivery else None,
+    'faktur': order_paid.invoice_ids[:1].name,
+    'nota_kredit': credit_note.name,
+    'pembayaran_masuk': existing('invoice_paid_payment').name if existing('invoice_paid_payment') else None,
+    'pembayaran_keluar': vendor_payment.name if vendor_payment else None,
+}
+expected_prefixes = {
+    'penawaran': 'SO', 'pembelian': 'PO', 'penerimaan': 'GR', 'pengiriman': 'DO',
+    'faktur': 'INV', 'nota_kredit': 'CN', 'pembayaran_masuk': 'RCPT', 'pembayaran_keluar': 'PAY',
+}
+for key, prefix in expected_prefixes.items():
+    assert numbered[key] and numbered[key].startswith(prefix), (key, numbered[key])
 env.cr.commit()
 print('managed demo seed complete')
 print({
@@ -337,4 +451,5 @@ print({
     'variants': env['product.product'].search_count([('product_tmpl_id.categ_id', 'child_of', category_demo.id)]),
     'quotations': env['sale.order'].search_count([('state', 'in', ('draft', 'sent'))]),
     'orders': env['sale.order'].search_count([('state', 'in', ('sale', 'done'))]),
+    'document_numbers': numbered,
 })

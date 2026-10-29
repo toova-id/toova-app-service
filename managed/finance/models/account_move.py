@@ -1,10 +1,73 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models
+from odoo import api, fields, models
+from odoo.tools import date_utils
+
+MANAGED_DOCUMENT_SEQUENCE_REGEX = (
+    r'^(?P<prefix1>\D+?)'
+    r'(?P<year>\d{2})'
+    r'(?P<month>0[1-9]|1[0-2])'
+    r'(?P<seq>\d{6})'
+    r'(?P<suffix>\D*?)$'
+)
 
 
 class AccountMove(models.Model):
     _inherit = 'account.move'
+
+    @property
+    def _sequence_monthly_regex(self):
+        return MANAGED_DOCUMENT_SEQUENCE_REGEX
+
+    @api.model
+    def _managed_configure_document_sequences(self):
+        journals = self.env['account.journal'].sudo().search([])
+        journals.write({'sequence_override_regex': False})
+        journals.filtered(lambda journal: journal.type in ('sale', 'purchase')).write({'refund_sequence': True})
+        journals.filtered(lambda journal: journal.type in ('bank', 'cash')).write({'payment_sequence': True})
+        return journals
+
+    def _managed_payment_type(self):
+        self.ensure_one()
+        return self.payment_id.payment_type or self.env.context.get('default_payment_type')
+
+    def _managed_sequence_code(self):
+        self.ensure_one()
+        if self.payment_id or self.env.context.get('is_payment'):
+            return 'RCPT' if self._managed_payment_type() == 'inbound' else 'PAY'
+        return {
+            'entry': 'JE',
+            'out_invoice': 'INV',
+            'out_receipt': 'INV',
+            'out_refund': 'CN',
+            'in_invoice': 'BILL',
+            'in_receipt': 'BILL',
+            'in_refund': 'DN',
+        }[self.move_type]
+
+    def _get_last_sequence_domain(self, relaxed=False):
+        self.ensure_one()
+        if not self.date or not self.company_id:
+            return 'WHERE FALSE', {}
+        sequence_date = fields.Date.to_date(self.date)
+        date_start, date_end = date_utils.get_month(sequence_date)
+        code = self._managed_sequence_code()
+        return """
+            WHERE company_id = %(managed_company_id)s
+              AND date BETWEEN %(managed_date_start)s AND %(managed_date_end)s
+              AND name ~ %(managed_sequence_pattern)s
+              AND name != '/'
+        """, {
+            'managed_company_id': self.company_id.id,
+            'managed_date_start': date_start,
+            'managed_date_end': date_end,
+            'managed_sequence_pattern': f'^{code}{sequence_date.year % 100:02d}{sequence_date.month:02d}[0-9]{{6}}$',
+        }
+
+    def _get_starting_sequence(self):
+        self.ensure_one()
+        sequence_date = fields.Date.to_date(self.date)
+        return f'{self._managed_sequence_code()}{sequence_date.year % 100:02d}{sequence_date.month:02d}000000'
 
     @api.model
     def _managed_ui_contract(self, action_xmlid):

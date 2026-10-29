@@ -72,6 +72,19 @@ Managed create memaksa env.company server-side
 Existing record tetap mengikuti native ACL dan record rules
 ```
 
+Document numbering rule:
+
+```text
+Gunakan native ir.sequence, stock.picking.type sequence, dan Accounting sequence.mixin
+Format fixed KODEYYMMNNNNNN; reset bulanan
+Accounting: INV, BILL, CN, DN, JE, RCPT, PAY; counter per jenis dokumen + company
+Stock aktif: DO, GR, ST, RTN; ADJ ditunda sampai managed adjustment document tersedia
+Commercial: SO, PO
+Jangan tambahkan separator atau generator nomor managed
+Jangan ubah nomor dokumen accounting yang sudah posted
+Master/reference teknis bukan document sequence managed
+```
+
 Hindari:
 
 - model pengganti untuk model native;

@@ -10,6 +10,58 @@ class StockMoveLine(models.Model):
     managed_demand_qty = fields.Float(related='move_id.product_uom_qty', string='Permintaan', readonly=True)
 
 
+class StockPickingType(models.Model):
+    _inherit = 'stock.picking.type'
+
+    def _managed_document_code(self):
+        self.ensure_one()
+        if self.sequence_code == 'RET':
+            return 'RTN'
+        return {'outgoing': 'DO', 'incoming': 'GR', 'internal': 'ST'}[self.code]
+
+    def _managed_assign_document_sequences(self):
+        sequences = self.env['ir.sequence'].sudo()
+        for picking_type in self.sudo().filtered('sequence_id'):
+            code = picking_type._managed_document_code()
+            sequence_code = f'managed.stock.{code}.{picking_type.company_id.id}'
+            sequence = sequences.search([('code', '=', sequence_code), ('company_id', '=', picking_type.company_id.id)], limit=1)
+            values = {
+                'name': f'Managed Stock {code}',
+                'code': sequence_code,
+                'prefix': f'{code}%(y)s%(month)s',
+                'padding': 6,
+                'use_date_range': True,
+                'managed_monthly_reset': True,
+                'company_id': picking_type.company_id.id,
+            }
+            if sequence:
+                sequence.write(values)
+            else:
+                sequence = sequences.create(values)
+            picking_type.sequence_id = sequence
+        return self
+
+    @api.model
+    def _managed_configure_document_sequences(self):
+        purchase_sequence = self.env.ref('purchase.seq_purchase_order', raise_if_not_found=False)
+        if purchase_sequence:
+            purchase_sequence.sudo().write({
+                'name': 'Purchase Order',
+                'prefix': 'PO%(y)s%(month)s',
+                'padding': 6,
+                'use_date_range': True,
+                'managed_monthly_reset': True,
+            })
+        picking_types = self.sudo().with_context(active_test=False).search([('sequence_id', '!=', False)])
+        return picking_types._managed_assign_document_sequences()
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        picking_types = super().create(vals_list)
+        picking_types._managed_assign_document_sequences()
+        return picking_types
+
+
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
@@ -127,6 +179,19 @@ class StockPicking(models.Model):
         self._check_managed_delivery()
         return super().button_validate()
 
+
+class StockReturnPicking(models.TransientModel):
+    _inherit = 'stock.return.picking'
+
+    def _prepare_picking_default_values(self):
+        values = super()._prepare_picking_default_values()
+        sequence = self.env['ir.sequence'].sudo().search([
+            ('code', '=', f'managed.stock.RTN.{self.picking_id.company_id.id}'),
+            ('company_id', '=', self.picking_id.company_id.id),
+        ], limit=1)
+        if sequence:
+            values['name'] = sequence.next_by_id(sequence_date=fields.Datetime.now())
+        return values
 
 class ManagedSettingsRegistry(models.AbstractModel):
     _inherit = 'managed.settings.registry'

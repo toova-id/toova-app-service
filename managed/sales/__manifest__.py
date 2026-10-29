@@ -7,6 +7,7 @@
     'summary': 'Managed quotation and sales order workflow',
     'data': ['views/actions.xml'],
     'depends': ['sale_stock', 'contact_persons', 'products'],
+    'post_init_hook': 'post_init_hook',
     'installable': True,
     'auto_install': False,
     'license': 'LGPL-3',

@@ -8,6 +8,18 @@ class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
     @api.model
+    def _managed_configure_document_sequence(self):
+        sequence = self.env.ref('sale.seq_sale_order').sudo()
+        sequence.write({
+            'name': 'Sales Order',
+            'prefix': 'SO%(y)s%(month)s',
+            'padding': 6,
+            'use_date_range': True,
+            'managed_monthly_reset': True,
+        })
+        return sequence
+
+    @api.model
     def _managed_ui_contract(self, action_xmlid):
         if action_xmlid not in {'sales.action_quotations', 'sales.action_orders'}:
             return super()._managed_ui_contract(action_xmlid)

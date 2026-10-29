@@ -5,6 +5,7 @@ from odoo import SUPERUSER_ID, api
 
 def post_init_hook(cr, registry):
     env = api.Environment(cr, SUPERUSER_ID, {})
+    env['account.move']._managed_configure_document_sequences()
     roles = env['managed.settings.role'].sudo().search([('name', '=', 'Tenant Administrator')])
     permissions = ('finance.customer_invoices', 'finance.payments')
     for role in roles:
