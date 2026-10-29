@@ -784,6 +784,15 @@
   .toova-variants-read i { @apply not-italic text-muted-foreground; }
   .toova-variants-read b { @apply text-right font-medium tabular-nums; }
   .toova-category-summary { @apply grid gap-4 md:grid-cols-2; }
+  .toova-pricelist-rules-value { @apply overflow-hidden rounded-md border; }
+  .toova-pricelist-rules-value table { @apply w-full min-w-[720px] border-collapse text-left text-[10px]; }
+  .toova-pricelist-rules-value th { @apply border-b bg-muted/40 px-3 py-2 text-[9px] font-medium uppercase tracking-[.02em] text-muted-foreground; }
+  .toova-pricelist-rules-value td { @apply border-b px-3 py-3 tabular-nums last:border-b-0; }
+  .toova-pricelist-rules-value tbody tr:last-child td { @apply border-b-0; }
+  .toova-pricelist-rules-value td:first-child strong, .toova-pricelist-rules-value td:first-child small { @apply block; }
+  .toova-pricelist-rules-value td:first-child strong { @apply font-medium; }
+  .toova-pricelist-rules-value td:first-child small { @apply mt-0.5 text-[9px] text-muted-foreground; }
+  .toova-pricelist-rules-value .managed-relation-card-empty { @apply border-0; }
   .toova-pricelist-rule-list { @apply overflow-hidden rounded-md border; }
   .toova-pricelist-rule-list > article { @apply grid min-h-12 grid-cols-[32px_minmax(0,1fr)_max-content] items-center gap-3 border-b px-3 last:border-b-0; }
   .toova-pricelist-rule-icon { @apply grid h-7 w-7 place-items-center rounded-md bg-muted text-muted-foreground; }

@@ -19,7 +19,7 @@ for (const token of ["Nama atribut", "Pilihan nilai", "Pengaturan lanjutan", "25
 for (const token of ["menu_products_root", "menu_product_attributes", "menu_product_categories", "menu_product_pricelists", "menu_product_uom", "action_product_categories", "action_product_pricelists", "action_uom_categories"]) if (!actions.includes(token)) throw new Error(`managed product navigation missing ${token}`);
 for (const token of ["Identitas kategori", "Default accounting"]) if (!categoryForm.includes(token)) throw new Error(`managed category form missing ${token}`);
 for (const token of ["Identitas daftar harga", "Aturan harga", "Pengaturan lanjutan"]) if (!pricelistForm.includes(token)) throw new Error(`managed pricelist form missing ${token}`);
-for (const token of ["Tambah aturan harga", "Semua produk", "Formula lanjutan", "min_quantity", "targetReady", "applied_on: next.applied_on"]) if (!pricelistRules.includes(token)) throw new Error(`managed pricelist rules missing ${token}`);
+for (const token of ["Tambah aturan harga", "Semua produk", "Formula lanjutan", "min_quantity", "targetReady", "applied_on: next.applied_on", "Produk / Cakupan", "Variant tertentu", "Semua variant produk"]) if (!pricelistRules.includes(token)) throw new Error(`managed pricelist rules missing ${token}`);
 for (const token of ["Kelompok satuan", "Satuan & konversi", "Isi kemasan"]) if (!uomForm.includes(token)) throw new Error(`managed UoM form missing ${token}`);
 for (const token of ["Tambah satuan konversi", "Nilai dalam", "Kuantitas minimum", "managed_conversion_locked"]) if (!uomUnits.includes(token)) throw new Error(`managed UoM editor missing ${token}`);
 console.log("managed products self-check passed");

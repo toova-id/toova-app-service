@@ -59,6 +59,12 @@ export function PricelistRulesEditor({ actionId, field, value, parentValues, onC
 
 export function PricelistRulesValue({ value }: { value: unknown }) {
   const rows = Array.isArray(value) ? value as Row[] : [];
-  const count = rows.filter((row) => row.active !== false).length;
-  return <span>{count ? `${count} aturan harga` : "Belum ada aturan"}</span>;
+  const active = rows.filter((row) => row.active !== false);
+  const scope = (row: Row) => row.applied_on === "2_product_category" ? relation(row.categ_id) : row.applied_on === "1_product" ? relation(row.product_tmpl_id) : row.applied_on === "0_product_variant" ? relation(row.product_id) : "Semua produk";
+  const target = (row: Row) => row.applied_on === "0_product_variant" ? [relation(row.product_tmpl_id), relation(row.product_id)].filter(Boolean).join(" · ") : scope(row);
+  const price = (row: Row) => row.compute_price === "percentage" ? `${Number(row.percent_price || 0).toLocaleString("id-ID")}% diskon` : row.compute_price === "formula" ? "Formula lanjutan" : Number(row.fixed_price || 0).toLocaleString("id-ID");
+  return <div className="toova-pricelist-rules-value">
+    <div className="overflow-x-auto"><table><thead><tr><th>Produk / Cakupan</th><th>Harga</th><th>Minimum</th><th>Periode</th></tr></thead><tbody>{active.map((row, index) => <tr key={String(row.id || index)}><td><strong>{target(row)}</strong><small>{row.applied_on === "0_product_variant" ? "Variant tertentu" : row.applied_on === "1_product" ? "Semua variant produk" : row.applied_on === "2_product_category" ? "Kategori produk" : "Seluruh katalog"}</small></td><td>{price(row)}</td><td>{Number(row.min_quantity || 0).toLocaleString("id-ID")}</td><td>{[date(row.date_start), date(row.date_end)].filter(Boolean).join(" – ") || "Selalu"}</td></tr>)}</tbody></table></div>
+    {!active.length && <div className="managed-relation-card-empty">Belum ada aturan harga.</div>}
+  </div>;
 }
