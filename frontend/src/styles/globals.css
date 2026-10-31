@@ -445,6 +445,8 @@
   .toova-sales-state li.completed b { @apply text-foreground; }
   .toova-sales-state li.current i { @apply border-primary bg-primary text-primary-foreground; }
   .toova-sales-state li.current b { @apply font-semibold text-foreground; }
+  .toova-sales-state > div > p { @apply mt-3 border-t pt-3 text-[9px] text-muted-foreground; }
+  .toova-sales-state.complete > button { @apply border-emerald-500/30 bg-emerald-500 text-white hover:bg-emerald-600; }
   .toova-sales-mark { @apply grid h-10 w-10 shrink-0 place-items-center rounded-lg border bg-muted/30; }
   .toova-sales-mark svg { @apply h-4 w-4 text-muted-foreground; }
   .toova-sales-actions { @apply flex flex-wrap justify-end gap-1; }
@@ -484,31 +486,39 @@
   .toova-sales-field > span b { @apply ml-0.5 text-primary; }
   .toova-sales-field > div { @apply min-w-0 text-xs; }
   .toova-sales-field.wide { @apply md:col-span-2; }
+  .toova-sales-facts { @apply grid overflow-hidden rounded-md border bg-border sm:grid-cols-2 xl:grid-cols-4; }
+  .toova-sales-facts article { @apply flex min-h-28 min-w-0 flex-col justify-center bg-background p-4; }
+  .toova-sales-facts article.primary { @apply bg-muted/10; }
+  .toova-sales-facts span { @apply text-[9px] font-semibold uppercase tracking-[.06em] text-muted-foreground; }
+  .toova-sales-facts strong { @apply mt-1 truncate text-sm font-semibold tabular-nums; }
+  .toova-sales-facts article.primary strong { @apply text-lg; }
+  .toova-sales-facts small { @apply mt-1 truncate text-[9px] text-muted-foreground; }
   .toova-sales-lines .toova-sales-field { @apply block; }
   .toova-sales-lines .toova-sales-field > span { @apply sr-only; }
-  .toova-sales-process { @apply grid overflow-hidden rounded-md border lg:grid-cols-[minmax(0,1fr)_300px]; }
-  .toova-sales-process-lanes { @apply grid divide-y md:grid-cols-2 md:divide-x md:divide-y-0; }
-  .toova-sales-process article { @apply relative grid min-h-36 grid-cols-[40px_minmax(0,1fr)_8px] items-center gap-3 p-5; }
-  .toova-sales-process-icon { @apply grid h-10 w-10 place-items-center rounded-md border bg-muted/20; }
-  .toova-sales-process-icon svg { @apply h-4 w-4 text-muted-foreground; }
-  .toova-sales-process article span { @apply text-[9px] font-semibold uppercase tracking-[.07em] text-muted-foreground; }
-  .toova-sales-process article h3 { @apply mt-1 text-sm font-semibold; }
-  .toova-sales-process article p { @apply mt-1 text-[9px] text-muted-foreground; }
-  .toova-sales-process article > i { @apply h-2 w-2 rounded-full bg-muted-foreground/30; }
-  .toova-sales-process article[data-tone="work"] .toova-sales-process-icon { @apply border-primary/20 bg-primary/5; }
-  .toova-sales-process article[data-tone="work"] .toova-sales-process-icon svg, .toova-sales-process article[data-tone="work"] > i { @apply text-primary bg-primary; }
-  .toova-sales-process article[data-tone="done"] .toova-sales-process-icon { @apply border-emerald-500/20 bg-emerald-500/10; }
-  .toova-sales-process article[data-tone="done"] .toova-sales-process-icon svg { @apply text-emerald-600; }
-  .toova-sales-process article[data-tone="done"] > i { @apply bg-emerald-500; }
-  .toova-sales-process article[data-tone="warn"] .toova-sales-process-icon { @apply border-amber-500/20 bg-amber-500/10; }
-  .toova-sales-process article[data-tone="warn"] .toova-sales-process-icon svg { @apply text-amber-600; }
-  .toova-sales-process article[data-tone="warn"] > i { @apply bg-amber-500; }
-  .toova-sales-process > aside { @apply grid content-center divide-y border-t bg-muted/10 px-5 lg:border-l lg:border-t-0; }
-  .toova-sales-process > aside > div { @apply flex min-h-16 items-center gap-3; }
-  .toova-sales-process > aside svg { @apply h-4 w-4 shrink-0 text-muted-foreground; }
-  .toova-sales-process > aside span { @apply flex min-w-0 flex-1 flex-col; }
-  .toova-sales-process > aside small { @apply text-[9px] text-muted-foreground; }
-  .toova-sales-process > aside strong { @apply truncate text-xs font-semibold tabular-nums; }
+  .toova-sales-process { @apply overflow-hidden rounded-md border; }
+  .toova-sales-process > header { @apply flex items-center justify-between gap-4 border-b bg-muted/10 px-5 py-4; }
+  .toova-sales-process > header > div { @apply flex min-w-0 items-center gap-3; }
+  .toova-sales-process > header > div > span { @apply grid h-8 w-8 shrink-0 place-items-center rounded-full bg-muted text-muted-foreground; }
+  .toova-sales-process > header > div > span svg { @apply h-4 w-4; }
+  .toova-sales-process > header h3 { @apply text-sm font-semibold; }
+  .toova-sales-process > header p { @apply mt-0.5 truncate text-[10px] text-muted-foreground; }
+  .toova-sales-process > header > b { @apply w-fit rounded-full border bg-background px-2.5 py-1 text-[9px] font-medium text-muted-foreground; }
+  .toova-sales-process.complete > header { @apply bg-emerald-500/5; }
+  .toova-sales-process.complete > header > div > span { @apply bg-emerald-500/10 text-emerald-700 dark:text-emerald-300; }
+  .toova-sales-process.complete > header h3 { @apply text-emerald-700 dark:text-emerald-300; }
+  .toova-sales-process.complete > header > b { @apply border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300; }
+  .toova-sales-process-stepper-wrap { @apply w-full overflow-x-auto; }
+  .toova-sales-process-stepper { @apply grid w-full min-w-[560px] px-5 py-4 sm:min-w-0 sm:grid-cols-4; }
+  .toova-sales-process-stepper article { @apply relative flex min-w-0 items-center gap-2 pb-4 sm:flex-col sm:items-start sm:gap-2 sm:pb-0; }
+  .toova-sales-process-stepper article:not(:last-child)::after { content: ""; @apply absolute bottom-0 left-3 top-7 w-px bg-border sm:bottom-auto sm:left-7 sm:right-2 sm:top-3 sm:h-px sm:w-auto; }
+  .toova-sales-process-stepper article i { @apply relative z-10 grid h-6 w-6 shrink-0 place-items-center rounded-full border bg-background text-[9px] not-italic text-muted-foreground; }
+  .toova-sales-process-stepper article i svg { @apply h-3 w-3; }
+  .toova-sales-process-stepper article span { @apply truncate pr-3 text-[10px] font-medium text-muted-foreground; }
+  .toova-sales-process-stepper article.completed:not(:last-child)::after { @apply bg-emerald-500/40; }
+  .toova-sales-process-stepper article.completed i { @apply border-emerald-500/20 bg-emerald-500/10 text-emerald-700; }
+  .toova-sales-process-stepper article.completed span { @apply text-foreground; }
+  .toova-sales-process-stepper article.current i { @apply border-emerald-500 bg-emerald-500 text-white; box-shadow: 0 0 0 4px rgb(16 185 129 / .10); }
+  .toova-sales-process-stepper article.current span { @apply font-semibold text-foreground; }
   .toova-sales-totals { @apply flex justify-end border-b px-8 py-6; }
   .toova-sales-totals dl { @apply w-full max-w-sm space-y-2; }
   .toova-sales-totals dl > div { @apply flex justify-between border-b pb-2 text-xs; }
@@ -998,11 +1008,10 @@
   .toova-sales-tabs { @apply top-[148px] px-4; }
   .toova-sales-section, .toova-sales-progress, .toova-sales-totals { @apply px-4; }
   .toova-sales-grid, .toova-sales-overview { @apply grid-cols-1; }
+  .toova-sales-facts { @apply grid-cols-1; }
   .toova-sales-field { @apply grid-cols-1 gap-1; }
   .toova-sales-progress ol { @apply gap-0; }
   .toova-sales-progress li span { @apply whitespace-normal text-[9px]; }
-  .toova-sales-process { @apply grid-cols-1; }
-  .toova-sales-process-lanes { @apply grid-cols-1 divide-x-0 divide-y; }
   .toova-sales-heading { @apply flex-wrap; }
   .toova-sales-state > div { @apply left-auto right-0; }
   .toova-sales-related-list article { @apply items-start; }

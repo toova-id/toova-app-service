@@ -23,6 +23,9 @@ class TestSaleManagedUiContract(TransactionCase):
         self.assertIn('managed_discount_fixed', columns)
         self.assertIn('picking_ids', fields)
         self.assertIn('invoice_ids', fields)
+        self.assertIn('managed_process_status', fields)
+        self.assertIn('managed_payment_status', fields)
+        self.assertEqual(dict(fields['state']['selection'])['done'], 'Dikunci')
         self.assertNotIn('amount_total', contract['form']['write_fields'])
 
     def test_sales_order_sequence_uses_monthly_industry_format(self):
@@ -42,6 +45,15 @@ class TestSaleManagedUiContract(TransactionCase):
         })
         line._onchange_managed_fixed_discount()
         self.assertEqual(line.discount, 15)
+
+    def test_managed_order_progress_uses_fulfillment_invoice_and_payment_state(self):
+        order = self.env['sale.order'].new({'state': 'sale'})
+        order.managed_delivery_required = True
+        order.delivery_status = 'partial'
+        order.invoice_status = 'to invoice'
+        order._compute_managed_order_progress()
+        self.assertEqual(order.managed_process_status, 'fulfillment')
+        self.assertEqual(order.managed_payment_status, 'not_invoiced')
 
     def test_order_related_documents_use_native_relations(self):
         order = self.env['sale.order'].new({})

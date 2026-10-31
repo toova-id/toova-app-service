@@ -1,4 +1,4 @@
-import { ArrowUpRight, CalendarDays, Check, CircleDollarSign, FileText, PackageCheck, Save, ShoppingCart, UserRound } from "lucide-react";
+import { ArrowUpRight, Check, FileText, PackageCheck, Save, ShoppingCart, UserRound } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { DocumentBack, DocumentRelations } from "@toova/components/document-relations";
@@ -28,8 +28,20 @@ export default function SaleOrderForm({ schema, id, values, relatedDocuments, ed
   const relationCount = (name: string) => Array.isArray(values[name]) ? values[name].length : 0;
   const deliveryCount = relationCount("picking_ids");
   const invoiceCount = relationCount("invoice_ids");
-  const deliveryState = String(values.delivery_status || "pending");
-  const invoiceState = String(values.invoice_status || "no");
+  const processState = String(values.managed_process_status || (quotation ? "quotation" : "fulfillment"));
+  const processSteps = quotation
+    ? [["quotation", "Penawaran"]]
+    : [["fulfillment", "Pengiriman"], ["invoicing", "Faktur"], ["payment", "Pembayaran"], ["complete", "Selesai"]];
+  const selection = (name: string) => fields[name]?.selection?.find(([key]) => key === values[name])?.[1] || "Belum diproses";
+  const processIndex = Math.max(0, processSteps.findIndex(([key]) => key === processState));
+  const processComplete = processState === "complete";
+  const processLabel = quotation ? selection("state") : selection("managed_process_status");
+  const processMessage = processState === "complete" ? "Pesanan terpenuhi dan pembayaran lunas."
+    : processState === "payment" ? "Menunggu pelunasan faktur pelanggan."
+    : processState === "invoicing" ? "Pengiriman selesai; faktur belum dibuat."
+    : processState === "fulfillment" ? "Pesanan sedang dipenuhi oleh gudang."
+    : "Pesanan belum dikonfirmasi.";
+  const completedSteps = processComplete ? processSteps.length : processIndex;
   const customer = Array.isArray(values.partner_id) ? String(values.partner_id[1]) : "Pelanggan belum dipilih";
   const related = (key: string) => relatedDocuments.find((group) => group.key === key);
   const openRelated = (actionXmlid: string, recordId: number) => {
@@ -47,7 +59,7 @@ export default function SaleOrderForm({ schema, id, values, relatedDocuments, ed
     return <label className={`toova-sales-field ${className}`} title={meta.help}><span>{meta.label}{required && <b>*</b>}</span><div>{editing && !readonly ? <FieldEditor actionId={schema.id} field={meta} value={values[name]} parentValues={values} onChange={(value) => onChange(name, value)}/> : <FieldValue field={meta} value={values[name]} record={values}/>}</div></label>;
   };
   const money = (name: string) => fields[name] ? <FieldValue field={fields[name]} value={values[name]} record={values}/> : <>—</>;
-  const selection = (name: string) => fields[name]?.selection?.find(([key]) => key === values[name])?.[1] || "Belum diproses";
+  const value = (name: string) => fields[name] ? <FieldValue field={fields[name]} value={values[name]} record={values}/> : <>—</>;
   const section = (title: string, description: string, content: JSX.Element) => <section className="toova-sales-section"><header><h2>{title}</h2><p>{description}</p></header>{content}</section>;
   const tabs: [Tab, string, number?][] = quotation
     ? [["summary", "Ringkasan"], ["items", "Item", itemCount], ["settings", "Pengaturan"]]
@@ -55,7 +67,7 @@ export default function SaleOrderForm({ schema, id, values, relatedDocuments, ed
 
   return <div className="toova-sales-document">
     <header className="toova-sales-header">
-      <div className="toova-sales-title"><DocumentBack onBack={onBack}/><div className="toova-sales-mark"><ShoppingCart/></div><div><div className="toova-sales-heading"><h1>{id ? String(values.name || "Pesanan") : "Penawaran baru"}</h1>{id && status && <div className="toova-sales-state"><button type="button" aria-label={`Status saat ini: ${selection("state")}`}>{selection("state")}</button><div role="tooltip"><span>Perjalanan dokumen</span><ol>{statusOptions.map(([key, label], index) => <li key={key} className={index < statusIndex ? "completed" : index === statusIndex ? "current" : undefined}><i>{index < statusIndex ? <Check/> : index + 1}</i><b>{label}</b></li>)}</ol></div></div>}</div><p>{customer}</p></div></div>
+      <div className="toova-sales-title"><DocumentBack onBack={onBack}/><div className="toova-sales-mark"><ShoppingCart/></div><div><div className="toova-sales-heading"><h1>{id ? String(values.name || "Pesanan") : "Penawaran baru"}</h1>{id && status && <div className={`toova-sales-state ${processComplete ? "complete" : ""}`}><button type="button" aria-label={`Status pesanan: ${processLabel}`}>{processLabel}</button><div role="tooltip"><span>{quotation ? "Perjalanan dokumen" : "Progres bisnis"}</span><ol>{(quotation ? statusOptions : processSteps).map(([key, label], index) => { const current = quotation ? statusIndex : processIndex; return <li key={key} className={index < current || (!quotation && processComplete) ? "completed" : index === current ? "current" : undefined}><i>{index < current || (!quotation && processComplete) ? <Check/> : index + 1}</i><b>{label}</b></li>; })}</ol>{!quotation && <p>Dokumen: {selection("state")}{values.state === "done" ? " · tidak dapat diedit" : " · tetap aktif"}</p>}</div></div>}</div><p>{customer}</p></div></div>
       <div className="toova-sales-actions"><DocumentRelations groups={relatedDocuments}/>{id && secondaryButtons.map((button) => <Button key={`${button.type}:${button.name}`} variant="outline" onClick={() => onButton(button.name, button.type)}>{button.label}</Button>)}{id && primaryButton && <Button onClick={() => onButton(primaryButton.name, primaryButton.type)}>{primaryButton.label}</Button>}{(id ? schema.form.write : schema.form.create) && (editing ? <Button onClick={onSave} disabled={saving}><Save className="h-3.5 w-3.5"/>{saving ? "Menyimpan..." : "Simpan"}</Button> : schema.form.write && <Button variant="outline" onClick={onEdit}>Edit</Button>)}</div>
     </header>
 
@@ -64,7 +76,8 @@ export default function SaleOrderForm({ schema, id, values, relatedDocuments, ed
     <main className="toova-sales-body">
       {tab === "summary" && <>
         {section("Pelanggan", "Identitas, alamat, dan referensi transaksi.", <div className="toova-sales-overview"><div className="toova-sales-customer"><UserRound/><div><span>Pelanggan</span><h3>{customer}</h3></div></div><div className="toova-sales-grid">{field("partner_id")}{field("client_order_ref")}{field("partner_invoice_id")}{field("partner_shipping_id")}{field("date_order")}{quotation && field("validity_date")}</div></div>)}
-        {!quotation && section("Progres pesanan", "Pantau pemenuhan dan penagihan tanpa meninggalkan pesanan.", <div className="toova-sales-process"><div className="toova-sales-process-lanes"><article data-tone={deliveryState === "full" ? "done" : deliveryState === "pending" ? "idle" : "work"}><div className="toova-sales-process-icon"><PackageCheck/></div><div><span>Pengiriman</span><h3>{selection("delivery_status")}</h3><p>{deliveryCount ? `${deliveryCount} dokumen pengiriman terhubung` : "Menunggu proses gudang"}</p></div><i aria-hidden="true"/></article><article data-tone={invoiceState === "invoiced" ? "done" : invoiceState === "no" ? "idle" : invoiceState === "upselling" ? "warn" : "work"}><div className="toova-sales-process-icon"><FileText/></div><div><span>Penagihan</span><h3>{selection("invoice_status")}</h3><p>{invoiceCount ? `${invoiceCount} faktur pelanggan terhubung` : "Belum ada faktur pelanggan"}</p></div><i aria-hidden="true"/></article></div><aside><div><CircleDollarSign/><span><small>Total pesanan</small><strong>{money("amount_total")}</strong></span></div><div><CalendarDays/><span><small>Janji kirim</small><strong>{values.commitment_date ? new Date(String(values.commitment_date).replace(" ", "T") + "Z").toLocaleDateString("id-ID", { dateStyle: "medium" }) : "Belum ditentukan"}</strong></span></div></aside></div>)}
+        {section("Detail pesanan", "Nilai dan konteks utama untuk mengambil keputusan.", <div className="toova-sales-facts"><article className="primary"><span>Total pesanan</span><strong>{money("amount_total")}</strong><small>Subtotal {money("amount_untaxed")} · Pajak {money("amount_tax")}</small></article><article><span>Tanggal pesanan</span><strong>{value("date_order")}</strong><small>{values.client_order_ref ? `Ref. ${values.client_order_ref}` : "Tanpa referensi pelanggan"}</small></article><article><span>Janji kirim</span><strong>{value("commitment_date")}</strong><small>{selection("picking_policy")}</small></article><article><span>Penanggung jawab</span><strong>{value("user_id")}</strong><small>{Array.isArray(values.team_id) ? String(values.team_id[1]) : "Tanpa tim penjualan"}</small></article></div>)}
+        {!quotation && section("Progres pesanan", "Status bisnis dari pengiriman sampai pembayaran.", <div className={`toova-sales-process ${processComplete ? "complete" : ""}`}><header><div><span>{processComplete ? <Check/> : <PackageCheck/>}</span><div><h3>{processLabel}</h3><p>{processMessage}</p></div></div><b>{completedSteps}/{processSteps.length}</b></header><div className="toova-sales-process-stepper-wrap"><div className="toova-sales-process-stepper">{processSteps.map(([key, label], index) => <article key={key} className={index < processIndex || processComplete ? "completed" : index === processIndex ? "current" : "upcoming"}><i>{index < processIndex || processComplete ? <Check/> : index + 1}</i><span>{label}</span></article>)}</div></div></div>)}
         {section("Catatan", "Syarat dan informasi yang ikut pada dokumen penjualan.", <div className="toova-sales-grid">{field("note", "wide")}</div>)}
       </>}
 

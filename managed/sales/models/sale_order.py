@@ -55,6 +55,61 @@ class SaleOrderLine(models.Model):
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
+    managed_delivery_required = fields.Boolean(compute='_compute_managed_order_progress', string='Perlu pengiriman')
+    managed_payment_status = fields.Selection([
+        ('not_invoiced', 'Belum ditagih'),
+        ('unpaid', 'Belum dibayar'),
+        ('partial', 'Dibayar sebagian'),
+        ('paid', 'Lunas'),
+    ], compute='_compute_managed_order_progress', string='Status pembayaran')
+    managed_process_status = fields.Selection([
+        ('quotation', 'Penawaran'),
+        ('fulfillment', 'Pemenuhan'),
+        ('invoicing', 'Penagihan'),
+        ('payment', 'Menunggu pembayaran'),
+        ('complete', 'Selesai'),
+        ('cancelled', 'Dibatalkan'),
+    ], compute='_compute_managed_order_progress', string='Progres pesanan')
+
+    @api.depends(
+        'state', 'delivery_status', 'invoice_status',
+        'order_line.display_type', 'order_line.product_id.detailed_type',
+        'invoice_ids.state', 'invoice_ids.move_type', 'invoice_ids.payment_state',
+    )
+    def _compute_managed_order_progress(self):
+        for order in self:
+            invoices = order.invoice_ids.filtered(
+                lambda move: move.state != 'cancel' and move.move_type in ('out_invoice', 'out_refund')
+            )
+            payment_states = set(invoices.mapped('payment_state'))
+            order.managed_delivery_required = any(
+                not line.display_type and line.product_id.detailed_type != 'service'
+                for line in order.order_line
+            )
+            if not invoices:
+                payment_status = 'not_invoiced'
+            elif payment_states and payment_states <= {'paid', 'reversed'}:
+                payment_status = 'paid'
+            elif payment_states & {'partial', 'in_payment', 'paid'}:
+                payment_status = 'partial'
+            else:
+                payment_status = 'unpaid'
+            order.managed_payment_status = payment_status
+            delivery_complete = not order.managed_delivery_required or order.delivery_status == 'full'
+            if order.state == 'cancel':
+                process_status = 'cancelled'
+            elif order.state in ('draft', 'sent'):
+                process_status = 'quotation'
+            elif not delivery_complete:
+                process_status = 'fulfillment'
+            elif not invoices:
+                process_status = 'invoicing'
+            elif payment_status != 'paid':
+                process_status = 'payment'
+            else:
+                process_status = 'complete'
+            order.managed_process_status = process_status
+
     @api.model
     def _managed_configure_document_sequence(self):
         sequence = self.env.ref('sale.seq_sale_order').sudo()
@@ -135,8 +190,18 @@ class SaleOrder(models.Model):
             {'name': 'invoice_status', 'label': 'Status tagihan', 'selection': [
                 ('upselling', 'Perlu penyesuaian'), ('invoiced', 'Sudah ditagih'), ('to invoice', 'Perlu ditagih'), ('no', 'Belum dapat ditagih'),
             ]},
+            {'name': 'managed_delivery_required', 'label': 'Perlu pengiriman'},
+            {'name': 'managed_payment_status', 'label': 'Status pembayaran', 'selection': [
+                ('not_invoiced', 'Belum ditagih'), ('unpaid', 'Belum dibayar'),
+                ('partial', 'Dibayar sebagian'), ('paid', 'Lunas'),
+            ]},
+            {'name': 'managed_process_status', 'label': 'Progres pesanan', 'selection': [
+                ('quotation', 'Penawaran'), ('fulfillment', 'Pengiriman'),
+                ('invoicing', 'Penagihan'), ('payment', 'Menunggu pembayaran'),
+                ('complete', 'Selesai'), ('cancelled', 'Dibatalkan'),
+            ]},
             {'name': 'state', 'label': 'Status', 'widget': 'statusbar', 'selection': [
-                ('draft', 'Draf'), ('sent', 'Terkirim'), ('sale', 'Dikonfirmasi'), ('done', 'Selesai'), ('cancel', 'Dibatalkan'),
+                ('draft', 'Draf'), ('sent', 'Terkirim'), ('sale', 'Dikonfirmasi'), ('done', 'Dikunci'), ('cancel', 'Dibatalkan'),
             ]},
         ]
         writable = {
