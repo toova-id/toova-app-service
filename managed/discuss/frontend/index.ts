@@ -1,3 +1,4 @@
+import "./styles.css";
 import { registerClientAction, registerModuleIcon } from "@toova/features/feature-registry";
 import { Inbox } from "lucide-react";
 import InboxPage from "./inbox-page";

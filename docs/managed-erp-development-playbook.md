@@ -284,6 +284,25 @@ Hindari:
 
 Review copy bersama layout. Hapus teks sebelum menambah komponen baru.
 
+### 3.10 Form shell dan ownership CSS
+
+Semua custom form managed memakai shell bersama `frontend/src/components/managed-form.tsx`:
+
+- `ManagedFormShell` = header (back, icon, title, subtitle, badge, actions), tab nav opsional, body full-width.
+- `ManagedFormSection` = section judul + deskripsi + konten.
+- Shell hanya komposisi visual. Business field, tab content, dan workflow tetap milik addon.
+- Back navigation lewat prop `onBack` (bukan `basePath` + `Link` manual).
+
+CSS ownership:
+
+| File | Isi |
+| --- | --- |
+| `frontend/src/styles/globals.css` | token, shell aplikasi, list/kanban/workspace, primitive generik |
+| `frontend/src/styles/managed-form.css` | kelas `.managed-form-*` milik shell |
+| `managed/<addon>/frontend/styles.css` | kelas domain addon, diimpor dari `managed/<addon>/frontend/index.ts` |
+
+Aturan: satu addon tidak boleh override kelas addon lain. `managed/directory/frontend/styles.css` adalah shared directory/product base dan diimpor eksplisit oleh `customers`, `vendors`, `contact_persons`, `products`. Prefix kelas wajib (`.toova-sales-*`, `.toova-product-*`). Hapus kelas mati di file yang sama saat form berubah.
+
 ## 4. Domain pattern yang sudah ditetapkan
 
 ### Directory

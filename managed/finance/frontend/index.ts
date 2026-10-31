@@ -1,3 +1,4 @@
+import "./styles.css";
 import "./navigation";
 import { Landmark } from "lucide-react";
 import { registerModuleIcon } from "@toova/features/feature-registry";

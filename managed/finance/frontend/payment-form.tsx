@@ -1,5 +1,6 @@
 import { ArrowDownLeft, ArrowUpRight, CheckCircle2, Landmark, ReceiptText } from "lucide-react";
-import { DocumentBack, DocumentRelations } from "@toova/components/document-relations";
+import { DocumentRelations } from "@toova/components/document-relations";
+import { ManagedFormShell } from "@toova/components/managed-form";
 import { Button } from "@toova/components/ui/button";
 import { FieldValue } from "@toova/views/field-registry";
 import type { CustomFormViewProps } from "@toova/views/view-registry";
@@ -14,11 +15,9 @@ export default function PaymentForm({ schema, id, values, relatedDocuments, onBa
   const stateLabel = fields.state?.selection?.find(([key]) => key === values.state)?.[1] || String(values.state || "Draf");
   const documentNumber = values.name && values.name !== "/" ? String(values.name) : "Belum bernomor";
 
-  return <div className="toova-payment-document">
-    <header className="toova-finance-header"><div className="toova-finance-title"><DocumentBack onBack={onBack}/><div className={`toova-payment-mark ${inbound ? "inbound" : "outbound"}`}>{inbound ? <ArrowDownLeft/> : <ArrowUpRight/>}</div><div><h1>{id ? documentNumber : "Pembayaran"}</h1><p>{String(values.payment_reference || "Tanpa referensi")}</p></div></div><div className="toova-finance-actions"><DocumentRelations groups={relatedDocuments}/></div></header>
+  return <ManagedFormShell icon={inbound ? <ArrowDownLeft/> : <ArrowUpRight/>} title={id ? documentNumber : "Pembayaran"} subtitle={String(values.payment_reference || "Tanpa referensi")} actions={<DocumentRelations groups={relatedDocuments}/>} onBack={onBack} className={`toova-payment-document ${inbound ? "inbound" : "outbound"}`}>
+    <div className="toova-payment-body"><section className="toova-payment-hero"><div className={`toova-payment-direction ${inbound ? "inbound" : "outbound"}`}>{inbound ? <ArrowDownLeft/> : <ArrowUpRight/>}</div><span>{inbound ? "Diterima dari" : "Dibayarkan kepada"}</span><h2>{Array.isArray(values.partner_id) ? String(values.partner_id[1]) : "Mitra belum ditentukan"}</h2><strong>{amount}</strong><p>{values.date ? new Date(`${values.date}T00:00:00`).toLocaleDateString("id-ID", { dateStyle: "long" }) : "Tanggal belum ditentukan"}</p><i className={posted ? "done" : "draft"}>{posted ? <CheckCircle2/> : <ReceiptText/>}{stateLabel}</i></section>
 
-    <main className="toova-payment-body"><section className="toova-payment-hero"><div className={`toova-payment-direction ${inbound ? "inbound" : "outbound"}`}>{inbound ? <ArrowDownLeft/> : <ArrowUpRight/>}</div><span>{inbound ? "Diterima dari" : "Dibayarkan kepada"}</span><h2>{Array.isArray(values.partner_id) ? String(values.partner_id[1]) : "Mitra belum ditentukan"}</h2><strong>{amount}</strong><p>{values.date ? new Date(`${values.date}T00:00:00`).toLocaleDateString("id-ID", { dateStyle: "long" }) : "Tanggal belum ditentukan"}</p><i className={posted ? "done" : "draft"}>{posted ? <CheckCircle2/> : <ReceiptText/>}{stateLabel}</i></section>
-
-      <section className="toova-payment-info"><header><Landmark/><div><h2>Detail pembayaran</h2><p>Data ini berasal dari jurnal dan rekonsiliasi native Odoo.</p></div></header><div>{field("journal_id")}{field("payment_method_line_id")}{field("partner_type")}{field("currency_id")}{field("payment_reference")}{field("is_reconciled")}</div></section></main>
-  </div>;
+      <section className="toova-payment-info"><header><Landmark/><div><h2>Detail pembayaran</h2><p>Data ini berasal dari jurnal dan rekonsiliasi native Odoo.</p></div></header><div>{field("journal_id")}{field("payment_method_line_id")}{field("partner_type")}{field("currency_id")}{field("payment_reference")}{field("is_reconciled")}</div></section></div>
+  </ManagedFormShell>;
 }

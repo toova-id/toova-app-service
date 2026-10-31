@@ -1,11 +1,12 @@
-import { ArrowLeft, Save, ShieldCheck } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Save, ShieldCheck } from "lucide-react";
 import { Button } from "@toova/components/ui/button";
+import { ManagedFormSection, ManagedFormShell } from "@toova/components/managed-form";
 import { FieldEditor, FieldValue } from "@toova/views/field-registry";
 import type { CustomFormViewProps } from "@toova/views/view-registry";
 
-export default function RoleSettingsForm({ schema, basePath, id, values, editing, saving, onEdit, onChange, onSave }: CustomFormViewProps) {
+export default function RoleSettingsForm({ schema, id, values, editing, saving, onEdit, onChange, onSave, onBack }: CustomFormViewProps) {
   const fields = Object.fromEntries((schema.form.allFields || []).map((field) => [field.name, field]));
   const field = (name: string) => { const meta = fields[name]; if (!meta) return null; return <label><span>{meta.label}</span><div>{editing ? <FieldEditor actionId={schema.id} field={meta} value={values[name]} parentValues={values} onChange={(value) => onChange(name, value)}/> : <FieldValue field={meta} value={values[name]} record={values}/>}</div></label>; };
-  return <div className="toova-settings-record"><header><Button asChild variant="ghost" size="icon"><Link to={basePath}><ArrowLeft/></Link></Button><div className="toova-settings-record-icon"><ShieldCheck/></div><div><h1>{String(values.name || "Role baru")}</h1></div><div>{(id ? schema.form.write : schema.form.create) && (editing ? <Button onClick={onSave} disabled={saving}><Save/>{saving ? "Menyimpan..." : "Simpan"}</Button> : <Button variant="outline" onClick={onEdit}>Edit</Button>)}</div></header><main><section><h2>Identitas</h2><div className="toova-settings-record-grid">{field("name")}{field("active")}{field("user_ids")}</div></section><section><h2>Hak akses</h2>{field("grant_ids")}</section></main></div>;
+  const actions = (id ? schema.form.write : schema.form.create) && (editing ? <Button onClick={onSave} disabled={saving}><Save/>{saving ? "Menyimpan..." : "Simpan"}</Button> : <Button variant="outline" onClick={onEdit}>Edit</Button>);
+  return <ManagedFormShell icon={<ShieldCheck/>} title={String(values.name || "Role baru")} subtitle="Role & hak akses" actions={actions} onBack={onBack} className="toova-settings-record"><ManagedFormSection title="Identitas"><div className="toova-settings-record-grid">{field("name")}{field("active")}{field("user_ids")}</div></ManagedFormSection><ManagedFormSection title="Hak akses">{field("grant_ids")}</ManagedFormSection></ManagedFormShell>;
 }

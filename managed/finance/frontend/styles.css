@@ -1,0 +1,87 @@
+.toova-finance-document, .toova-delivery-document, .toova-payment-document { @apply min-h-[calc(100vh-44px)] bg-background; }
+.toova-finance-status, .toova-delivery-status { @apply grid border-b bg-muted/10 px-8 md:grid-cols-3; }
+.toova-finance-status > span, .toova-delivery-status > span { @apply grid min-h-16 grid-cols-[28px_minmax(0,1fr)] content-center border-b py-3 md:border-b-0 md:border-r md:px-5; }
+.toova-finance-status > span:last-child, .toova-delivery-status > span:last-child { @apply border-0; }
+.toova-finance-status svg, .toova-delivery-status svg { @apply row-span-2 h-4 w-4 self-center text-muted-foreground; }
+.toova-finance-status i, .toova-delivery-status i { @apply text-[9px] not-italic uppercase tracking-wide text-muted-foreground; }
+.toova-finance-status b, .toova-delivery-status b { @apply text-xs font-medium; }
+.toova-finance-status [data-tone="done"] svg, .toova-delivery-status [data-tone="done"] svg { @apply text-emerald-600; }
+.toova-finance-status [data-tone="work"] svg, .toova-delivery-status [data-tone="work"] svg { @apply text-primary; }
+.toova-finance-status [data-tone="warn"] svg, .toova-delivery-status [data-tone="warn"] svg { @apply text-amber-600; }
+.toova-finance-body, .toova-delivery-body { @apply w-full; }
+.toova-finance-overview, .toova-delivery-overview { @apply grid gap-8 border-b px-8 py-7 xl:grid-cols-[minmax(320px,.8fr)_minmax(600px,1.2fr)]; }
+.toova-finance-customer, .toova-delivery-address { @apply flex min-w-0 items-start gap-3; }
+.toova-finance-customer > svg, .toova-delivery-address > svg { @apply mt-1 h-5 w-5 shrink-0 text-muted-foreground; }
+.toova-finance-customer > div, .toova-delivery-address > div { @apply min-w-0 flex-1; }
+.toova-finance-customer > div > span, .toova-delivery-address > div > span { @apply text-[9px] font-semibold uppercase tracking-wide text-muted-foreground; }
+.toova-finance-customer .hero { @apply mt-1 block; }
+.toova-finance-customer .hero > span { @apply sr-only; }
+.toova-finance-customer .hero > div, .toova-delivery-address h2 { @apply truncate text-xl font-semibold tracking-[-.02em]; }
+.toova-delivery-address p { @apply mt-1 text-[10px] text-muted-foreground; }
+.toova-finance-meta, .toova-delivery-meta { @apply grid content-start gap-x-8 gap-y-3 md:grid-cols-2; }
+.toova-finance-field, .toova-delivery-field { @apply grid min-w-0 grid-cols-[110px_minmax(0,1fr)] items-center gap-3; }
+.toova-finance-field > span, .toova-delivery-field > span { @apply text-[10px] text-muted-foreground; }
+.toova-finance-field > span b, .toova-delivery-field > span b { @apply ml-0.5 text-primary; }
+.toova-finance-field > div, .toova-delivery-field > div { @apply min-w-0 text-xs; }
+.toova-finance-lines, .toova-delivery-operations, .toova-delivery-demand { @apply border-b px-8 py-6; }
+.toova-finance-lines > header, .toova-delivery-operations > header { @apply mb-4 flex items-end justify-between gap-4; }
+.toova-finance-lines h2, .toova-delivery-operations h2, .toova-delivery-demand h2, .toova-payment-info h2 { @apply text-sm font-semibold tracking-[-.015em]; }
+.toova-finance-lines header p, .toova-delivery-operations header p, .toova-delivery-demand header p, .toova-payment-info header p { @apply mt-1 text-[10px] text-muted-foreground; }
+.toova-finance-lines header > b, .toova-delivery-operations header > b { @apply rounded-full bg-muted px-2 py-1 text-[9px] font-medium; }
+.toova-finance-lines table, .toova-delivery-lines table { @apply w-full min-w-[820px] border-collapse text-left text-[11px]; }
+.toova-finance-lines th, .toova-delivery-lines th { @apply border-b bg-muted/30 px-3 py-2 text-[9px] font-medium uppercase tracking-wide text-muted-foreground; }
+.toova-finance-lines td, .toova-delivery-lines td { @apply border-b px-3 py-3 align-top; }
+.toova-finance-lines .number { @apply text-right tabular-nums; }
+.toova-finance-empty { @apply py-10 text-center text-[10px] text-muted-foreground; }
+.toova-finance-closing { @apply grid gap-10 px-8 py-7 lg:grid-cols-[minmax(0,1fr)_380px]; }
+.toova-finance-closing .note { @apply grid-cols-1 items-start gap-2; }
+.toova-finance-closing aside { @apply rounded-md border bg-muted/10 p-5; }
+.toova-finance-closing dl { @apply space-y-2; }
+.toova-finance-closing dl > div { @apply flex justify-between border-b pb-2 text-xs; }
+.toova-finance-closing dt { @apply text-muted-foreground; }
+.toova-finance-closing dd { @apply font-medium tabular-nums; }
+.toova-finance-closing .total { @apply mt-3 border-0 pt-2 text-base; }
+.toova-finance-closing .total dt, .toova-finance-closing .total dd { @apply font-semibold text-foreground; }
+.toova-finance-closing .residual { @apply mt-3 border-t border-b-0 pt-3; }
+.toova-finance-closing aside > p { @apply mt-4 border-l-2 pl-2 text-[10px] font-medium text-muted-foreground; }
+.toova-finance-closing aside > p[data-tone="done"] { @apply border-emerald-500 text-emerald-700 dark:text-emerald-300; }
+.toova-finance-closing aside > p[data-tone="work"] { @apply border-primary text-foreground; }
+.toova-delivery-field.operations { @apply block; }
+.toova-delivery-field.operations > span { @apply sr-only; }
+.toova-delivery-lines td:last-child { @apply w-10 text-right; }
+.toova-delivery-lines td button { @apply grid h-7 w-7 place-items-center rounded hover:bg-muted; }
+.toova-delivery-lines td button svg { @apply h-3.5 w-3.5; }
+.toova-delivery-notes { @apply px-8 py-6; }
+.toova-delivery-lines td:first-child strong, .toova-delivery-lines td:first-child small { @apply block; }
+.toova-delivery-lines td:first-child small { @apply mt-0.5 text-[9px] text-muted-foreground; }
+
+.toova-payment-body { @apply mx-auto grid w-full max-w-[1200px] gap-0 lg:grid-cols-[minmax(320px,.8fr)_minmax(480px,1.2fr)]; }
+.toova-payment-hero { @apply flex min-h-[520px] flex-col items-center justify-center border-b px-8 py-12 text-center lg:border-b-0 lg:border-r; }
+.toova-payment-direction { @apply mb-5 grid h-14 w-14 place-items-center rounded-full border; }
+.toova-payment-direction svg { @apply h-6 w-6; }
+.toova-payment-direction.inbound { @apply border-emerald-500/20 bg-emerald-500/10 text-emerald-600; }
+.toova-payment-direction.outbound { @apply border-amber-500/20 bg-amber-500/10 text-amber-600; }
+.toova-payment-hero > span { @apply text-[9px] font-semibold uppercase tracking-[.1em] text-muted-foreground; }
+.toova-payment-hero h2 { @apply mt-2 text-xl font-semibold; }
+.toova-payment-hero > strong { @apply mt-6 text-3xl font-semibold tracking-[-.035em] tabular-nums; }
+.toova-payment-hero > p { @apply mt-2 text-[11px] text-muted-foreground; }
+.toova-payment-hero > i { @apply mt-8 flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] not-italic; }
+.toova-payment-hero > i svg { @apply h-3.5 w-3.5; }
+.toova-payment-hero > i.done { @apply border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300; }
+.toova-payment-info { @apply px-8 py-10; }
+.toova-payment-info > header { @apply mb-7 flex gap-3; }
+.toova-payment-info > header > svg { @apply mt-0.5 h-5 w-5 text-muted-foreground; }
+.toova-payment-info > div { @apply divide-y border-y; }
+.toova-payment-detail { @apply grid grid-cols-[160px_minmax(0,1fr)] items-center gap-4 py-4; }
+.toova-payment-detail span { @apply text-[10px] text-muted-foreground; }
+.toova-payment-detail b { @apply text-xs font-medium; }
+
+@media (max-width: 767px) {
+  .toova-finance-status, .toova-delivery-status { @apply px-4; }
+  .toova-finance-overview, .toova-delivery-overview, .toova-finance-lines, .toova-delivery-operations, .toova-delivery-demand, .toova-finance-closing, .toova-delivery-notes { @apply px-4; }
+  .toova-finance-meta, .toova-delivery-meta { @apply grid-cols-1; }
+  .toova-finance-field, .toova-delivery-field { @apply grid-cols-1 gap-1; }
+  .toova-payment-body { @apply grid-cols-1; }
+  .toova-payment-hero { @apply min-h-[360px]; }
+  .toova-payment-detail { @apply grid-cols-[120px_minmax(0,1fr)]; }
+}

@@ -1,3 +1,4 @@
+import "./styles.css";
 import "./navigation";
 import { PackageCheck } from "lucide-react";
 import { registerClientAction, registerModuleIcon } from "@toova/features/feature-registry";

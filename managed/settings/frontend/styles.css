@@ -1,0 +1,79 @@
+.toova-settings-workspace { @apply grid min-h-[calc(100vh-44px)] grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)]; }
+.toova-settings-sidebar { @apply border-b lg:border-b-0 lg:border-r; }
+.toova-settings-sidebar > header { @apply border-b px-5 py-4; }
+.toova-settings-sidebar > header h1 { @apply text-base font-semibold; }
+.toova-settings-sidebar > header p { @apply mt-1 text-[11px] text-muted-foreground; }
+.toova-settings-sidebar nav { @apply flex gap-1 overflow-x-auto p-2 lg:flex-col lg:overflow-visible; }
+.toova-settings-sidebar nav > button { @apply flex min-w-52 items-center gap-3 px-3 py-2.5 text-left hover:bg-muted lg:min-w-0; }
+.toova-settings-sidebar nav > button.module-start { @apply lg:relative lg:mt-3; }
+.toova-settings-sidebar nav > button.module-start::before { content: ""; @apply hidden lg:absolute lg:-top-2 lg:left-0 lg:right-0 lg:block lg:h-px lg:bg-border; }
+.toova-settings-sidebar nav > button.active { @apply bg-accent text-accent-foreground; }
+.toova-settings-sidebar nav button > svg:first-child { @apply h-4 w-4 shrink-0 text-muted-foreground; }
+.toova-settings-sidebar nav button > svg:last-child { @apply ml-auto h-3.5 w-3.5 shrink-0 text-muted-foreground; }
+.toova-settings-sidebar nav button > span { @apply flex min-w-0 flex-col; }
+.toova-settings-sidebar nav button strong { @apply text-xs font-semibold; }
+.toova-settings-sidebar nav button small { @apply max-w-40 truncate text-[10px] text-muted-foreground; }
+.toova-settings-content { @apply min-w-0; }
+.toova-settings-content-header { @apply flex min-h-[70px] flex-col justify-between gap-2 border-b px-6 py-4 md:flex-row md:items-center; }
+.toova-settings-content-header h2 { @apply text-lg font-semibold; }
+.toova-settings-content-header p { @apply text-xs text-muted-foreground; }
+.toova-settings-content-header > b { @apply text-[10px] font-medium text-emerald-700 dark:text-emerald-300; }
+.toova-settings-content-header > b.warning { @apply text-amber-700 dark:text-amber-300; }
+.toova-settings-content-body { @apply min-w-0; }
+.toova-settings-content > footer { @apply border-t px-6 py-3 text-[10px] text-muted-foreground; }
+
+.toova-settings-provider { @apply flex flex-col; }
+.toova-settings-provider-actions { @apply sticky top-11 z-10 flex min-h-12 items-center justify-between border-b bg-background/95 px-6 py-2 text-xs text-muted-foreground backdrop-blur; }
+.toova-settings-provider-actions svg { @apply h-3.5 w-3.5; }
+.toova-settings-provider > section { @apply border-b px-6 py-5 last:border-b-0; }
+.toova-settings-provider > section > header h2 { @apply text-sm font-semibold; }
+.toova-settings-provider > section > header p { @apply mt-1 text-xs text-muted-foreground; }
+.toova-settings-options { @apply mt-4 grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2; }
+.toova-settings-options > label, .toova-settings-info { @apply flex min-h-16 flex-col justify-between gap-2 border-b pb-4 text-xs; }
+.toova-settings-options > label > span, .toova-settings-info strong { @apply font-semibold; }
+.toova-settings-profile { @apply flex min-h-[88px] items-center gap-4 border-b px-6 py-4; }
+.toova-settings-profile-mark { @apply grid h-11 w-11 shrink-0 place-items-center bg-primary/10 text-primary; }
+.toova-settings-profile-mark svg { @apply h-5 w-5; }
+.toova-settings-profile > div:nth-child(2) { @apply min-w-0 flex-1; }
+.toova-settings-profile span { @apply text-[10px] font-medium text-muted-foreground; }
+.toova-settings-profile h2 { @apply truncate text-base font-semibold; }
+.toova-settings-profile p { @apply truncate text-xs text-muted-foreground; }
+.toova-settings-record-grid { @apply mt-4 grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2; }
+.toova-settings-record-grid > label { @apply flex flex-col gap-1.5 text-xs; }
+.toova-settings-record-grid > label > span { @apply text-[11px] font-medium text-muted-foreground; }
+
+.toova-settings-record { @apply flex flex-col; }
+.toova-settings-record > header { @apply grid min-h-[74px] grid-cols-[auto_auto_1fr_auto] items-center gap-3 border-b px-6 py-3; }
+.toova-settings-record header h1 { @apply text-base font-semibold; }
+.toova-settings-record header p { @apply text-xs text-muted-foreground; }
+.toova-settings-record > main > section { @apply border-b px-6 py-5 last:border-b-0; }
+.toova-settings-record > main > section > h2 { @apply text-sm font-semibold; }
+.toova-settings-record > main > section > p { @apply mt-1 text-xs text-muted-foreground; }
+
+.toova-settings-collection { @apply flex flex-col; }
+.toova-settings-collection > header { @apply flex min-h-[60px] w-full items-center justify-between gap-3 border-b px-6 py-3; }
+.toova-settings-collection-search { @apply relative w-full max-w-none md:max-w-md; }
+.toova-settings-collection-search > svg { @apply absolute left-3 top-2 h-4 w-4 text-muted-foreground; }
+.toova-settings-collection-search input { @apply pl-9; }
+.toova-settings-collection-list { @apply w-full; }
+.toova-settings-collection-list > button { @apply grid min-h-14 w-full grid-cols-[36px_minmax(140px,1fr)_minmax(140px,1fr)_64px] items-center gap-3 border-b px-6 text-left hover:bg-muted/50; }
+.toova-settings-collection-list > button:last-of-type { @apply border-b-0; }
+.toova-settings-collection-list > button > span { @apply grid h-8 w-8 place-items-center bg-muted text-muted-foreground; }
+.toova-settings-collection-list > button > span svg { @apply h-4 w-4; }
+.toova-settings-collection-list > button strong { @apply min-w-0 truncate text-xs; }
+.toova-settings-collection-list > button small { @apply min-w-0 truncate text-[11px] text-muted-foreground; }
+.toova-settings-collection-list > button > b { @apply justify-self-end text-[9px] font-medium; }
+.toova-settings-collection-list > button > b.active { @apply text-emerald-700; }
+.toova-settings-collection-list > button > b.inactive { @apply text-muted-foreground; }
+
+.toova-role-matrix { @apply mt-4 flex flex-col border-t; }
+.toova-role-matrix > section { @apply border-b; }
+.toova-role-matrix > section > header { @apply flex flex-col justify-between gap-3 bg-muted/30 px-4 py-3 md:flex-row md:items-center; }
+.toova-role-matrix > section > header h3 { @apply text-xs font-semibold; }
+.toova-role-matrix > section > header div { @apply flex gap-1; }
+.toova-role-matrix button { @apply border px-2.5 py-1.5 text-[10px] font-medium text-muted-foreground hover:bg-muted disabled:opacity-50; }
+.toova-role-row { @apply flex flex-col justify-between gap-3 border-t px-4 py-3 md:flex-row md:items-center; }
+.toova-role-row > span { @apply text-xs font-medium; }
+.toova-role-row > div { @apply grid grid-cols-3 bg-muted p-0.5; }
+.toova-role-row > div button { @apply border-0 bg-transparent; }
+.toova-role-row > div button.active { @apply bg-background text-foreground shadow-[var(--shadow-control)]; }

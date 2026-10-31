@@ -1,6 +1,6 @@
-import { ArrowLeft, UserRound } from "lucide-react";
-import { Link } from "react-router-dom";
+import { UserRound } from "lucide-react";
 import { Button } from "@toova/components/ui/button";
+import { ManagedFormSection, ManagedFormShell } from "@toova/components/managed-form";
 import { FieldEditor, FieldValue, registerFieldEditor, registerFieldRenderer } from "@toova/views/field-registry";
 import type { CustomFormViewProps } from "@toova/views/view-registry";
 import type { PermissionFeature } from "@toova/features/settings/settings-registry";
@@ -25,12 +25,13 @@ registerFieldEditor("managed_permission_matrix", ({ actionId, value, onChange })
 registerFieldRenderer("managed_permission_matrix", ({ value }) => <span>{Array.isArray(value) ? `${value.length} akses` : "Belum ada akses"}</span>);
 
 function SettingsFormShell({ props }: { props: CustomFormViewProps }) {
-  const { schema, basePath, id, values, editing, saving, onEdit, onChange, onSave } = props;
+  const { schema, id, values, editing, saving, onEdit, onChange, onSave, onBack } = props;
   const Icon = UserRound;
   const title = String(values.name || "Pengguna baru");
   const fields = Object.fromEntries((schema.form.allFields || []).map((field) => [field.name, field]));
   const field = (name: string) => { const meta = fields[name]; if (!meta) return null; return <label><span>{meta.label}</span><div>{editing ? <FieldEditor actionId={schema.id} field={meta} value={values[name]} parentValues={values} onChange={(value) => onChange(name, value)}/> : <FieldValue field={meta} value={values[name]} record={values}/>}</div></label>; };
-  return <div className="toova-settings-record"><header><Button asChild variant="ghost" size="icon"><Link to={basePath}><ArrowLeft/></Link></Button><div className="toova-settings-record-icon"><Icon/></div><div><h1>{title}</h1><p>{String(values.email || values.login || "Email belum diisi")}</p></div><div>{(id ? schema.form.write : schema.form.create) && (editing ? <Button onClick={onSave} disabled={saving}>{saving ? "Menyimpan..." : "Simpan"}</Button> : <Button variant="outline" onClick={onEdit}>Edit</Button>)}</div></header><main>{schema.form.sections.map((section) => <section key={section.id || section.label}><h2>{section.label}</h2>{section.description && <p>{section.description}</p>}<div className="toova-settings-record-grid">{section.fields.map((meta) => field(meta.name))}</div></section>)}</main></div>;
+  const actions = (id ? schema.form.write : schema.form.create) && (editing ? <Button onClick={onSave} disabled={saving}>{saving ? "Menyimpan..." : "Simpan"}</Button> : <Button variant="outline" onClick={onEdit}>Edit</Button>);
+  return <ManagedFormShell icon={<Icon/>} title={title} subtitle={String(values.email || values.login || "Email belum diisi")} actions={actions} onBack={onBack} className="toova-settings-record">{schema.form.sections.map((section) => <ManagedFormSection key={section.id || section.label} title={section.label} description={section.description}><div className="toova-settings-record-grid">{section.fields.map((meta) => field(meta.name))}</div></ManagedFormSection>)}</ManagedFormShell>;
 }
 
 export function UserSettingsForm(props: CustomFormViewProps) { return <SettingsFormShell props={props}/>; }

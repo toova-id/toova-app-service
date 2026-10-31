@@ -1,7 +1,7 @@
-import { ArrowLeft, Building2, Landmark, MapPin, Save, UserRound } from "lucide-react";
+import { Building2, Landmark, MapPin, Save, UserRound } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { Button } from "@toova/components/ui/button";
+import { ManagedFormSection, ManagedFormShell } from "@toova/components/managed-form";
 import { FieldEditor, FieldValue } from "@toova/views/field-registry";
 import { modifierActive } from "@toova/views/modifiers";
 import type { CustomFormViewProps } from "@toova/views/view-registry";
@@ -11,7 +11,7 @@ type Tab = "summary" | "addresses" | "contacts" | "commercial" | "tax";
 type Kind = "customer" | "vendor";
 
 export default function PartyForm(props: CustomFormViewProps & { kind: Kind }) {
-  const { schema, basePath, id, values, editing, saving, onEdit, onChange, onSave, kind } = props;
+  const { schema, id, values, editing, saving, onEdit, onChange, onSave, onBack, kind } = props;
   const [tab, setTab] = useState<Tab>("summary");
   const customer = kind === "customer";
   const noun = customer ? "Pelanggan" : "Vendor";
@@ -26,27 +26,20 @@ export default function PartyForm(props: CustomFormViewProps & { kind: Kind }) {
     if (!meta || modifierActive(meta.modifiers, "invisible", values)) return null;
     const readonly = Boolean(meta.readonly) || modifierActive(meta.modifiers, "readonly", values);
     const required = Boolean(meta.required) || modifierActive(meta.modifiers, "required", values);
-    return <label className={`toova-customer-field ${className}`} title={meta.help}>
+    return <label className={`managed-form-field toova-customer-field ${className}`} title={meta.help}>
       <span>{meta.label}{required && <b>*</b>}</span>
       <div>{editing && !readonly ? <FieldEditor actionId={schema.id} field={meta} value={values[name]} parentValues={values} onChange={(value) => onChange(name, value)}/> : <FieldValue field={meta} value={values[name]} record={values}/>}</div>
     </label>;
   };
 
-  const section = (title: string, description: string, content: JSX.Element) => <section className="toova-customer-section"><header><h2>{title}</h2><p>{description}</p></header>{content}</section>;
+  const section = (title: string, description: string, content: JSX.Element) => <ManagedFormSection title={title} description={description} className="toova-customer-section">{content}</ManagedFormSection>;
   const image = fields.image_1920 ? <div className="toova-customer-field"><span className="sr-only">Logo</span><div>{editing ? <FieldEditor actionId={schema.id} field={fields.image_1920} value={values.image_1920} onChange={(value) => onChange("image_1920", value)}/> : <FieldValue field={fields.image_1920} value={values.image_1920} record={values}/>}</div></div> : null;
   const tabs: [Tab, string, number?][] = [["summary", "Ringkasan"], ["addresses", "Alamat", addressCount], ["contacts", "Kontak/PIC", contactCount], ["commercial", customer ? "Penjualan & Keuangan" : "Pembelian & Keuangan"], ["tax", customer ? "Pajak & Coretax" : "Pajak & Bank", customer ? undefined : bankCount]];
   const indonesia = Array.isArray(values.country_id) && values.country_id[1] === "Indonesia";
   const addressFields = <div className="toova-customer-grid">{field("managed_address_text", "wide")}{field("country_id")}{field("state_id")}{indonesia && field("managed_indonesia_regency_id")}{indonesia && field("managed_indonesia_district_id")}{indonesia && field("managed_indonesia_village_id")}{!indonesia && field("city")}{field("zip")}</div>;
 
-  return <div className="toova-customer">
-    <header className="toova-customer-header">
-      <div className="toova-customer-title"><Button asChild variant="ghost" size="icon"><Link to={basePath}><ArrowLeft className="h-3.5 w-3.5"/></Link></Button><div className="toova-customer-avatar">{values.company_type === "person" ? <UserRound/> : <Building2/>}</div><div><h1>{id ? String(values.name || values.display_name || noun) : `${noun} baru`}</h1><p>{values.company_type === "person" ? "Individu" : "Perusahaan"} · {values.active === false ? "Diarsipkan" : "Aktif"}</p></div></div>
-      <div className="toova-customer-actions">{(id ? schema.form.write : schema.form.create) && (editing ? <Button onClick={onSave} disabled={saving}><Save className="h-3.5 w-3.5"/>{saving ? "Menyimpan..." : "Simpan"}</Button> : <Button variant="outline" onClick={onEdit}>Edit</Button>)}</div>
-    </header>
-
-    <nav className="toova-customer-tabs" aria-label={`Bagian ${noun.toLowerCase()}`}>{tabs.map(([key, label, count]) => <button key={key} type="button" className={tab === key ? "active" : undefined} onClick={() => setTab(key)}>{label}{count !== undefined && <i>{count}</i>}</button>)}</nav>
-
-    <main className="toova-customer-body">
+  const actions = (id ? schema.form.write : schema.form.create) && (editing ? <Button onClick={onSave} disabled={saving}><Save className="h-3.5 w-3.5"/>{saving ? "Menyimpan..." : "Simpan"}</Button> : <Button variant="outline" onClick={onEdit}>Edit</Button>);
+  return <ManagedFormShell icon={values.company_type === "person" ? <UserRound/> : <Building2/>} title={id ? String(values.name || values.display_name || noun) : `${noun} baru`} subtitle={`${values.company_type === "person" ? "Individu" : "Perusahaan"} · ${values.active === false ? "Diarsipkan" : "Aktif"}`} actions={actions} tabs={tabs.map(([key, label, count]) => ({ key, label, count }))} activeTab={tab} onTabChange={setTab} onBack={onBack} className="toova-customer">
       {tab === "summary" && <>
         {section(`Identitas ${noun.toLowerCase()}`, `Identitas legal dan kanal komunikasi utama ${noun.toLowerCase()}.`, <div className="toova-customer-overview"><div className="toova-customer-logo">{image}</div><div className="toova-customer-grid">{field("company_type")}{field("name")}{field("email")}{field("phone")}{field("mobile")}{field("website")}{field("lang")}{field("category_id")}</div></div>)}
         {section("Alamat utama", customer ? "Fallback penagihan dan pengiriman jika belum ada alamat khusus." : "Alamat legal dan korespondensi utama untuk purchase order dan vendor bill.", addressFields)}
@@ -62,6 +55,5 @@ export default function PartyForm(props: CustomFormViewProps & { kind: Kind }) {
         {section(customer ? "Pajak & Coretax" : "Pajak vendor", customer ? "Identitas pajak berada pada customer utama, bukan alamat pengiriman." : "Identitas pajak berada pada vendor utama, bukan PIC atau lokasi cabang.", <div className="toova-customer-grid">{field("l10n_id_pkp")}{field("vat")}{field("l10n_id_nik")}{field("l10n_id_tku")}{field("l10n_id_buyer_document_type")}{field("l10n_id_buyer_document_number")}{field("l10n_id_tax_name")}{field("l10n_id_tax_address", "wide")}{customer && field("l10n_id_kode_transaksi")}</div>)}
         {!customer && section("Rekening pembayaran", "Rekening resmi vendor untuk pembayaran keluar. Verifikasi perubahan rekening di luar sistem sebelum membayar.", <div className="toova-customer-relation"><div className="toova-vendor-bank-heading"><Landmark/><span>{bankCount} rekening aktif</span></div>{field("bank_ids")}</div>)}
       </>}
-    </main>
-  </div>;
+  </ManagedFormShell>;
 }

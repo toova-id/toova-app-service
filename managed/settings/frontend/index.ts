@@ -1,3 +1,4 @@
+import "./styles.css";
 import "./views";
 import { registerClientAction } from "@toova/features/feature-registry";
 import SettingsShell from "@toova/features/settings/settings-shell";

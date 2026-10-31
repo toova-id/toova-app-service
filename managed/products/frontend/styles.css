@@ -1,0 +1,161 @@
+.toova-product-inventory-summary { @apply grid gap-3; }
+.toova-product-stock-status { @apply flex items-center gap-3 rounded-md border bg-muted/20 px-4 py-3; }
+.toova-product-stock-status > i { @apply h-2 w-2 shrink-0 rounded-full bg-muted-foreground/50; }
+.toova-product-stock-status.tracked > i { @apply bg-primary; box-shadow: 0 0 0 4px rgb(0 206 124 / .10); }
+.toova-product-stock-status > div { @apply flex min-w-0 flex-col gap-0.5; }
+.toova-product-stock-status strong { @apply text-[11px] font-medium; }
+.toova-product-stock-status span { @apply text-[9px] text-muted-foreground; }
+.toova-product-metrics { @apply grid grid-cols-1 overflow-hidden rounded-md border bg-background sm:grid-cols-2; }
+.toova-product-metrics article { @apply flex min-h-32 gap-4 border-b p-5 sm:border-b-0 sm:border-r; }
+.toova-product-metrics article:last-child { @apply border-b-0 sm:border-r-0; }
+.toova-product-metric-icon { @apply grid h-9 w-9 shrink-0 place-items-center rounded-md bg-accent text-accent-foreground; }
+.toova-product-metric-icon svg { @apply h-4 w-4; }
+.toova-product-metrics article.forecast .toova-product-metric-icon { @apply bg-muted text-muted-foreground; }
+.toova-product-metric-copy { @apply flex min-w-0 flex-1 flex-col; }
+.toova-product-metric-copy > span { @apply text-[9px] font-semibold uppercase tracking-[.06em] text-muted-foreground; }
+.toova-product-metric-copy > strong { @apply mt-1 flex items-baseline gap-1.5 text-2xl font-semibold tracking-[-.035em] tabular-nums; }
+.toova-product-metric-copy > strong small { @apply max-w-32 truncate text-[10px] font-normal tracking-normal text-muted-foreground; }
+.toova-product-metric-copy > p { @apply mt-auto pt-2 text-[9px] text-muted-foreground; }
+.toova-product-empty { @apply mx-8 my-8 grid min-h-48 place-items-center content-center gap-2 rounded-md border border-dashed bg-muted/10 px-5 text-center; }
+.toova-product-empty > svg { @apply h-6 w-6 text-muted-foreground; }
+.toova-product-empty strong { @apply text-xs font-medium; }
+.toova-product-empty span { @apply max-w-md text-[10px] text-muted-foreground; }
+.toova-variant-config { @apply overflow-hidden rounded-md border; }
+.toova-variant-preview { @apply flex flex-col justify-between gap-3 border-b bg-muted/20 px-4 py-3 sm:flex-row sm:items-center; }
+.toova-variant-preview > div { @apply flex items-baseline gap-2; }
+.toova-variant-preview strong { @apply text-lg font-semibold tabular-nums; }
+.toova-variant-preview span { @apply text-[10px] text-muted-foreground; }
+.toova-variant-preview p { @apply text-[9px] text-muted-foreground; }
+.toova-attribute-lines { @apply divide-y; }
+.toova-attribute-lines > article { @apply grid gap-3 p-4; }
+.toova-attribute-lines article > header { @apply flex items-center justify-between gap-3; }
+.toova-attribute-lines article > header small { @apply text-[9px] text-muted-foreground; }
+.toova-attribute-lines article > header button { @apply grid h-8 w-8 shrink-0 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-destructive; }
+.toova-attribute-lines article > header svg { @apply h-3.5 w-3.5; }
+.toova-attribute-line-fields { @apply grid min-w-0 gap-3 lg:grid-cols-[minmax(260px,.7fr)_minmax(360px,1.3fr)]; }
+.toova-attribute-line-fields > label { @apply min-w-0; }
+.toova-attribute-line-fields .toova-combobox-trigger, .toova-attribute-line-fields .toova-multi-select { @apply w-full; }
+.toova-attribute-lines label { @apply grid min-w-0 gap-1; }
+.toova-attribute-lines label > span { @apply text-[9px] font-medium text-muted-foreground; }
+.toova-attribute-prices { @apply min-w-0 overflow-hidden rounded-md border; }
+.toova-attribute-prices > header, .toova-attribute-prices > label { @apply grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(130px,180px)] items-center gap-4 px-3; }
+.toova-attribute-prices > header { @apply min-h-8 bg-muted/40 text-[9px] font-medium uppercase tracking-[.02em] text-muted-foreground; }
+.toova-attribute-prices > header span:last-child { @apply text-right; }
+.toova-attribute-prices > label { @apply min-h-10 border-t; }
+.toova-attribute-prices > label > span { @apply min-w-0 truncate text-[10px] font-medium; }
+.toova-attribute-prices > label > div { @apply grid grid-cols-[14px_minmax(0,1fr)] items-center gap-1; }
+.toova-attribute-prices > label > div > span { @apply text-center text-[10px] text-muted-foreground; }
+.toova-attribute-prices input { @apply h-7 min-w-0 w-full rounded-md border border-input bg-background px-2 text-right text-[11px] outline-none focus:border-[var(--focus-border)]; }
+.toova-variant-empty { @apply grid gap-1 px-4 py-8 text-center text-[10px] text-muted-foreground; }
+.toova-variant-empty strong { @apply text-xs font-medium text-foreground; }
+.toova-variant-empty > a { @apply mx-auto mt-2; }
+.toova-attribute-summary { @apply flex flex-wrap gap-1.5; }
+.toova-attribute-summary > span { @apply inline-flex gap-1 rounded bg-muted px-2 py-1 text-[10px]; }
+.toova-attribute-summary strong { @apply font-medium; }
+.toova-attribute-summary i { @apply text-[10px] not-italic text-muted-foreground; }
+.toova-attribute-color { @apply h-2.5 w-2.5 rounded-full border; }
+.toova-attribute-name { @apply grid gap-4 md:grid-cols-2; }
+.toova-attribute-values { @apply min-w-0 overflow-hidden rounded-md border; }
+.toova-attribute-values-head, .toova-attribute-value-row { @apply grid min-w-0 grid-cols-[minmax(0,1fr)_32px] items-start gap-3 px-3; }
+.toova-attribute-values-head .name, .toova-attribute-value-name { @apply col-start-1 row-start-1 min-w-0; }
+.toova-attribute-values-head .actions, .toova-attribute-value-row > button { @apply col-start-2 row-start-1; }
+.toova-attribute-values-head .color, .toova-attribute-values-head .custom { @apply hidden; }
+.toova-attribute-color-input, .toova-attribute-custom { @apply col-span-full col-start-1 row-start-2; }
+.toova-attribute-values.advanced.color-mode .toova-attribute-custom { @apply row-start-3; }
+.toova-attribute-values.color-mode .toova-attribute-values-head, .toova-attribute-values.color-mode .toova-attribute-value-row { @apply sm:grid-cols-[minmax(0,1fr)_150px_32px]; }
+.toova-attribute-values.color-mode .toova-attribute-values-head .color, .toova-attribute-values.color-mode .toova-attribute-color-input { @apply sm:col-span-1 sm:col-start-2 sm:row-start-1; }
+.toova-attribute-values.color-mode .toova-attribute-values-head .color { @apply sm:block; }
+.toova-attribute-values.color-mode .toova-attribute-values-head .actions, .toova-attribute-values.color-mode .toova-attribute-value-row > button { @apply sm:col-start-3; }
+.toova-attribute-values.advanced:not(.color-mode) .toova-attribute-values-head, .toova-attribute-values.advanced:not(.color-mode) .toova-attribute-value-row { @apply sm:grid-cols-[minmax(0,1fr)_150px_32px]; }
+.toova-attribute-values.advanced:not(.color-mode) .toova-attribute-values-head .custom, .toova-attribute-values.advanced:not(.color-mode) .toova-attribute-custom { @apply sm:col-span-1 sm:col-start-2 sm:row-start-1; }
+.toova-attribute-values.advanced:not(.color-mode) .toova-attribute-values-head .custom { @apply sm:block; }
+.toova-attribute-values.advanced:not(.color-mode) .toova-attribute-values-head .actions, .toova-attribute-values.advanced:not(.color-mode) .toova-attribute-value-row > button { @apply sm:col-start-3; }
+.toova-attribute-values.advanced.color-mode .toova-attribute-values-head, .toova-attribute-values.advanced.color-mode .toova-attribute-value-row { @apply sm:grid-cols-[minmax(0,1fr)_150px_150px_32px]; }
+.toova-attribute-values.advanced.color-mode .toova-attribute-values-head .custom, .toova-attribute-values.advanced.color-mode .toova-attribute-custom { @apply sm:col-span-1 sm:col-start-3 sm:row-start-1; }
+.toova-attribute-values.advanced.color-mode .toova-attribute-values-head .custom { @apply sm:block; }
+.toova-attribute-values.advanced.color-mode .toova-attribute-values-head .actions, .toova-attribute-values.advanced.color-mode .toova-attribute-value-row > button { @apply sm:col-start-4; }
+.toova-attribute-values-head { @apply min-h-8 items-center bg-muted/40 text-[9px] font-medium uppercase tracking-[.02em] text-muted-foreground; }
+.toova-attribute-value-row { @apply min-h-11 border-t py-1.5; }
+.toova-attribute-value-row.invalid input { @apply border-destructive; }
+.toova-attribute-value-row small { @apply mt-1 block text-[9px] text-destructive; }
+.toova-attribute-value-row > button { @apply grid h-8 w-8 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-destructive; }
+.toova-attribute-value-row > button svg { @apply h-3 w-3; }
+.toova-attribute-color-input { @apply flex h-8 items-center gap-2 rounded-md border px-2 text-[10px] text-muted-foreground; }
+.toova-attribute-color-input input { @apply h-5 w-7 cursor-pointer border-0 bg-transparent p-0; }
+.toova-attribute-custom { @apply flex h-8 items-center gap-2 text-[10px] text-muted-foreground; }
+.toova-attribute-keyboard-hint { @apply border-t px-3 py-2 text-[9px] text-muted-foreground; }
+.toova-attribute-unit-note { @apply mt-3 flex gap-3 rounded-md border bg-muted/20 p-3; }
+.toova-attribute-unit-note > svg { @apply mt-0.5 h-4 w-4 shrink-0 text-muted-foreground; }
+.toova-attribute-unit-note > div { @apply grid gap-0.5; }
+.toova-attribute-unit-note strong { @apply text-[10px] font-medium; }
+.toova-attribute-unit-note span { @apply text-[9px] leading-relaxed text-muted-foreground; }
+.toova-attribute-advanced-section { @apply py-6; }
+.toova-attribute-advanced { @apply min-w-0 overflow-hidden rounded-md border; }
+.toova-attribute-advanced > button { @apply flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/30; }
+.toova-attribute-advanced > button > div { @apply grid gap-0.5; }
+.toova-attribute-advanced > button strong { @apply text-xs font-medium; }
+.toova-attribute-advanced > button span { @apply text-[9px] text-muted-foreground; }
+.toova-attribute-advanced > button svg { @apply h-4 w-4 text-muted-foreground transition-transform; }
+.toova-attribute-advanced > button svg.open { @apply rotate-180; }
+.toova-attribute-advanced > .toova-customer-grid { @apply border-t p-4; }
+.toova-attribute-mode-lock { @apply col-span-full text-[9px] text-amber-700; }
+.toova-attribute-usage { @apply grid gap-4 md:grid-cols-2; }
+.toova-variants-table { @apply overflow-x-auto rounded-md border; }
+.toova-variants-table table { @apply w-full min-w-[880px] border-collapse text-[11px]; }
+.toova-variants-table th { @apply h-9 border-b bg-muted/40 px-3 text-left text-[9px] font-medium uppercase tracking-[.02em] text-muted-foreground; }
+.toova-variants-table td { @apply h-12 border-b px-3 tabular-nums; }
+.toova-variants-table tr:last-child td { @apply border-b-0; }
+.toova-variant-name { @apply flex items-center gap-2; }
+.toova-variant-name > span, .toova-variant-name > svg { @apply h-7 w-7 shrink-0 rounded bg-muted p-1.5 text-muted-foreground; }
+.toova-variant-name strong { @apply max-w-60 truncate font-medium; }
+.toova-variants-read { @apply grid gap-1; }
+.toova-variants-read > span { @apply grid grid-cols-[minmax(100px,1fr)_minmax(90px,.5fr)_90px] gap-3 border-b py-1.5 text-[10px] last:border-b-0; }
+.toova-variants-read i { @apply not-italic text-muted-foreground; }
+.toova-variants-read b { @apply text-right font-medium tabular-nums; }
+.toova-category-summary { @apply grid gap-4 md:grid-cols-2; }
+.toova-pricelist-rules-value { @apply overflow-hidden rounded-md border; }
+.toova-pricelist-rules-value table { @apply w-full min-w-[720px] border-collapse text-left text-[10px]; }
+.toova-pricelist-rules-value th { @apply border-b bg-muted/40 px-3 py-2 text-[9px] font-medium uppercase tracking-[.02em] text-muted-foreground; }
+.toova-pricelist-rules-value td { @apply border-b px-3 py-3 tabular-nums last:border-b-0; }
+.toova-pricelist-rules-value tbody tr:last-child td { @apply border-b-0; }
+.toova-pricelist-rules-value td:first-child strong, .toova-pricelist-rules-value td:first-child small { @apply block; }
+.toova-pricelist-rules-value td:first-child strong { @apply font-medium; }
+.toova-pricelist-rules-value td:first-child small { @apply mt-0.5 text-[9px] text-muted-foreground; }
+.toova-pricelist-rules-value .managed-relation-card-empty { @apply border-0; }
+.toova-pricelist-rule-list { @apply overflow-hidden rounded-md border; }
+.toova-pricelist-rule-list > article { @apply grid min-h-12 grid-cols-[32px_minmax(0,1fr)_max-content] items-center gap-3 border-b px-3 last:border-b-0; }
+.toova-pricelist-rule-icon { @apply grid h-7 w-7 place-items-center rounded-md bg-muted text-muted-foreground; }
+.toova-pricelist-rule-icon svg { @apply h-3.5 w-3.5; }
+.toova-pricelist-rule-list > article > div:nth-child(2) { @apply grid min-w-0 gap-0.5; }
+.toova-pricelist-rule-list strong { @apply truncate text-[10px] font-medium; }
+.toova-pricelist-rule-list span { @apply truncate text-[9px] text-muted-foreground; }
+.toova-pricelist-rules > .workspace-relation-add { @apply mt-2; }
+.toova-pricelist-rule-drawer main { @apply grid grid-cols-2 gap-3; }
+.toova-pricelist-rule-drawer main > label { @apply grid min-w-0 gap-1; }
+.toova-pricelist-rule-drawer main > label.wide, .toova-pricelist-rule-drawer main > .wide { @apply col-span-full; }
+.toova-pricelist-rule-drawer main > label > span { @apply text-[9px] font-medium text-muted-foreground; }
+.toova-pricelist-rule-drawer main input:not([type=checkbox]), .toova-pricelist-rule-drawer main button[role=combobox] { @apply h-8 w-full; }
+.toova-pricelist-advanced-toggle { @apply h-8 rounded-md border border-dashed text-[10px] text-muted-foreground hover:bg-muted/30; }
+.toova-pricelist-target-hint { @apply rounded-md border border-dashed bg-muted/20 px-3 py-2 text-[9px] text-muted-foreground; }
+.toova-uom-unit-list { @apply overflow-hidden rounded-md border; }
+.toova-uom-unit-list > article { @apply grid min-h-12 grid-cols-[32px_minmax(0,1fr)_max-content] items-center gap-3 border-b px-3 last:border-b-0; }
+.toova-uom-unit-icon { @apply grid h-7 w-7 place-items-center rounded-md bg-muted text-muted-foreground; }
+.toova-uom-unit-icon svg { @apply h-3.5 w-3.5; }
+.toova-uom-unit-list > article > div:nth-child(2) { @apply grid min-w-0 gap-0.5; }
+.toova-uom-unit-list strong { @apply flex min-w-0 items-center gap-2 truncate text-[10px] font-medium; }
+.toova-uom-unit-list strong i { @apply shrink-0 rounded-full bg-primary/10 px-1.5 py-0.5 text-[8px] font-medium not-italic text-primary; }
+.toova-uom-unit-list span { @apply truncate text-[9px] text-muted-foreground; }
+.toova-uom-units > .workspace-relation-add { @apply mt-2; }
+.toova-uom-unit-drawer main { @apply grid grid-cols-2 gap-3; }
+.toova-uom-unit-drawer main > label { @apply grid min-w-0 gap-1; }
+.toova-uom-unit-drawer main > label.wide { @apply col-span-full; }
+.toova-uom-unit-drawer main > label > span { @apply text-[9px] font-medium text-muted-foreground; }
+.toova-uom-unit-drawer main > label > small { @apply text-[9px] text-amber-700; }
+.toova-uom-equation { @apply grid grid-cols-[max-content_14px_minmax(100px,1fr)_max-content] items-center gap-2 rounded-md border bg-muted/20 p-2; }
+.toova-uom-equation > b { @apply text-[10px] font-medium; }
+.toova-uom-equation > span { @apply text-center text-muted-foreground; }
+.toova-uom-equation input { @apply bg-background; }
+.toova-uom-read { @apply overflow-hidden rounded-md border; }
+.toova-uom-read > span { @apply grid min-h-10 grid-cols-[minmax(100px,.4fr)_minmax(0,1fr)] items-center gap-3 border-b px-3 text-[10px] last:border-b-0; }
+.toova-uom-read strong { @apply font-medium; }
+.toova-uom-read i { @apply truncate not-italic text-muted-foreground; }

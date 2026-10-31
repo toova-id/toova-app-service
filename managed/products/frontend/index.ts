@@ -1,3 +1,5 @@
+import "../../directory/frontend/styles.css";
+import "./styles.css";
 import "./views";
 import "./navigation";
 import { registerFieldEditor, registerFieldRenderer } from "@toova/views/field-registry";

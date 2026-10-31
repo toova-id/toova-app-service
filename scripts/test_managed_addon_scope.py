@@ -57,6 +57,21 @@ assert '--runtime-role=http' in restart_script and '--runtime-role=realtime' in 
 assert '--session-store=redis' in restart_script and 'managed.realtime_url' in restart_script, \
     'local HTTP/realtime roles must share Redis sessions and publish direct websocket URL'
 assert 'nginx' not in restart_script.lower(), 'local realtime stack must not require nginx'
+frontend_entries = {path: path.read_text() for path in (ROOT / 'managed').glob('*/frontend/index.ts')}
+for style_path in (ROOT / 'managed').glob('*/frontend/styles.css'):
+    addon = style_path.parents[1].name
+    assert any(
+        f'{addon}/frontend/styles.css' in source or (path.parent == style_path.parent and './styles.css' in source)
+        for path, source in frontend_entries.items()
+    ), f'managed addon CSS must be imported by a managed frontend entry: {style_path}'
+globals_css = (ROOT / 'frontend/src/styles/globals.css').read_text()
+domain_prefixes = (
+    'toova-sales-', 'toova-product-', 'toova-customer-', 'toova-finance-', 'toova-delivery-',
+    'toova-payment-', 'toova-warehouse-', 'toova-settings-', 'toova-inbox-',
+)
+assert not [prefix for prefix in domain_prefixes if f'.{prefix}' in globals_css], \
+    'domain CSS must live in managed/<addon>/frontend/styles.css, not core globals.css'
+
 for init_path in (ROOT / 'managed').glob('*/tests/__init__.py'):
     for line in init_path.read_text().splitlines():
         if line.startswith('from . import '):

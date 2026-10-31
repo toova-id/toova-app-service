@@ -1,3 +1,4 @@
+import "./styles.css";
 import "./navigation";
 import "./views";
 import { HandCoins } from "lucide-react";
