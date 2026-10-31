@@ -23,7 +23,7 @@ export default function InvoiceForm({ schema, id, values, relatedDocuments, edit
     const meta = fields[name];
     if (!meta || modifierActive(meta.modifiers, "invisible", values)) return null;
     const writable = editing && draft && !meta.readonly;
-    return <label className={`toova-finance-field ${className}`}><span>{meta.label}{meta.required && <b>*</b>}</span><div>{writable ? <FieldEditor actionId={schema.id} field={meta} value={values[name]} parentValues={values} onChange={(value) => onChange(name, value)}/> : <FieldValue field={meta} value={values[name]} record={values}/>}</div></label>;
+    return <label className={`managed-form-field ${className}`}><span>{meta.label}{meta.required && <b>*</b>}</span><div>{writable ? <FieldEditor actionId={schema.id} field={meta} value={values[name]} parentValues={values} onChange={(value) => onChange(name, value)}/> : <FieldValue field={meta} value={values[name]} record={values}/>}</div></label>;
   };
   const money = (name: string) => fields[name] ? <FieldValue field={fields[name]} value={values[name]} record={values}/> : <>—</>;
   const lineValue = (row: Row, name: string) => fields.invoice_line_ids?.relationView?.columns.find((column) => column.name === name);

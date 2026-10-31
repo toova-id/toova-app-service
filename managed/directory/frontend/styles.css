@@ -1,34 +1,7 @@
 .toova-customer { @apply min-h-[calc(100vh-44px)] bg-background; }
-.managed-form-header { @apply sticky top-11 z-30 flex min-h-[82px] items-center justify-between gap-4 border-b bg-background/95 px-6 py-3 backdrop-blur; }
-.managed-form-title { @apply flex min-w-0 items-center gap-3; }
-.managed-form-title > div:last-child { @apply min-w-0; }
-.managed-form-title > div:last-child > span { @apply text-[9px] font-semibold uppercase tracking-[.08em] text-muted-foreground; }
-.managed-form-title h1 { @apply truncate text-lg font-semibold tracking-[-.025em]; }
-.managed-form-title p { @apply text-[10px] text-muted-foreground; }
-.managed-form-mark { @apply grid h-10 w-10 shrink-0 place-items-center rounded-lg border bg-muted/30; }
-.managed-form-mark svg { @apply h-4 w-4 text-muted-foreground; }
-.managed-form-actions { @apply flex gap-1; }
-.managed-form-tabs { @apply sticky top-[126px] z-20 flex min-h-10 gap-1 overflow-x-auto border-b bg-background px-6; }
-.managed-form-tabs button { @apply flex items-center gap-1.5 border-b-2 border-transparent px-3 py-2 text-[11px] text-muted-foreground; }
-.managed-form-tabs button.active { @apply border-primary font-medium text-foreground; }
-.managed-form-tabs i { @apply min-w-4 rounded-full bg-muted px-1 text-center text-[9px] not-italic; }
-.managed-form-body { @apply mx-auto w-full max-w-[1440px]; }
-.toova-product .managed-form-body { @apply max-w-none; }
-.managed-form-section { @apply border-b px-8 py-6 last:border-b-0; }
-.managed-form-section > header { @apply mb-5; }
-.managed-form-section h2 { @apply text-sm font-semibold tracking-[-.015em]; }
-.managed-form-section header p { @apply mt-1 text-[10px] text-muted-foreground; }
 .toova-customer-overview { @apply grid gap-8 lg:grid-cols-[180px_minmax(0,1fr)]; }
-.toova-customer-logo .toova-customer-field { @apply block; }
-.toova-customer-logo .toova-customer-field > span { @apply sr-only; }
-.toova-customer-grid { @apply grid grid-cols-1 gap-x-10 gap-y-3 md:grid-cols-2; }
-.toova-customer-field { @apply grid min-w-0 grid-cols-[128px_minmax(0,1fr)] items-center gap-3; }
-.toova-customer-field > span { @apply text-[10px] text-muted-foreground; }
-.toova-customer-field > span b { @apply ml-0.5 text-primary; }
-.toova-customer-field > div { @apply min-w-0 text-xs; }
-.toova-customer-field.wide { @apply md:col-span-2; }
-.toova-customer-relation > .toova-customer-field { @apply block; }
-.toova-customer-relation > .toova-customer-field > span { @apply sr-only; }
+.toova-customer-logo .managed-form-field { @apply block; }
+.toova-customer-logo .managed-form-field > span { @apply sr-only; }
 .toova-customer-fallback { @apply mx-8 mt-6 flex gap-3 rounded-md border bg-muted/20 p-4; }
 .toova-customer-fallback > svg { @apply mt-0.5 h-4 w-4 shrink-0 text-muted-foreground; }
 .toova-customer-fallback > div { @apply flex min-w-0 flex-col; }
@@ -72,4 +45,4 @@
 .toova-contact-company small { @apply mt-1 text-[9px] text-muted-foreground; }
 .toova-contact-notes { @apply grid grid-cols-[24px_minmax(0,1fr)] items-start gap-2; }
 .toova-contact-notes > svg { @apply mt-2 h-3.5 w-3.5 text-muted-foreground; }
-.toova-contact-notes .toova-customer-field { @apply grid-cols-[128px_minmax(0,1fr)]; }
+.toova-contact-notes .managed-form-field { @apply grid-cols-[128px_minmax(0,1fr)]; }

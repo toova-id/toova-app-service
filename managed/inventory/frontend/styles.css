@@ -10,7 +10,7 @@
 .toova-warehouse-bar b { @apply hidden text-[10px] font-medium sm:block; }
 .toova-warehouse-bar .online { @apply flex items-center gap-1 text-[9px] font-medium text-emerald-700 before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500; }
 .toova-warehouse-bar svg { @apply h-3.5 w-3.5; }
-.toova-warehouse-workspace { @apply mx-auto w-full max-w-[1400px] px-4 py-6 md:px-8 md:py-8; }
+.toova-warehouse-workspace { @apply w-full px-4 py-6 md:px-8 md:py-8; }
 .toova-warehouse-heading { @apply flex items-end justify-between gap-4; }
 .toova-warehouse-heading span { @apply text-[9px] font-semibold uppercase tracking-[.1em] text-muted-foreground; }
 .toova-warehouse-heading h1 { @apply mt-1 text-2xl font-semibold tracking-[-.035em]; }

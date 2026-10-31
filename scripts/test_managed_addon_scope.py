@@ -71,6 +71,16 @@ domain_prefixes = (
 )
 assert not [prefix for prefix in domain_prefixes if f'.{prefix}' in globals_css], \
     'domain CSS must live in managed/<addon>/frontend/styles.css, not core globals.css'
+form_css = (ROOT / 'frontend/src/styles/managed-form.css').read_text()
+for line in form_css.splitlines():
+    if line.startswith(('.managed-form-body', '.managed-form-section', '.managed-form-grid')):
+        assert 'max-w' not in line, f'managed form shell must stay full width: {line.strip()}'
+for style_path in (ROOT / 'managed').glob('*/frontend/styles.css'):
+    for line in style_path.read_text().splitlines():
+        for selector in line.split('{', 1)[0].split(','):
+            selector = selector.strip()
+            assert not (selector.startswith('.managed-form-') and not set(selector[1:]) & set(' .>:')), \
+                f'shared .managed-form-* primitives belong to frontend/src/styles/managed-form.css: {style_path}'
 
 for init_path in (ROOT / 'managed').glob('*/tests/__init__.py'):
     for line in init_path.read_text().splitlines():

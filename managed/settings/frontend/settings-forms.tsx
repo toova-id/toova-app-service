@@ -29,9 +29,9 @@ function SettingsFormShell({ props }: { props: CustomFormViewProps }) {
   const Icon = UserRound;
   const title = String(values.name || "Pengguna baru");
   const fields = Object.fromEntries((schema.form.allFields || []).map((field) => [field.name, field]));
-  const field = (name: string) => { const meta = fields[name]; if (!meta) return null; return <label><span>{meta.label}</span><div>{editing ? <FieldEditor actionId={schema.id} field={meta} value={values[name]} parentValues={values} onChange={(value) => onChange(name, value)}/> : <FieldValue field={meta} value={values[name]} record={values}/>}</div></label>; };
+  const field = (name: string) => { const meta = fields[name]; if (!meta) return null; return <label className="managed-form-field"><span>{meta.label}</span><div>{editing ? <FieldEditor actionId={schema.id} field={meta} value={values[name]} parentValues={values} onChange={(value) => onChange(name, value)}/> : <FieldValue field={meta} value={values[name]} record={values}/>}</div></label>; };
   const actions = (id ? schema.form.write : schema.form.create) && (editing ? <Button onClick={onSave} disabled={saving}>{saving ? "Menyimpan..." : "Simpan"}</Button> : <Button variant="outline" onClick={onEdit}>Edit</Button>);
-  return <ManagedFormShell icon={<Icon/>} title={title} subtitle={String(values.email || values.login || "Email belum diisi")} actions={actions} onBack={onBack} className="toova-settings-record">{schema.form.sections.map((section) => <ManagedFormSection key={section.id || section.label} title={section.label} description={section.description}><div className="toova-settings-record-grid">{section.fields.map((meta) => field(meta.name))}</div></ManagedFormSection>)}</ManagedFormShell>;
+  return <ManagedFormShell icon={<Icon/>} title={title} subtitle={String(values.email || values.login || "Email belum diisi")} actions={actions} onBack={onBack} className="toova-settings-record">{schema.form.sections.map((section) => <ManagedFormSection key={section.id || section.label} title={section.label} description={section.description}><div className="managed-form-grid">{section.fields.map((meta) => field(meta.name))}</div></ManagedFormSection>)}</ManagedFormShell>;
 }
 
 export function UserSettingsForm(props: CustomFormViewProps) { return <SettingsFormShell props={props}/>; }

@@ -23,7 +23,7 @@ export default function DeliveryForm({ schema, id, values, relatedDocuments, edi
     const meta = fields[name];
     if (!meta || modifierActive(meta.modifiers, "invisible", values)) return null;
     const writable = editing && editable && !meta.readonly;
-    return <label className={`toova-delivery-field ${className}`}><span>{meta.label}{meta.required && <b>*</b>}</span><div>{writable ? <FieldEditor actionId={schema.id} field={meta} value={values[name]} parentValues={values} onChange={(value) => onChange(name, value)}/> : <FieldValue field={meta} value={values[name]} record={values}/>}</div></label>;
+    return <label className={`managed-form-field ${className}`}><span>{meta.label}{meta.required && <b>*</b>}</span><div>{writable ? <FieldEditor actionId={schema.id} field={meta} value={values[name]} parentValues={values} onChange={(value) => onChange(name, value)}/> : <FieldValue field={meta} value={values[name]} record={values}/>}</div></label>;
   };
 
   const actions = <><DocumentRelations groups={relatedDocuments}/>{id && <Button asChild variant="outline"><Link to={`/app/persediaan/operasi-gudang?task=${id}`}><ScanLine/>Mode Gudang</Link></Button>}{id && secondaryButtons.map((button) => <Button key={`${button.type}:${button.name}`} variant="outline" onClick={() => onButton(button.name, button.type)}>{button.label}</Button>)}{id && primaryButton && <Button onClick={() => onButton(primaryButton.name, primaryButton.type)}>{primaryButton.label}</Button>}{editable && schema.form.write && (editing ? <Button onClick={onSave} disabled={saving}><Save className="h-3.5 w-3.5"/>{saving ? "Menyimpan..." : "Simpan"}</Button> : <Button variant="outline" onClick={onEdit}>Edit jadwal</Button>)}</>;

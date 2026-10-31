@@ -38,17 +38,8 @@
 .toova-settings-profile span { @apply text-[10px] font-medium text-muted-foreground; }
 .toova-settings-profile h2 { @apply truncate text-base font-semibold; }
 .toova-settings-profile p { @apply truncate text-xs text-muted-foreground; }
-.toova-settings-record-grid { @apply mt-4 grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2; }
-.toova-settings-record-grid > label { @apply flex flex-col gap-1.5 text-xs; }
-.toova-settings-record-grid > label > span { @apply text-[11px] font-medium text-muted-foreground; }
 
 .toova-settings-record { @apply flex flex-col; }
-.toova-settings-record > header { @apply grid min-h-[74px] grid-cols-[auto_auto_1fr_auto] items-center gap-3 border-b px-6 py-3; }
-.toova-settings-record header h1 { @apply text-base font-semibold; }
-.toova-settings-record header p { @apply text-xs text-muted-foreground; }
-.toova-settings-record > main > section { @apply border-b px-6 py-5 last:border-b-0; }
-.toova-settings-record > main > section > h2 { @apply text-sm font-semibold; }
-.toova-settings-record > main > section > p { @apply mt-1 text-xs text-muted-foreground; }
 
 .toova-settings-collection { @apply flex flex-col; }
 .toova-settings-collection > header { @apply flex min-h-[60px] w-full items-center justify-between gap-3 border-b px-6 py-3; }

@@ -15,21 +15,11 @@
 .toova-sales-state li.current b { @apply font-semibold text-foreground; }
 .toova-sales-state > div > p { @apply mt-3 border-t pt-3 text-[9px] text-muted-foreground; }
 .toova-sales-state.complete > button { @apply border-emerald-500/30 bg-emerald-500 text-white hover:bg-emerald-600; }
-.toova-sales-section { @apply border-b px-8 py-6 last:border-b-0; }
-.toova-sales-section > header { @apply mb-5; }
-.toova-sales-section h2 { @apply text-sm font-semibold tracking-[-.015em]; }
-.toova-sales-section header p { @apply mt-1 text-[10px] text-muted-foreground; }
 .toova-sales-overview { @apply grid gap-8 xl:grid-cols-[minmax(300px,.7fr)_minmax(600px,1.3fr)]; }
 .toova-sales-customer { @apply flex min-w-0 items-start gap-3; }
 .toova-sales-customer > svg { @apply mt-1 h-5 w-5 shrink-0 text-muted-foreground; }
 .toova-sales-customer span { @apply text-[9px] font-semibold uppercase tracking-wide text-muted-foreground; }
 .toova-sales-customer h3 { @apply mt-1 truncate text-xl font-semibold tracking-[-.02em]; }
-.toova-sales-grid { @apply grid grid-cols-1 gap-x-10 gap-y-3 md:grid-cols-2; }
-.toova-sales-field { @apply grid min-w-0 grid-cols-[128px_minmax(0,1fr)] items-center gap-3; }
-.toova-sales-field > span { @apply text-[10px] text-muted-foreground; }
-.toova-sales-field > span b { @apply ml-0.5 text-primary; }
-.toova-sales-field > div { @apply min-w-0 text-xs; }
-.toova-sales-field.wide { @apply md:col-span-2; }
 .toova-sales-facts { @apply grid overflow-hidden rounded-md border bg-border sm:grid-cols-2 xl:grid-cols-4; }
 .toova-sales-facts article { @apply flex min-h-28 min-w-0 flex-col justify-center bg-background p-4; }
 .toova-sales-facts article.primary { @apply bg-muted/10; }
@@ -37,8 +27,8 @@
 .toova-sales-facts strong { @apply mt-1 truncate text-sm font-semibold tabular-nums; }
 .toova-sales-facts article.primary strong { @apply text-lg; }
 .toova-sales-facts small { @apply mt-1 truncate text-[9px] text-muted-foreground; }
-.toova-sales-lines .toova-sales-field { @apply block; }
-.toova-sales-lines .toova-sales-field > span { @apply sr-only; }
+.toova-sales-lines .managed-form-field { @apply block; }
+.toova-sales-lines .managed-form-field > span { @apply sr-only; }
 .toova-sales-process { @apply overflow-hidden rounded-md border; }
 .toova-sales-process > header { @apply flex items-center justify-between gap-4 border-b bg-muted/10 px-5 py-4; }
 .toova-sales-process > header > div { @apply flex min-w-0 items-center gap-3; }
@@ -103,10 +93,7 @@
 .toova-sale-lines > .workspace-relation-add { @apply border-x border-b; }
 
 @media (max-width: 767px) {
-  .toova-sales-section, .toova-sales-progress, .toova-sales-totals { @apply px-4; }
-  .toova-sales-grid, .toova-sales-overview { @apply grid-cols-1; }
   .toova-sales-facts { @apply grid-cols-1; }
-  .toova-sales-field { @apply grid-cols-1 gap-1; }
   .toova-sales-state > div { @apply left-auto right-0; }
   .toova-sales-related-list article { @apply items-start; }
   .toova-document-meta .workspace-datetime { @apply grid-cols-1; }

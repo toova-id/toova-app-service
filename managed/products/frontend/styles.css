@@ -97,7 +97,7 @@
 .toova-attribute-advanced > button span { @apply text-[9px] text-muted-foreground; }
 .toova-attribute-advanced > button svg { @apply h-4 w-4 text-muted-foreground transition-transform; }
 .toova-attribute-advanced > button svg.open { @apply rotate-180; }
-.toova-attribute-advanced > .toova-customer-grid { @apply border-t p-4; }
+.toova-attribute-advanced > .managed-form-grid { @apply border-t p-4; }
 .toova-attribute-mode-lock { @apply col-span-full text-[9px] text-amber-700; }
 .toova-attribute-usage { @apply grid gap-4 md:grid-cols-2; }
 .toova-variants-table { @apply overflow-x-auto rounded-md border; }

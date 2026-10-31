@@ -298,8 +298,10 @@ CSS ownership:
 | File | Isi |
 | --- | --- |
 | `frontend/src/styles/globals.css` | token, shell aplikasi, list/kanban/workspace, primitive generik |
-| `frontend/src/styles/managed-form.css` | kelas `.managed-form-*` milik shell |
+| `frontend/src/styles/managed-form.css` | kelas `.managed-form-*` milik shell, termasuk primitive `-section`, `-grid`, `-field`, `-relation` |
 | `managed/<addon>/frontend/styles.css` | kelas domain addon, diimpor dari `managed/<addon>/frontend/index.ts` |
+
+Primitive layout form dipakai apa adanya: `managed-form-section` (padding `px-8 py-6`), `managed-form-grid` (2 kolom, 3 kolom di `2xl`), `managed-form-field` (label 128px + value), `managed-form-field wide`, `managed-form-relation`. Addon tidak mendefinisikan ulang kelas ini; hanya boleh memakai sebagai bagian selector turunan (contoh `.toova-sales-lines .managed-form-field`). Body form wajib full width — tanpa `max-w` atau `mx-auto` di `.managed-form-body` / `-section` / `-grid`. Dua aturan ini dijaga `scripts/test_managed_addon_scope.py`.
 
 Aturan: satu addon tidak boleh override kelas addon lain. `managed/directory/frontend/styles.css` adalah shared directory/product base dan diimpor eksplisit oleh `customers`, `vendors`, `contact_persons`, `products`. Prefix kelas wajib (`.toova-sales-*`, `.toova-product-*`). Hapus kelas mati di file yang sama saat form berubah.
 

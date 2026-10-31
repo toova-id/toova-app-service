@@ -13,7 +13,8 @@
 .managed-form-tabs button.active { @apply border-primary font-medium text-foreground; }
 .managed-form-tabs i { @apply min-w-4 rounded-full bg-muted px-1 text-center text-[9px] not-italic; }
 .managed-form-body { @apply w-full; }
-.managed-form-section { @apply border-b px-8 py-6 last:border-b-0; }
+.managed-form-section { @apply w-full border-b px-8 py-6 last:border-b-0; }
+.managed-form-grid { @apply grid w-full grid-cols-1 gap-x-10 gap-y-3 md:grid-cols-2 2xl:grid-cols-3; }
 .managed-form-section > header { @apply mb-5; }
 .managed-form-section h2 { @apply text-sm font-semibold tracking-[-.015em]; }
 .managed-form-section header p { @apply mt-1 text-[10px] text-muted-foreground; }
@@ -21,7 +22,7 @@
 .managed-form-field > span { @apply text-[10px] text-muted-foreground; }
 .managed-form-field > span b { @apply ml-0.5 text-primary; }
 .managed-form-field > div { @apply min-w-0 text-xs; }
-.managed-form-field.wide { @apply md:col-span-2; }
+.managed-form-field.wide { @apply md:col-span-2 2xl:col-span-3; }
 .managed-form-badge { @apply rounded-full border bg-muted/20 px-2.5 py-1 text-[9px] font-semibold text-foreground; }
 .managed-form-relation > .managed-form-field { @apply block; }
 .managed-form-relation > .managed-form-field > span { @apply sr-only; }
