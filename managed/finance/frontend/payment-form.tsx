@@ -1,11 +1,11 @@
-import { ArrowDownLeft, ArrowLeft, ArrowUpRight, CheckCircle2, Landmark, ReceiptText } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowDownLeft, ArrowUpRight, CheckCircle2, Landmark, ReceiptText } from "lucide-react";
+import { DocumentBack, DocumentRelations } from "@toova/components/document-relations";
 import { Button } from "@toova/components/ui/button";
 import { FieldValue } from "@toova/views/field-registry";
 import type { CustomFormViewProps } from "@toova/views/view-registry";
 import type { FieldSchema } from "@toova/views/types";
 
-export default function PaymentForm({ schema, basePath, id, values }: CustomFormViewProps) {
+export default function PaymentForm({ schema, id, values, relatedDocuments, onBack }: CustomFormViewProps) {
   const fields = Object.fromEntries((schema.form.allFields || []).map((field) => [field.name, field])) as Record<string, FieldSchema>;
   const inbound = values.payment_type === "inbound";
   const posted = values.state === "posted";
@@ -15,7 +15,7 @@ export default function PaymentForm({ schema, basePath, id, values }: CustomForm
   const documentNumber = values.name && values.name !== "/" ? String(values.name) : "Belum bernomor";
 
   return <div className="toova-payment-document">
-    <header className="toova-finance-header"><div className="toova-finance-title"><Button asChild variant="ghost" size="icon"><Link to={basePath}><ArrowLeft className="h-3.5 w-3.5"/></Link></Button><div className={`toova-payment-mark ${inbound ? "inbound" : "outbound"}`}>{inbound ? <ArrowDownLeft/> : <ArrowUpRight/>}</div><div><h1>{id ? documentNumber : "Pembayaran"}</h1><p>{String(values.payment_reference || "Tanpa referensi")}</p></div></div></header>
+    <header className="toova-finance-header"><div className="toova-finance-title"><DocumentBack onBack={onBack}/><div className={`toova-payment-mark ${inbound ? "inbound" : "outbound"}`}>{inbound ? <ArrowDownLeft/> : <ArrowUpRight/>}</div><div><h1>{id ? documentNumber : "Pembayaran"}</h1><p>{String(values.payment_reference || "Tanpa referensi")}</p></div></div><div className="toova-finance-actions"><DocumentRelations groups={relatedDocuments}/></div></header>
 
     <main className="toova-payment-body"><section className="toova-payment-hero"><div className={`toova-payment-direction ${inbound ? "inbound" : "outbound"}`}>{inbound ? <ArrowDownLeft/> : <ArrowUpRight/>}</div><span>{inbound ? "Diterima dari" : "Dibayarkan kepada"}</span><h2>{Array.isArray(values.partner_id) ? String(values.partner_id[1]) : "Mitra belum ditentukan"}</h2><strong>{amount}</strong><p>{values.date ? new Date(`${values.date}T00:00:00`).toLocaleDateString("id-ID", { dateStyle: "long" }) : "Tanggal belum ditentukan"}</p><i className={posted ? "done" : "draft"}>{posted ? <CheckCircle2/> : <ReceiptText/>}{stateLabel}</i></section>
 

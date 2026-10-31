@@ -10,6 +10,14 @@ export function firstAction(item: ServerNavigationItem): ServerNavigationItem | 
   for (const child of item.children) { const action = firstAction(child); if (action) return action; }
 }
 
+export function findByActionXmlid(items: ServerNavigationItem[], actionXmlid: string): ServerNavigationItem | undefined {
+  for (const item of items) {
+    if (item.actionXmlid === actionXmlid) return item;
+    const child = findByActionXmlid(item.children, actionXmlid);
+    if (child) return child;
+  }
+}
+
 export function findMenuByPath(items: ServerNavigationItem[], pathname: string): ServerNavigationItem | undefined {
   let best: ServerNavigationItem | undefined;
   for (const item of items) {

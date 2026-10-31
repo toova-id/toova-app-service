@@ -401,6 +401,14 @@
   .toova-order-process article > span { @apply flex min-w-0 flex-1 flex-col gap-1; }
   .toova-order-process article strong { @apply text-xs font-medium; }
   .toova-order-process article small { @apply text-[10px] text-muted-foreground; }
+  .toova-document-relations { @apply contents; }
+  .toova-document-relations > div { @apply contents; }
+  .toova-document-relations > div > span { @apply sr-only; }
+  .toova-document-relations > div > div { @apply contents; }
+  .toova-document-relations button { @apply inline-flex min-h-8 max-w-40 cursor-pointer items-center gap-1.5 rounded-md border bg-background px-2.5 text-left transition-colors hover:border-primary/40 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring; }
+  .toova-document-relations button b { @apply min-w-0 truncate text-[11px] font-medium; }
+  .toova-document-relations button svg { @apply h-3 w-3 shrink-0 text-muted-foreground; }
+  .toova-document-relations button svg:last-child { @apply opacity-50; }
   .toova-document-fields { @apply grid grid-cols-1 gap-x-10 gap-y-3 md:grid-cols-2 xl:grid-cols-3; }
   .toova-document-table { @apply block; }
   .toova-document-table > span { @apply sr-only; }
@@ -614,6 +622,7 @@
   .toova-customer-tabs button.active { @apply border-primary font-medium text-foreground; }
   .toova-customer-tabs i { @apply min-w-4 rounded-full bg-muted px-1 text-center text-[9px] not-italic; }
   .toova-customer-body { @apply mx-auto w-full max-w-[1440px]; }
+  .toova-product .toova-customer-body { @apply max-w-none; }
   .toova-customer-section { @apply border-b px-8 py-6 last:border-b-0; }
   .toova-customer-section > header { @apply mb-5; }
   .toova-customer-section h2 { @apply text-sm font-semibold tracking-[-.015em]; }

@@ -202,6 +202,26 @@ class SaleOrder(models.Model):
             },
         }
 
+    def _managed_related_documents(self):
+        self.ensure_one()
+        return [
+            {
+                'key': 'deliveries', 'label': _('Pengiriman'),
+                'action_xmlid': 'inventory.action_deliveries', 'records': self.picking_ids,
+                'status_field': 'managed_operation_status',
+            },
+            {
+                'key': 'invoices', 'label': _('Faktur pelanggan'),
+                'action_xmlid': 'finance.action_customer_invoices', 'records': self.invoice_ids,
+                'status_field': 'payment_state',
+                'status_labels': {
+                    'not_paid': _('Belum dibayar'), 'in_payment': _('Dalam pembayaran'),
+                    'paid': _('Lunas'), 'partial': _('Dibayar sebagian'),
+                    'reversed': _('Dibalik'), 'invoicing_legacy': _('Legacy'),
+                },
+            },
+        ]
+
     def action_create_managed_invoice(self):
         self.ensure_one()
         if self.state not in ('sale', 'done'):

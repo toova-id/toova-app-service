@@ -64,6 +64,16 @@ class TestManagedFinance(TransactionCase):
             names.append(move.name)
         self.assertEqual(names, ['JE2603000001', 'JE2603000002'])
 
+    def test_finance_related_documents_use_native_reconciliation_and_sale_lines(self):
+        invoice = self.env['account.move'].new({'move_type': 'out_invoice'})
+        invoice_related = {item['key']: item for item in invoice._managed_related_documents()}
+        self.assertEqual(invoice_related['sale_orders']['action_xmlid'], 'sales.action_orders')
+        self.assertEqual(invoice_related['payments']['action_xmlid'], 'finance.action_payments')
+        payment = self.env['account.payment'].new({'payment_type': 'inbound', 'partner_type': 'customer'})
+        payment_related = {item['key']: item for item in payment._managed_related_documents()}
+        self.assertEqual(payment_related['invoices']['action_xmlid'], 'finance.action_customer_invoices')
+        self.assertEqual(payment_related['sale_orders']['action_xmlid'], 'sales.action_orders')
+
     def test_payment_contract_is_read_only(self):
         contract = self.env['account.payment']._managed_ui_contract('finance.action_payments')
         self.assertFalse(contract['list']['create'])

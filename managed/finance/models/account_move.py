@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.tools import date_utils
 
 MANAGED_DOCUMENT_SEQUENCE_REGEX = (
@@ -160,8 +160,47 @@ class AccountMove(models.Model):
         }
 
 
+    def _managed_related_documents(self):
+        self.ensure_one()
+        sale_orders = self.invoice_line_ids.sale_line_ids.order_id
+        return [
+            {
+                'key': 'sale_orders', 'label': _('Pesanan sumber'),
+                'action_xmlid': 'sales.action_orders', 'records': sale_orders,
+                'status_field': 'state',
+            },
+            {
+                'key': 'payments', 'label': _('Pembayaran'),
+                'action_xmlid': 'finance.action_payments', 'records': self._get_reconciled_payments(),
+                'status_field': 'state',
+                'status_labels': {'draft': _('Draf'), 'posted': _('Diposting'), 'cancel': _('Dibatalkan')},
+            },
+        ]
+
 class AccountPayment(models.Model):
     _inherit = 'account.payment'
+
+    def _managed_related_documents(self):
+        self.ensure_one()
+        invoices = self.reconciled_invoice_ids.filtered(lambda move: move.move_type in ('out_invoice', 'out_refund'))
+        sale_orders = invoices.invoice_line_ids.sale_line_ids.order_id
+        return [
+            {
+                'key': 'invoices', 'label': _('Faktur pelanggan'),
+                'action_xmlid': 'finance.action_customer_invoices', 'records': invoices,
+                'status_field': 'payment_state',
+                'status_labels': {
+                    'not_paid': _('Belum dibayar'), 'in_payment': _('Dalam pembayaran'),
+                    'paid': _('Lunas'), 'partial': _('Dibayar sebagian'),
+                    'reversed': _('Dibalik'), 'invoicing_legacy': _('Legacy'),
+                },
+            },
+            {
+                'key': 'sale_orders', 'label': _('Pesanan sumber'),
+                'action_xmlid': 'sales.action_orders', 'records': sale_orders,
+                'status_field': 'state',
+            },
+        ]
 
     @api.model
     def _managed_ui_contract(self, action_xmlid):

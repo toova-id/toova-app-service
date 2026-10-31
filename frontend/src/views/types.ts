@@ -33,4 +33,6 @@ export interface ActionSchema {
   list: { id: number | false; title: string; columns: FieldSchema[]; readFields?: string[]; defaultOrder?: string; create: boolean; delete: boolean; export: boolean; filters: FilterSchema[]; actions: BulkActionSchema[] };
   form: { id: number | false; title: string; sections: { id?: string; label: string; description?: string; columns?: 1 | 2 | 3; fields: FieldSchema[] }[]; allFields?: FieldSchema[]; writeFields?: string[]; create: boolean; write: boolean; onchange: Record<string, string>; statusField?: FieldSchema; statusVisible: string[]; buttons: FormButtonSchema[] };
 }
+export interface RelatedDocumentItem { id: number; label: string; status?: string | null }
+export interface RelatedDocumentGroup { key: string; label: string; actionXmlid: string; items: RelatedDocumentItem[] }
 export interface RecordsResponse { items: Record<string, unknown>[]; total: number; page: number; pageSize: number }

@@ -21,6 +21,12 @@ class TestManagedInventory(TransactionCase):
         })
         self.assertIsNone(self.env['stock.picking']._managed_ui_contract('stock.unknown_action'))
 
+    def test_delivery_related_document_uses_native_sale_relation(self):
+        picking = self.env['stock.picking'].new({})
+        related = picking._managed_related_documents()
+        self.assertEqual(related[0]['action_xmlid'], 'sales.action_orders')
+        self.assertEqual(related[0]['records'], picking.sale_id)
+
     def test_operation_summary_uses_native_state_and_quantities(self):
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
         picking = self.env['stock.picking'].new({

@@ -10,6 +10,10 @@ class Base(models.AbstractModel):
     def _managed_ui_contract(self, action_xmlid):
         return None
 
+    def _managed_related_documents(self):
+        """Return native record relations exposed as managed document links."""
+        return []
+
     @api.model
     def _managed_apply_company_default(self, values):
         """Managed tenant owns company selection; users never choose it."""

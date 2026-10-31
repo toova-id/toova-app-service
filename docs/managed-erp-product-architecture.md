@@ -349,7 +349,7 @@ Keuangan
 └── Pembayaran
 ```
 
-Customer tetap dikelola di Contacts, Product/Variant serta Daftar Harga tetap di Products, pengiriman operasional dimiliki Persediaan, invoice dan pembayaran dimiliki Keuangan, pengaturan penjualan berada di Pengaturan, dan analitik akan menjadi workspace lintas domain terpisah. Pesanan menjadi control tower kecil: menampilkan status native, membuka Pengiriman/Faktur managed, dan membuat draft faktur melalui wizard native; tidak membuat CRUD Stock atau Accounting kedua di Sales.
+Customer tetap dikelola di Contacts, Product/Variant serta Daftar Harga tetap di Products, pengiriman operasional dimiliki Persediaan, invoice dan pembayaran dimiliki Keuangan, pengaturan penjualan berada di Pengaturan, dan analitik akan menjadi workspace lintas domain terpisah. Pesanan menjadi control tower kecil: menampilkan status native, membuka Pengiriman/Faktur managed, dan membuat draft faktur melalui wizard native; tidak membuat CRUD Stock atau Accounting kedua di Sales. Navigasi lintas dokumen memakai relasi canonical native (`picking_ids`, `invoice_ids`, sale line, dan rekonsiliasi pembayaran), action XML ID, ACL/record rule, serta permission target. Tombol kembali mengikuti riwayat managed dalam tab dan jatuh kembali ke list pemilik saat halaman dibuka langsung; field `origin`/`invoice_origin` hanya label, bukan identity relation.
 
 Nomor dokumen managed memakai kode industri fixed tanpa konfigurasi user:
 

@@ -184,6 +184,14 @@ class StockPicking(models.Model):
             },
         }
 
+    def _managed_related_documents(self):
+        self.ensure_one()
+        return [{
+            'key': 'sale_orders', 'label': _('Pesanan sumber'),
+            'action_xmlid': 'sales.action_orders', 'records': self.sale_id,
+            'status_field': 'state',
+        }]
+
     def _check_managed_delivery(self):
         if not self.env.context.get('managed_ui'):
             return

@@ -16,6 +16,7 @@ export interface ServerNavigationItem {
   path: string | null;
   actionId: number | null;
   actionModel: "ir.actions.act_window" | "ir.actions.client" | null;
+  actionXmlid?: string | null;
   xmlid: string;
   module: string | null;
   hidden?: boolean;

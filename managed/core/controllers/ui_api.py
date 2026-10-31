@@ -91,6 +91,8 @@ def _menu_tree():
             children = serialize_many(menu['children'], menu_path)
             action_model = menu.get('actionModel')
             action_id = menu.get('actionID') if menu.get('actionID') in managed_actions.get(action_model, set()) else None
+            action = request.env[action_model].sudo().browse(action_id) if action_id and action_model in request.env else False
+            action_xmlid = action.get_external_id().get(action.id) if action else None
             if not action_id and not children:
                 continue
             items.append({
@@ -99,6 +101,7 @@ def _menu_tree():
                 'path': menu_path if action_id else None,
                 'actionId': action_id,
                 'actionModel': action_model if action_id else None,
+                'actionXmlid': action_xmlid,
                 'xmlid': menu.get('xmlid') or '',
                 'module': menu.get('xmlid', '').partition('.')[0] or None,
                 'children': children,
@@ -139,6 +142,44 @@ def _scoped_record(action, record_id):
     if not record:
         raise MissingError('Record not found.')
     return record
+
+def _serialize_related_documents(record):
+    documents = []
+    for relation in record._managed_related_documents():
+        action_xmlid = relation.get('action_xmlid')
+        action = request.env.ref(action_xmlid, raise_if_not_found=False)
+        if not action or action._name != 'ir.actions.act_window' or action.id not in _visible_action_ids('ir.actions.act_window'):
+            continue
+        if not _managed_permission(_action_permission(action)):
+            continue
+        target = relation.get('records', request.env[action.res_model])
+        if target._name != action.res_model:
+            continue
+        target.check_access_rights('read')
+        context, domain = _eval_action(action)
+        visible = request.env[action.res_model].with_context(**context).search(
+            expression.AND([domain, [('id', 'in', target.ids)]]), order='id',
+        )
+        if not visible:
+            continue
+        status_field = relation.get('status_field')
+        status_meta = visible._fields.get(status_field)
+        selection = dict(status_meta._description_selection(request.env)) if status_meta and status_meta.type == 'selection' else {}
+        items = []
+        for target_record in visible:
+            status = target_record[status_field] if status_field and status_field in target_record._fields else False
+            status_labels = relation.get('status_labels', {})
+            document_name = target_record.name if 'name' in target_record._fields and target_record.name not in (False, '/') else target_record.display_name
+            items.append({
+                'id': target_record.id,
+                'label': document_name,
+                'status': status_labels.get(status, selection.get(status, status)) if status else None,
+            })
+        documents.append({
+            'key': relation['key'], 'label': relation['label'],
+            'actionXmlid': action_xmlid, 'items': items,
+        })
+    return documents
 
 def _domain_value(value):
     if isinstance(value, (list, tuple)):
@@ -964,7 +1005,10 @@ class ManagedUiApi(http.Controller):
                 return request.make_json_response({'id': None, 'values': values}, headers=[('Cache-Control', 'no-store')])
             record = _scoped_record(action, int(record_id))
             values = _serialize_form_values(model, record.read(fields_to_read)[0], schema)
-            return request.make_json_response({'id': record.id, 'values': values}, headers=[('Cache-Control', 'no-store')])
+            return request.make_json_response({
+                'id': record.id, 'values': values,
+                'relatedDocuments': _serialize_related_documents(record),
+            }, headers=[('Cache-Control', 'no-store')])
         except (AccessError, MissingError) as error:
             return _error(error, 'forbidden', 403)
         except (UserError, ValidationError, ValueError) as error:

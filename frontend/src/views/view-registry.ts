@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import type { ActionSchema, RecordsResponse } from "./types";
+import type { ActionSchema, RecordsResponse, RelatedDocumentGroup } from "./types";
 
 export interface CustomListViewProps {
   schema: ActionSchema;
@@ -23,12 +23,14 @@ export interface CustomFormViewProps {
   basePath: string;
   id?: number;
   values: Record<string, unknown>;
+  relatedDocuments: RelatedDocumentGroup[];
   editing: boolean;
   saving: boolean;
   onEdit: () => void;
   onChange: (name: string, value: unknown) => void;
   onSave: () => void;
   onButton: (name: string, type: "object" | "action") => void;
+  onBack: () => void;
 }
 
 const modelListViews = new Map<string, ComponentType<CustomListViewProps>>();

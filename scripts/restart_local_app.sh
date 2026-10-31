@@ -29,7 +29,6 @@ docker rm -f "$APP_CONTAINER" "$REALTIME_CONTAINER" erp-local-proxy >/dev/null 2
 
 docker run -d --name "$APP_CONTAINER" --network "$NETWORK" --restart unless-stopped -p 8069:8069 \
   -v erp-local-odoo-data:/var/lib/odoo \
-  -v "$ROOT/managed:/opt/odoo/managed:ro" \
   "$IMAGE" \
   --db_host="$DB_HOST" --db_port=5432 --db_user=odoo --db_password=odoo \
   -d "$DB_NAME" --no-database-list --runtime-role=http --workers=1 --max-cron-threads=0 --registry-signaling=poll \
@@ -37,7 +36,6 @@ docker run -d --name "$APP_CONTAINER" --network "$NETWORK" --restart unless-stop
 
 docker run -d --name "$REALTIME_CONTAINER" --network "$NETWORK" --restart unless-stopped -p 8072:8072 \
   -v erp-local-odoo-data:/var/lib/odoo \
-  -v "$ROOT/managed:/opt/odoo/managed:ro" \
   "$IMAGE" gevent \
   --db_host="$DB_HOST" --db_port=5432 --db_user=odoo --db_password=odoo \
   -d "$DB_NAME" --no-database-list --runtime-role=realtime --workers=0 --max-cron-threads=0 --registry-signaling=poll \

@@ -43,6 +43,14 @@ class TestSaleManagedUiContract(TransactionCase):
         line._onchange_managed_fixed_discount()
         self.assertEqual(line.discount, 15)
 
+    def test_order_related_documents_use_native_relations(self):
+        order = self.env['sale.order'].new({})
+        related = {item['key']: item for item in order._managed_related_documents()}
+        self.assertEqual(related['deliveries']['action_xmlid'], 'inventory.action_deliveries')
+        self.assertEqual(related['invoices']['action_xmlid'], 'finance.action_customer_invoices')
+        self.assertEqual(related['deliveries']['records'], order.picking_ids)
+        self.assertEqual(related['invoices']['records'], order.invoice_ids)
+
     def test_orders_cannot_be_created_from_order_action(self):
         contract = self.env['sale.order']._managed_ui_contract('sales.action_orders')
         self.assertFalse(contract['list']['create'])

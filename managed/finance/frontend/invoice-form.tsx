@@ -1,5 +1,5 @@
-import { ArrowLeft, CalendarDays, CircleDollarSign, FileCheck2, ReceiptText, Save, UserRound } from "lucide-react";
-import { Link } from "react-router-dom";
+import { CalendarDays, CircleDollarSign, FileCheck2, ReceiptText, Save, UserRound } from "lucide-react";
+import { DocumentBack, DocumentRelations } from "@toova/components/document-relations";
 import { Button } from "@toova/components/ui/button";
 import { FieldEditor, FieldValue } from "@toova/views/field-registry";
 import { modifierActive } from "@toova/views/modifiers";
@@ -8,7 +8,7 @@ import type { FieldSchema } from "@toova/views/types";
 
 type Row = Record<string, unknown>;
 
-export default function InvoiceForm({ schema, basePath, id, values, editing, saving, onEdit, onChange, onSave, onButton }: CustomFormViewProps) {
+export default function InvoiceForm({ schema, id, values, relatedDocuments, editing, saving, onEdit, onChange, onSave, onButton, onBack }: CustomFormViewProps) {
   const fields = Object.fromEntries((schema.form.allFields || []).map((field) => [field.name, field])) as Record<string, FieldSchema>;
   const lines = Array.isArray(values.invoice_line_ids) ? values.invoice_line_ids as Row[] : [];
   const draft = values.state === "draft";
@@ -32,7 +32,7 @@ export default function InvoiceForm({ schema, basePath, id, values, editing, sav
   };
 
   return <div className="toova-finance-document">
-    <header className="toova-finance-header"><div className="toova-finance-title"><Button asChild variant="ghost" size="icon"><Link to={basePath}><ArrowLeft className="h-3.5 w-3.5"/></Link></Button><div className="toova-finance-mark"><ReceiptText/></div><div><h1>{id ? documentNumber : "Faktur baru"}</h1><p>{String(values.invoice_origin || "Tanpa pesanan sumber")}</p></div></div><div className="toova-finance-actions">{id && visibleButtons.map((button) => <Button key={`${button.type}:${button.name}`} variant={button.primary ? "default" : "outline"} onClick={() => onButton(button.name, button.type)}>{button.label}</Button>)}{draft && schema.form.write && (editing ? <Button onClick={onSave} disabled={saving}><Save className="h-3.5 w-3.5"/>{saving ? "Menyimpan..." : "Simpan draf"}</Button> : <Button variant="outline" onClick={onEdit}>Edit</Button>)}</div></header>
+    <header className="toova-finance-header"><div className="toova-finance-title"><DocumentBack onBack={onBack}/><div className="toova-finance-mark"><ReceiptText/></div><div><h1>{id ? documentNumber : "Faktur baru"}</h1><p>{String(values.invoice_origin || "Tanpa pesanan sumber")}</p></div></div><div className="toova-finance-actions"><DocumentRelations groups={relatedDocuments}/>{id && visibleButtons.map((button) => <Button key={`${button.type}:${button.name}`} variant={button.primary ? "default" : "outline"} onClick={() => onButton(button.name, button.type)}>{button.label}</Button>)}{draft && schema.form.write && (editing ? <Button onClick={onSave} disabled={saving}><Save className="h-3.5 w-3.5"/>{saving ? "Menyimpan..." : "Simpan draf"}</Button> : <Button variant="outline" onClick={onEdit}>Edit</Button>)}</div></header>
 
     <div className="toova-finance-status"><span data-tone={values.state === "posted" ? "done" : values.state === "cancel" ? "warn" : "work"}><FileCheck2/><i>Status dokumen</i><b>{stateLabel}</b></span><span data-tone={paymentTone}><CircleDollarSign/><i>Pembayaran</i><b>{paymentLabel}</b></span><span><CalendarDays/><i>Jatuh tempo</i><b>{values.invoice_date_due ? new Date(`${values.invoice_date_due}T00:00:00`).toLocaleDateString("id-ID", { dateStyle: "medium" }) : "Belum ditentukan"}</b></span></div>
 
