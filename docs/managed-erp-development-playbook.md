@@ -303,6 +303,8 @@ CSS ownership:
 
 Primitive layout form dipakai apa adanya: `managed-form-section` (padding `px-8 py-6`), `managed-form-grid` (2 kolom, 3 kolom di `2xl`), `managed-form-field` (label 128px + value), `managed-form-field wide`, `managed-form-relation`. Addon tidak mendefinisikan ulang kelas ini; hanya boleh memakai sebagai bagian selector turunan (contoh `.toova-sales-lines .managed-form-field`). Body form wajib full width — tanpa `max-w` atau `mx-auto` di `.managed-form-body` / `-section` / `-grid`. Dua aturan ini dijaga `scripts/test_managed_addon_scope.py`.
 
+Upload gambar memakai satu komponen `frontend/src/components/ui/image-upload.tsx` dengan ukuran tetap, bukan aspect-ratio: `.toova-image-upload` membawa token `--image-upload-size` (default `9rem`) yang dipakai `.toova-image-empty`, `.toova-image-preview`, dan renderer read-only `.workspace-image-value`. Konteks padat menurunkan token saja — `.workspace-list` `2.25rem`, `.workspace-relation` `1.75rem` — sehingga kotak tidak membesar mengikuti lebar kolom. Form yang memajang gambar di kolom kiri memakai lebar grid sama (`lg:grid-cols-[9rem_minmax(0,1fr)]` pada `.toova-customer-overview`, dipakai customer, vendor, contact person, product). Larangan `aspect-*` dan keharusan token dijaga `frontend/scripts/image-upload-self-check.mjs`.
+
 Aturan: satu addon tidak boleh override kelas addon lain. `managed/directory/frontend/styles.css` adalah shared directory/product base dan diimpor eksplisit oleh `customers`, `vendors`, `contact_persons`, `products`. Prefix kelas wajib (`.toova-sales-*`, `.toova-product-*`). Hapus kelas mati di file yang sama saat form berubah.
 
 ## 4. Domain pattern yang sudah ditetapkan

@@ -254,19 +254,20 @@
   .workspace-file-input svg:last-child { @apply text-primary; }
   .workspace-file-download { @apply inline-flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-[11px] hover:bg-muted; }
   .workspace-file-download svg { @apply h-3.5 w-3.5; }
-  .workspace-image-value { @apply inline-block overflow-hidden rounded-md border bg-muted shadow-[var(--shadow-control)]; }
-  .workspace-image-value img { @apply h-12 w-12 object-cover transition-transform hover:scale-105; }
-  .toova-image-upload { @apply w-full max-w-md; }
+  .workspace-image-value { --image-upload-size: 9rem; @apply block h-[var(--image-upload-size)] w-[var(--image-upload-size)] max-w-full shrink-0 overflow-hidden rounded-md border bg-muted/10 shadow-[var(--shadow-control)]; }
+  .workspace-image-value img { @apply h-full w-full object-contain; }
+  .toova-image-upload { --image-upload-size: 9rem; @apply w-[var(--image-upload-size)] max-w-full shrink-0; }
   .toova-image-upload.is-dragging { @apply rounded-md ring-2 ring-primary/30 ring-offset-2; }
-  .toova-image-empty { @apply flex aspect-square w-full flex-col items-center justify-center gap-1.5 rounded-md border border-dashed border-input bg-muted/10 px-4 py-4 text-center outline-none transition-colors hover:border-[var(--focus-border)] hover:bg-muted/30 focus-visible:ring-1 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50; }
-  .toova-image-empty svg { @apply mb-1 h-5 w-5 text-muted-foreground; }
+  .toova-image-empty { @apply flex h-[var(--image-upload-size)] w-full flex-col items-center justify-center gap-1.5 overflow-hidden rounded-md border border-dashed border-input bg-muted/10 px-3 py-3 text-center outline-none transition-colors hover:border-[var(--focus-border)] hover:bg-muted/30 focus-visible:ring-1 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50; }
+  .toova-image-empty svg { @apply mb-1 h-5 w-5 shrink-0 text-muted-foreground; }
   .toova-image-empty strong { @apply text-[11px] font-medium; }
-  .toova-image-empty small { @apply text-[9px] text-muted-foreground; }
-  .toova-image-preview { @apply relative overflow-hidden rounded-md border bg-muted/10 shadow-[var(--shadow-control)]; }
-  .toova-image-preview > img { @apply aspect-square w-full object-contain; }
-  .toova-image-preview > div { @apply absolute bottom-2 right-2 flex items-center gap-0.5 rounded-md border bg-background/95 p-0.5 shadow-[var(--shadow-control)] backdrop-blur; }
+  .toova-image-empty small { @apply text-[9px] leading-snug text-muted-foreground; }
+  .toova-image-preview { @apply relative h-[var(--image-upload-size)] w-full overflow-hidden rounded-md border bg-muted/10 shadow-[var(--shadow-control)]; }
+  .toova-image-preview > img { @apply h-full w-full object-contain; }
+  .toova-image-preview > div { @apply absolute bottom-1.5 right-1.5 flex items-center gap-0.5 rounded-md border bg-background/95 p-0.5 shadow-[var(--shadow-control)] backdrop-blur; }
   .toova-image-preview svg { @apply h-3.5 w-3.5; }
   .toova-image-upload > p { @apply mt-1.5 text-[10px] text-destructive; }
+  .workspace-form-control > .toova-image-upload { @apply w-[var(--image-upload-size)]; }
   .workspace-field-link { @apply inline-flex items-center gap-1 text-accent-foreground underline-offset-2 hover:underline; }
   .workspace-field-link svg { @apply h-3 w-3; }
   .workspace-copy-value { @apply inline-flex items-center gap-2; }
@@ -315,15 +316,18 @@
   .workspace-relation tr:last-child td { @apply border-b-0; }
   .workspace-relation td input:not([type=checkbox]), .workspace-relation td select, .workspace-relation td textarea { @apply h-7 min-h-7 min-w-24 px-2 py-1 text-[11px]; }
   .workspace-relation td textarea { @apply resize-none overflow-hidden; }
-  .workspace-relation .toova-image-upload { @apply min-w-28; }
-  .workspace-relation .toova-image-empty { @apply min-h-7 grid-cols-[14px_1fr] content-center gap-1 border-solid px-2 py-1 text-left; }
-  .workspace-relation .toova-image-empty > span { @apply m-0 h-auto w-auto border-0 bg-transparent shadow-none; }
-  .workspace-relation .toova-image-empty strong { @apply text-[10px]; }
-  .workspace-relation .toova-image-empty small, .workspace-relation .toova-image-empty em { @apply hidden; }
-  .workspace-relation .toova-image-preview { @apply flex h-7 items-center overflow-visible border-0 bg-transparent shadow-none; }
-  .workspace-relation .toova-image-preview > img { @apply h-7 w-7 rounded object-cover; }
-  .workspace-relation .toova-image-preview > div { @apply gap-0 border-0 bg-transparent p-0; }
-  .workspace-relation .toova-image-preview > div > :first-child { @apply px-2; }
+  .workspace-list .toova-image-upload, .workspace-list .workspace-image-value { --image-upload-size: 2.25rem; }
+  .workspace-relation .toova-image-upload, .workspace-list .toova-image-upload { @apply w-auto; }
+  .workspace-relation .toova-image-upload { --image-upload-size: 1.75rem; }
+  .workspace-relation .toova-image-empty, .workspace-list .toova-image-empty { @apply min-w-28 flex-row justify-start gap-1.5 border-solid px-2 py-1 text-left; }
+  .workspace-relation .toova-image-empty svg, .workspace-list .toova-image-empty svg { @apply mb-0 h-3.5 w-3.5; }
+  .workspace-relation .toova-image-empty strong, .workspace-list .toova-image-empty strong { @apply text-[10px]; }
+  .workspace-relation .toova-image-empty small, .workspace-list .toova-image-empty small { @apply hidden; }
+  .workspace-relation .toova-image-preview, .workspace-list .toova-image-preview { @apply flex w-auto items-center gap-1 overflow-visible border-0 bg-transparent shadow-none; }
+  .workspace-relation .toova-image-preview > img, .workspace-list .toova-image-preview > img { @apply h-[var(--image-upload-size)] w-[var(--image-upload-size)] rounded border object-cover; }
+  .workspace-relation .toova-image-preview > div, .workspace-list .toova-image-preview > div { @apply static gap-0 border-0 bg-transparent p-0; }
+  .workspace-relation .workspace-image-value { --image-upload-size: 1.75rem; }
+  .workspace-relation .workspace-image-value img, .workspace-list .workspace-image-value img { @apply object-cover; }
   .workspace-relation-delete { @apply w-8 min-w-8 text-right; }
   .workspace-relation-delete button { @apply grid h-6 w-6 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-destructive; }
   .workspace-relation-delete svg { @apply h-3 w-3; }

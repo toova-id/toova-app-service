@@ -1,7 +1,8 @@
 .toova-customer { @apply min-h-[calc(100vh-44px)] bg-background; }
-.toova-customer-overview { @apply grid gap-8 lg:grid-cols-[180px_minmax(0,1fr)]; }
+.toova-customer-overview { @apply grid gap-8 lg:grid-cols-[9rem_minmax(0,1fr)]; }
 .toova-customer-logo .managed-form-field { @apply block; }
 .toova-customer-logo .managed-form-field > span { @apply sr-only; }
+.toova-customer-logo .managed-form-field > div { @apply w-full; }
 .toova-customer-fallback { @apply mx-8 mt-6 flex gap-3 rounded-md border bg-muted/20 p-4; }
 .toova-customer-fallback > svg { @apply mt-0.5 h-4 w-4 shrink-0 text-muted-foreground; }
 .toova-customer-fallback > div { @apply flex min-w-0 flex-col; }
